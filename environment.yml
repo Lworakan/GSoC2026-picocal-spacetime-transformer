@@ -1,0 +1,19 @@
+name: picocal
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - pyyaml
+  - pip
+  - pip:
+      - torch
+      - torch-geometric
+      - uproot
+      - awkward
+      - plotly
+      - pytest
+      - ruff

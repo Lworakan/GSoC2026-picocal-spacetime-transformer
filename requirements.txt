@@ -1,0 +1,13 @@
+# Core
+numpy
+scipy
+torch
+torch-geometric
+uproot
+awkward
+# Plotting / exploration
+matplotlib
+plotly
+pandas
+# Config
+pyyaml

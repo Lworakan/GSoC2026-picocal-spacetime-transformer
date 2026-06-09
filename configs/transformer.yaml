@@ -1,0 +1,17 @@
+# Space-time transformer on Stage 1 (Phase 2).
+experiment: stage1_spacetime_transformer
+data:
+  stage: 1
+  path: data/stage1/
+  tree: events
+  knn_k: 8
+model:
+  name: spacetime_transformer
+  d_model: 128
+  use_timing: true     # set false for the timing-ablation study
+training:
+  epochs: 50
+  batch_size: 32
+  lr: 1.0e-3
+evaluation:
+  metrics: [bias, rmse, p68]

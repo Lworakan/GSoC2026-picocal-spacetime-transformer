@@ -1,0 +1,38 @@
+# Data (never commit simulation files)
+data/
+*.root
+*.h5
+*.hdf5
+*.npz
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# ML artifacts
+checkpoints/
+runs/
+wandb/
+*.pt
+*.ckpt
+lightning_logs/
+
+# Tooling / OS
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,11 @@
+# Stage 1: single-photon, uniform 40 mm cells, no background.
+experiment: stage1_cellular_automaton
+data:
+  stage: 1
+  path: data/stage1/   # git-ignored; provided by mentors
+  tree: events
+  knn_k: 8
+model:
+  name: cellular_automaton
+evaluation:
+  metrics: [bias, rmse, p68]
