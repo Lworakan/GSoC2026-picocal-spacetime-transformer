@@ -1,5 +1,5 @@
-# Data (never commit simulation files)
-data/
+# Data (never commit simulation files; anchored so src/picocal/data stays tracked)
+/data/
 *.root
 *.h5
 *.hdf5

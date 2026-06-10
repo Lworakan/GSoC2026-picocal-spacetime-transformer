@@ -2,8 +2,8 @@
 experiment: stage1_cellular_automaton
 data:
   stage: 1
-  path: data/stage1/   # git-ignored; provided by mentors
-  tree: events
+  path: data/full/     # git-ignored; matched_*.root from the mentors
+  tree: clusters_matched
   knn_k: 8
 model:
   name: cellular_automaton
