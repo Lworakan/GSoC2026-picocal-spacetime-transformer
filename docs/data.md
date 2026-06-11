@@ -40,6 +40,27 @@ Verified in `notebooks/01_exploration_matched_clusters.ipynb`:
 - ~67% of photons share their matched cluster with a sibling photon —
   responses for non-isolated photons include overlapping shower energy.
 
+## Minbias comparison sample (Drive)
+
+A small paired sample shared by the mentors on Google Drive (link provided privately):
+
+```
+data/gsoc_drive/with_minimum_bias/      5 files,  4,913 clusters  (2024-04 production)
+data/gsoc_drive/without_minimum_bias/   5 files,  9,861 clusters  (2024-07 production)
+```
+
+Same `clusters_matched` tree but an **older format** than the 100-file set:
+
+- only the ~9 cluster-member cells are stored per entry (no full 5×5 window, so almost no
+  silent cells), and there are no seed branches;
+- extra branches: `cell_energies_{front,back}_orig`, `total_energy_corr`,
+  `x/y_cluster_corr`, `z_cluster`. `_orig` minus the plain cell energies is a per-cell
+  record of removed (overlay) energy;
+- the raw gain is production-specific (~2030 and ~1890 raw/GeV here vs ~970 in the
+  100-file set) — calibrate each sample separately.
+
+Explored in `notebooks/02_minbias_comparison.ipynb`.
+
 ## Dataset stages (proposal plan)
 
 1. **Stage 1** — single-photon clusters (this dataset). Baseline floor.
