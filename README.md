@@ -54,8 +54,8 @@ docs/           design notes and usage
 
 ```bash
 # 1. Clone
-git clone https://github.com/<your-username>/picocal-spacetime-transformer.git
-cd picocal-spacetime-transformer
+git clone https://github.com/Lworakan/GSoC2026-picocal-spacetime-transformer.git
+cd GSoC2026-picocal-spacetime-transformer
 
 # 2. Environment (choose one)
 conda env create -f environment.yml && conda activate picocal
@@ -89,8 +89,10 @@ config at them. See `docs/data.md` for the expected layout and dataset stages.
 
 ## Documentation
 
-- `docs/` — design notes, data layout, and metric definitions
-- A development blog is kept as part of GSoC participation
+- `docs/physics-primer.md` — calorimetry concepts mapped to ML concepts
+- `docs/data.md` — dataset layout and measured conventions
+- `docs/research-log/` — weekly research logs (findings, decisions, open questions)
+- `notebooks/` — data exploration and result analysis
 
 ## Contributing
 

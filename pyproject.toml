@@ -33,5 +33,9 @@ where = ["src"]
 line-length = 100
 target-version = "py310"
 
+[tool.ruff.lint.per-file-ignores]
+# Exploration notebooks: allow mid-cell imports, statement chaining, plot lambdas.
+"*.ipynb" = ["E402", "E702", "E731"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

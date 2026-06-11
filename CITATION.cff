@@ -4,7 +4,8 @@ message: "If you use this software, please cite it as below."
 type: software
 authors:
   - given-names: Worakan
-repository-code: "https://github.com/<your-username>/picocal-spacetime-transformer"
+    family-names: Lasudee
+repository-code: "https://github.com/Lworakan/GSoC2026-picocal-spacetime-transformer"
 abstract: >-
   Space-time kernel transformer for energy reconstruction in the LHCb PicoCal,
   benchmarked against LHCb production clustering algorithms. Developed during

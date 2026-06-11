@@ -1,5 +1,14 @@
 # Data (never commit simulation files; anchored so src/picocal/data stays tracked)
 /data/
+download.tar
+
+# Personal meeting notes (local only)
+/notes/
+
+# Mentor-provided material (not ours to redistribute)
+gsoc26_instruction.pdf
+gsoc26_dataset_exploration_no_minbias.ipynb
+Worakan_Proposal_v5.pdf
 *.root
 *.h5
 *.hdf5
