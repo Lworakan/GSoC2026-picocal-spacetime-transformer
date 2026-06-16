@@ -18,6 +18,7 @@ dependencies = [
     "uproot",
     "awkward",
     "matplotlib",
+    "mplhep",
     "plotly",
     "pandas",
     "pyyaml",
