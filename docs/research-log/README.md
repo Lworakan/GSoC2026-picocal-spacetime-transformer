@@ -8,7 +8,7 @@ following week. Start each entry from [`template.md`](template.md).
 | Week | Dates | Entry | Theme |
 |---|---|---|---|
 | 1 | 2026-06-08 → 06-14 | [2026-06-week1.md](2026-06-week1.md) | Data exploration, loader, classical baseline |
-| 2 | 2026-06-15 → 06-21 | — | PyTorch dataset, evaluation module, CA baseline |
+| 2 | 2026-06-15 → 06-21 | [2026-06-week2.md](2026-06-week2.md) | PyTorch dataset, evaluation module, CA baseline |
 | 3 | 2026-06-22 → 06-28 | — | Graph Clustering baseline (M2 prep) |
 | 4 | 2026-06-29 → 07-05 | — | M2: both baselines evaluated |
 | 5–8 | July | — | Transformer (M3, midterm) |
