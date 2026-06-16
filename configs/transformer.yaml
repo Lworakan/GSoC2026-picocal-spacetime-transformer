@@ -2,9 +2,16 @@
 experiment: stage1_spacetime_transformer
 data:
   stage: 1
-  path: data/stage1/
-  tree: events
+  path: data/full/        # git-ignored; matched_*.root from the mentors
+  tree: clusters_matched
   knn_k: 8
+  in_features: 6          # cell_x, cell_y, log_energy, front_fraction, t_centered, t_valid
+  target: gev             # regression target: gev | log
+  split:                  # group-level (file, event) split, seeded
+    train: 0.8
+    val: 0.1
+    test: 0.1
+    seed: 0
 model:
   name: spacetime_transformer
   d_model: 128
