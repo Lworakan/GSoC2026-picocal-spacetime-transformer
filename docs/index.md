@@ -1,6 +1,8 @@
 # Documentation
 
 - [Data layout and dataset stages](data.md)
+- [Physics primer for ML people](physics-primer.md)
+- [Representation and techniques for the space-time transformer](research-notes/2026-week2-representation-and-techniques.md)
 - Design notes for the space-time transformer (to be added in Phase 2)
 
 ## Project milestones
