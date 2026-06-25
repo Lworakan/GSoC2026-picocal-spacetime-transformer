@@ -36,6 +36,12 @@ wandb/
 *.ckpt
 lightning_logs/
 
+# Thai-language study materials (kept local, not published)
+docs/physics-primer.md
+docs/walkthrough-01-data-to-transformer-th.md
+gsoc26_dataset_exploration_full_th.ipynb
+notebooks/01_input_data_from_mentor_th.ipynb
+
 # Tooling / OS
 .pytest_cache/
 .mypy_cache/

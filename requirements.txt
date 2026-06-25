@@ -8,6 +8,12 @@ awkward
 # Plotting / exploration
 matplotlib
 plotly
+bokeh>=3.9,<4
+ipywidgets>=8.1.8
+ipykernel
 pandas
 # Config
 pyyaml
+# Data explorer web app
+fastapi
+uvicorn[standard]

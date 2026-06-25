@@ -1,5 +1,15 @@
 # PicoCal Space-Time Transformer
 
+> **Rebuild status (2026-06-21):** this repository is being relearned and
+> rebuilt one guided lesson at a time. Results in the older generated
+> notebooks are **unverified reference material** until they are reproduced
+> and interpreted. Start with the active Thai lesson:
+> [`notebooks/01_input_data_from_mentor_th.ipynb`](notebooks/01_input_data_from_mentor_th.ipynb).
+>
+> **ภาษาที่ใช้เรียน:** การอธิบายและการทบทวนบทเรียนใช้ภาษาไทย แม้ผู้เรียนจะ
+> พิมพ์คำถามเป็นภาษาอังกฤษ โดยจะเก็บศัพท์เทคนิคภาษาอังกฤษไว้ในวงเล็บเพื่อเชื่อม
+> กับเอกสารวิจัยและโค้ดจริง
+
 Calorimeter energy reconstruction for the **LHCb PicoCal** using a space-time
 kernel transformer, benchmarked against LHCb's production clustering algorithms.
 
@@ -68,6 +78,23 @@ pytest
 # 4. Train a baseline on Stage 1 data
 python scripts/train.py --config configs/stage1.yaml
 ```
+
+## Data Explorer (interactive)
+
+A local web app to explore the matched-cluster dataset as a **real sensor** — the
+detector face, per-cell energies at true module pitch, every field with its
+meaning, and the physics/formulas — **bilingual TH/ENG**. It reads the ROOT files
+live (all 110 files) and needs no build step.
+
+```bash
+python scripts/run_explorer.py
+# or
+uvicorn picocal_explorer.app:app --app-dir src
+```
+
+Then open <http://127.0.0.1:8000>. Six views: overview, detector/sensor, shower
+depth, data dictionary, guided tour, and exploration & formulas.
+`docs/physics-primer.md` is its written companion.
 
 ## Reproducibility
 
