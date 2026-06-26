@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PicoCal Data Explorer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+<link rel="stylesheet" href="styles.css" />
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="vendor/d3.v7.min.js"></script>
+<script src="vendor/three.min.js"></script>
+<script defer src="diagrams.js"></script>
+<script defer src="threeview.js"></script>
+<script defer src="app.js"></script>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="logo">▣</span>
+    <span data-i18n="title">PicoCal Data Explorer</span>
+  </div>
+  <div class="controls">
+    <label class="ctl"><span data-i18n="file">File</span>
+      <select id="file-select"></select>
+    </label>
+    <div class="lang">
+      <button id="lang-th" class="lang-btn active">ไทย</button>
+      <button id="lang-en" class="lang-btn">EN</button>
+    </div>
+  </div>
+</header>
+
+<nav id="tabs">
+  <button class="tab active" data-view="fundamentals" data-i18n="tab_fundamentals">Fundamentals</button>
+  <button class="tab" data-view="overview" data-i18n="tab_overview">Overview</button>
+  <button class="tab" data-view="sensor" data-i18n="tab_sensor">Detector</button>
+  <button class="tab" data-view="threed" data-i18n="tab_threed">3D Event</button>
+  <button class="tab" data-view="shower" data-i18n="tab_shower">Shower depth</button>
+  <button class="tab" data-view="dictionary" data-i18n="tab_dictionary">Data dictionary</button>
+  <button class="tab" data-view="tour" data-i18n="tab_tour">Guided tour</button>
+  <button class="tab" data-view="exploration" data-i18n="tab_exploration">Exploration &amp; Formulas</button>
+</nav>
+
+<main>
+  <section id="view-fundamentals" class="view active"></section>
+  <section id="view-overview" class="view"></section>
+  <section id="view-sensor" class="view"></section>
+  <section id="view-threed" class="view"></section>
+  <section id="view-shower" class="view"></section>
+  <section id="view-dictionary" class="view"></section>
+  <section id="view-tour" class="view"></section>
+  <section id="view-exploration" class="view"></section>
+</main>
+
+<div id="tooltip" class="tooltip" hidden></div>
+<footer>
+  <span data-i18n="source">Data: provided Geant4 simulation — clusters_matched</span>
+</footer>
+</body>
+</html>

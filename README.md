@@ -1,5 +1,11 @@
 # PicoCal Space-Time Transformer
 
+> **Rebuild status:** this repository is being relearned and rebuilt one guided
+> lesson at a time. Older generated notebooks are **unverified reference material**
+> until reproduced and interpreted. Start with
+> [`notebooks/01_Data understanding _PyTorch tokens.ipynb`](notebooks/01_Data%20understanding%20_PyTorch%20tokens.ipynb)
+> (data understanding → PyTorch token dataset → transformer-ready features).
+
 Calorimeter energy reconstruction for the **LHCb PicoCal** using a space-time
 kernel transformer, benchmarked against LHCb's production clustering algorithms.
 
@@ -69,6 +75,23 @@ pytest
 python scripts/train.py --config configs/stage1.yaml
 ```
 
+## Data Explorer (interactive)
+
+A local web app to explore the matched-cluster dataset as a **real sensor** — the
+detector face, per-cell energies at true module pitch, every field with its
+meaning, and the physics/formulas — **bilingual TH/ENG**. It reads the ROOT files
+live (all 110 files) and needs no build step.
+
+```bash
+python scripts/run_explorer.py
+# or
+uvicorn picocal_explorer.app:app --app-dir src
+```
+
+Then open <http://127.0.0.1:8000>. Eight views: fundamentals, overview,
+detector/sensor, 3D event, shower depth, data dictionary, guided tour, and
+exploration & formulas.
+
 ## Reproducibility
 
 Following the HSF reproducibility guidance, the repo ships with a `Dockerfile`
@@ -84,14 +107,13 @@ Each result in the final report is tied to a tagged release and a config file.
 ## Data
 
 The PicoCal Geant4 simulation is provided by the mentors and is **not** committed
-to this repository. Place ROOT files under `data/` (git-ignored) and point the
-config at them. See `docs/data.md` for the expected layout and dataset stages.
+to this repository. Place ROOT files under `data/` (git-ignored); the explorer and
+notebook read them from `data/full/`.
 
 ## Documentation
 
-- `docs/physics-primer.md` — calorimetry concepts mapped to ML concepts
-- `docs/data.md` — dataset layout and measured conventions
-- `docs/research-log/` — weekly research logs (findings, decisions, open questions)
+- `notebooks/01_Data understanding _PyTorch tokens.ipynb` — data understanding → PyTorch token dataset → transformer-ready features
+- Interactive data explorer — see the section above
 - `notebooks/` — data exploration and result analysis
 
 ## Contributing
