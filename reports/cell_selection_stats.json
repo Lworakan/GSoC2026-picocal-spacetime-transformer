@@ -1,0 +1,64 @@
+{
+  "overall": {
+    "n_clusters": 36852,
+    "ncells_median": 81.0,
+    "ncells_mean": 134.94,
+    "ncells_p95": 384.0,
+    "ncells_max": 528,
+    "cover_3x3 (k<=9)": 0.9561,
+    "cover_5x5 (k<=25)": 0.9873,
+    "cover_k=13": 0.9682
+  },
+  "per_region": {
+    "R0_15mm": {
+      "n_clusters": 6609,
+      "ncells_median": 352.0,
+      "ncells_mean": 357.9,
+      "ncells_p95": 528.0,
+      "ncells_max": 528,
+      "cover_3x3 (k<=9)": 0.936,
+      "cover_5x5 (k<=25)": 0.9772,
+      "cover_k=13": 0.9516
+    },
+    "R1_30mm": {
+      "n_clusters": 7993,
+      "ncells_median": 137.0,
+      "ncells_mean": 177.97,
+      "ncells_p95": 336.0,
+      "ncells_max": 456,
+      "cover_3x3 (k<=9)": 0.9481,
+      "cover_5x5 (k<=25)": 0.9826,
+      "cover_k=13": 0.9611
+    },
+    "R2_40mm": {
+      "n_clusters": 9079,
+      "ncells_median": 81.0,
+      "ncells_mean": 82.49,
+      "ncells_p95": 109.0,
+      "ncells_max": 130,
+      "cover_3x3 (k<=9)": 0.9458,
+      "cover_5x5 (k<=25)": 0.9841,
+      "cover_k=13": 0.9603
+    },
+    "R3_60mm": {
+      "n_clusters": 11406,
+      "ncells_median": 36.0,
+      "ncells_mean": 36.87,
+      "ncells_p95": 51.0,
+      "ncells_max": 76,
+      "cover_3x3 (k<=9)": 0.975,
+      "cover_5x5 (k<=25)": 0.9971,
+      "cover_k=13": 0.9842
+    },
+    "R4_120mm": {
+      "n_clusters": 1765,
+      "ncells_median": 9.0,
+      "ncells_mean": 8.85,
+      "ncells_p95": 9.0,
+      "ncells_max": 9,
+      "cover_3x3 (k<=9)": 1.0,
+      "cover_5x5 (k<=25)": 1.0,
+      "cover_k=13": 1.0
+    }
+  }
+}

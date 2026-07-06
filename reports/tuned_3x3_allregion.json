@@ -1,0 +1,32 @@
+{
+  "config": {
+    "d_model": 96,
+    "nhead": 4,
+    "layers": 3,
+    "dropout": 0.1,
+    "epochs": 150,
+    "patience": 20,
+    "lr": 0.0003,
+    "wd": 0.0001,
+    "batch": 128,
+    "window": 3,
+    "all_region": true,
+    "seeds": 5
+  },
+  "tuned_transformer": {
+    "mean": 0.0453,
+    "std": 0.001,
+    "vals": [
+      0.0465,
+      0.0447,
+      0.0462,
+      0.0438,
+      0.0452
+    ]
+  },
+  "bar_BDT": 0.0563,
+  "bar_total_energy": 0.0579,
+  "delta_vs_bar": -0.011,
+  "sigma": -11.2,
+  "verdict": "WINS (firm)"
+}

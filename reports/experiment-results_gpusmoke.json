@@ -1,0 +1,66 @@
+{
+  "config": {
+    "files": 3,
+    "epochs": 2,
+    "window": 3,
+    "vertex": 100.0,
+    "region": 3,
+    "device": "cuda",
+    "batch": 64,
+    "tag": "gpusmoke"
+  },
+  "n_kept": 1033,
+  "n_region": 293,
+  "results": {
+    "E0_B0_sum": {
+      "sigma_eff": 28.5236,
+      "iqr": 27.6433,
+      "bias": 906.302
+    },
+    "E0_B1_seed": {
+      "sigma_eff": 141.6239,
+      "iqr": 174.7335,
+      "bias": 572.7797
+    },
+    "E0_B2_total_energy": {
+      "sigma_eff": 28.8991,
+      "iqr": 31.4498,
+      "bias": 926.5931
+    },
+    "E0_calibrated_sum": {
+      "sigma_eff": 0.0288,
+      "iqr": 0.0301,
+      "bias": -0.0099
+    },
+    "E0b_BDT": {
+      "sigma_eff": 0.045,
+      "iqr": 0.0497,
+      "bias": -0.0031
+    },
+    "E1_transformer_seed": {
+      "sigma_eff": 0.044,
+      "iqr": 0.0565,
+      "bias": -0.8931
+    },
+    "E2_transformer_cluster": {
+      "sigma_eff": 0.0317,
+      "iqr": 0.0338,
+      "bias": -0.9176
+    },
+    "E11_deepsets_seed": {
+      "sigma_eff": 0.0229,
+      "iqr": 0.0241,
+      "bias": -0.9418
+    },
+    "E4_all_regions_overall": {
+      "sigma_eff": 0.1127,
+      "iqr": 0.1405,
+      "bias": -0.83
+    },
+    "E4_all_regions_on_R3": {
+      "sigma_eff": 0.1413,
+      "iqr": 0.2117,
+      "bias": -0.7342
+    }
+  }
+}

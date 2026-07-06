@@ -1,0 +1,81 @@
+{
+  "config": {
+    "files": 3,
+    "epochs": 2,
+    "window": 3,
+    "vertex": 100.0,
+    "region": 3,
+    "device": "cuda",
+    "batch": 64,
+    "tag": "e12smoke"
+  },
+  "n_kept": 1033,
+  "n_region": 293,
+  "results": {
+    "E0_B0_sum_calib": {
+      "sigma_eff": 0.0288,
+      "iqr": 0.0301,
+      "bias": -0.0099
+    },
+    "E0_B1_seed_calib": {
+      "sigma_eff": 0.1898,
+      "iqr": 0.2195,
+      "bias": -0.0607
+    },
+    "E0_B2_total_energy_calib": {
+      "sigma_eff": 0.0294,
+      "iqr": 0.0307,
+      "bias": -0.011
+    },
+    "E0b_BDT": {
+      "sigma_eff": 0.045,
+      "iqr": 0.0497,
+      "bias": -0.0031
+    },
+    "E1_transformer_seed": {
+      "sigma_eff": 0.057,
+      "iqr": 0.0534,
+      "bias": -0.8499
+    },
+    "E2_transformer_cluster": {
+      "sigma_eff": 0.0317,
+      "iqr": 0.0338,
+      "bias": -0.9176
+    },
+    "E11_deepsets_seed": {
+      "sigma_eff": 0.0229,
+      "iqr": 0.0241,
+      "bias": -0.9418
+    },
+    "E4_all_regions_overall": {
+      "sigma_eff": 0.1127,
+      "iqr": 0.1405,
+      "bias": -0.83
+    },
+    "E4_all_regions_on_R3": {
+      "sigma_eff": 0.1413,
+      "iqr": 0.2117,
+      "bias": -0.7342
+    },
+    "E12a_drop_frontback": {
+      "sigma_eff": 0.0511,
+      "iqr": 0.0503,
+      "bias": -0.8768
+    },
+    "E12b_raw_energy": {
+      "sigma_eff": 0.0368,
+      "iqr": 0.0384,
+      "bias": -0.9144
+    },
+    "E12c_drop_region_onehot": {
+      "sigma_eff": 0.095,
+      "iqr": 0.1045,
+      "bias": -0.8242
+    },
+    "E12d_abs_coords": {
+      "sigma_eff": 0.035,
+      "iqr": 0.0408,
+      "bias": -0.9201
+    }
+  }
+}

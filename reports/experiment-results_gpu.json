@@ -1,0 +1,81 @@
+{
+  "config": {
+    "files": 100,
+    "epochs": 30,
+    "window": 3,
+    "vertex": 100.0,
+    "region": 3,
+    "device": "cuda",
+    "batch": 64,
+    "tag": "gpu"
+  },
+  "n_kept": 36852,
+  "n_region": 10692,
+  "results": {
+    "E0_B0_sum_calib": {
+      "sigma_eff": 0.0649,
+      "iqr": 0.0675,
+      "bias": 0.0208
+    },
+    "E0_B1_seed_calib": {
+      "sigma_eff": 0.2251,
+      "iqr": 0.2202,
+      "bias": 0.0527
+    },
+    "E0_B2_total_energy_calib": {
+      "sigma_eff": 0.0579,
+      "iqr": 0.0593,
+      "bias": 0.0184
+    },
+    "E0b_BDT": {
+      "sigma_eff": 0.0563,
+      "iqr": 0.0518,
+      "bias": 0.0099
+    },
+    "E1_transformer_seed": {
+      "sigma_eff": 0.0621,
+      "iqr": 0.0617,
+      "bias": 0.0561
+    },
+    "E2_transformer_cluster": {
+      "sigma_eff": 0.0911,
+      "iqr": 0.0899,
+      "bias": 0.078
+    },
+    "E11_deepsets_seed": {
+      "sigma_eff": 0.1136,
+      "iqr": 0.1124,
+      "bias": 0.0202
+    },
+    "E4_all_regions_overall": {
+      "sigma_eff": 0.0888,
+      "iqr": 0.0883,
+      "bias": 0.0777
+    },
+    "E4_all_regions_on_R3": {
+      "sigma_eff": 0.0405,
+      "iqr": 0.0399,
+      "bias": 0.0425
+    },
+    "E12a_drop_frontback": {
+      "sigma_eff": 0.102,
+      "iqr": 0.1084,
+      "bias": 0.0381
+    },
+    "E12b_raw_energy": {
+      "sigma_eff": 0.0517,
+      "iqr": 0.0462,
+      "bias": 0.0602
+    },
+    "E12c_drop_region_onehot": {
+      "sigma_eff": 0.0674,
+      "iqr": 0.0671,
+      "bias": 0.0855
+    },
+    "E12d_abs_coords": {
+      "sigma_eff": 0.0783,
+      "iqr": 0.0807,
+      "bias": 0.0304
+    }
+  }
+}
