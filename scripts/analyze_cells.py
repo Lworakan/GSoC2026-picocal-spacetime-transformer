@@ -119,9 +119,14 @@ def figures(ncells, region, dist_pitch, dist_region, cover, cover_region, KMAX, 
                                   name=RNAMES[r], line=dict(color=palette[r])))
     figC.add_trace(go.Scatter(x=ks, y=cover.mean(0), mode="lines",
                               name="all", line=dict(color="black", width=3, dash="dot")))
-    figC.add_vline(x=9, line_dash="dot", line_color="#888", annotation_text="3x3=9")
-    figC.add_vline(x=25, line_dash="dash", line_color="#888", annotation_text="5x5=25")
-    figC.add_hline(y=0.99, line_dash="dot", line_color="crimson", annotation_text="99%")
+    figC.add_vline(x=9, line_dash="dot", line_color="#888")
+    figC.add_vline(x=25, line_dash="dash", line_color="#888")
+    figC.add_hline(y=0.99, line_dash="dot", line_color="crimson",
+                   annotation_text="99%", annotation_position="top left")
+    figC.add_annotation(x=27, y=0.75, showarrow=False, align="left",
+                        text="···· vertical line 1:  3x3 = 9 cells<br>– – – vertical line 2:  5x5 = 25 cells",
+                        bgcolor="rgba(255,255,255,0.75)", bordercolor="#ccc", borderwidth=1,
+                        font=dict(size=12, color="#555"))
     figC.update_layout(template="plotly_white", width=900, height=480,
                        title="Energy captured vs number of nearest cells kept<br><sub>decision curve: how many cells to keep</sub>",
                        xaxis_title="nearest cells kept (sorted by distance to seed)",
