@@ -1,0 +1,5 @@
+config,seed,sigma_eff,elapsed
+geo,0,0.0483,1859
+geo_relbias,0,0.0482,3635
+geo,1,0.0473,2185
+geo_relbias,1,0.0461,4325

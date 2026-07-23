@@ -1,0 +1,9 @@
+config,seed,sigma_eff,elapsed
+base_real,0,0.0502,536
+mix_nofrac,0,0.0508,1835
+mix_frac,0,0.0512,1185
+mix_frac_gate,0,0.0511,1591
+base_real,1,0.0541,1336
+mix_nofrac,1,0.0528,814
+mix_frac,1,0.0514,5271
+mix_frac_gate,1,0.0516,4458

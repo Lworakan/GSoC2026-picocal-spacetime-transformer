@@ -1,0 +1,5 @@
+config,seed,sigma_eff,elapsed
+gravnet_aux,0,0.0518,5311
+gravnet_aux,1,0.0528,5926
+gravnet_aux,2,0.0521,5119
+gravnet_noaux,0,0.0562,3369

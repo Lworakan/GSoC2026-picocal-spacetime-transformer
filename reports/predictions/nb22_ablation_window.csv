@@ -1,0 +1,8 @@
+N,config,sigma_eff,std,seeds
+25,gate0_mse,0.0564,0.0005,3
+25,gate1_mse,0.0565,0.0014,3
+25,gate0_huber,0.0484,0.0001,3
+25,gate1_huber,0.0483,0.001,3
+40,gate1_huber,0.048,0.0002,3
+60,gate1_huber,0.0473,0.0006,3
+81,gate1_huber,0.0459,0.0008,3

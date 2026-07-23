@@ -1,0 +1,5 @@
+config,seed,sigma_eff,frac_mae,real_subfrac_med,elapsed
+base_rho,0,0.0482,0.2417,0.566,82
+sub_frac_rho,0,0.0491,0.0436,0.782,446
+base_rho,1,0.0483,0.2627,0.53,201
+sub_frac_rho,1,0.049,0.0435,0.776,599

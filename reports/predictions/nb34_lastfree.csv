@@ -1,0 +1,5 @@
+config,seed,sigma_eff,elapsed
+pure,3,0.0465,493
+pure,4,0.0475,1317
+cleanaux,0,0.0455,3285
+cleanaux,1,0.0469,3182
