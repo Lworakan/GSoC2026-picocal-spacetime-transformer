@@ -1,0 +1,5 @@
+config,seed,sigma_eff,elapsed
+trim,0,0.0747,474
+trim,1,0.0629,757
+qd,0,0.0418,187
+qd,1,0.0418,2032

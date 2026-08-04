@@ -1,0 +1,5 @@
+config,seed,sigma_eff,elapsed,kt,at
+pull,0,0.0455,1198,,
+pull,1,0.0466,902,,
+pullgate,0,0.0483,2107,3.422,0.114
+pullgate,1,0.0488,1892,3.437,0.14

@@ -1,0 +1,5 @@
+config,seed,sigma_eff,elapsed
+distill,0,0.0467,4547
+distill,1,0.0481,4727
+nodistill,0,0.0482,3791
+nodistill,1,0.047,4360

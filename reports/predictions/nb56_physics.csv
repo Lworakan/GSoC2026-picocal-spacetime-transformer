@@ -1,0 +1,7 @@
+config,seed,sigma_eff,elapsed
+lgpull,0,0.0425,1081
+lgpull,1,0.0419,1365
+late,0,0.0432,1364
+late,1,0.0426,1300
+both,0,0.0424,1145
+both,1,0.0424,1255

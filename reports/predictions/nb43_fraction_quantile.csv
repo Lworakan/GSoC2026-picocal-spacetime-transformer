@@ -1,0 +1,9 @@
+config,seed,sigma_eff,elapsed
+base,0,0.0468,432
+base,1,0.0464,720
+frac,0,0.0505,815
+frac,1,0.0476,753
+quant,0,0.0446,897
+quant,1,0.0445,791
+fracquant,0,0.0457,909
+fracquant,1,0.0445,913
