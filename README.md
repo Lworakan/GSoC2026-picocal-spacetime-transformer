@@ -20,6 +20,21 @@ BDT and calibrated-sum baselines, with a fully scripted, seed-exact reproducible
 
 ---
 
+## The core claim: PicoCal's timing helps exactly where it matters
+
+PicoCal records per-cell **timing** — information ordinary ECALs don't have. The central question of this
+project is whether that extra data genuinely improves reconstruction under real minimum-bias pileup.
+Answer, with its negative control:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/timing-dark.svg">
+  <img alt="Timing dumbbell: on clean data time features change nothing (+5%), under minimum bias they improve resolution by 19.4%" src="assets/timing-light.svg" width="100%">
+</picture>
+
+Same token pipeline, one change — include the per-cell time features or not. On the clean sample timing is
+dead weight; under pileup it removes a fifth of the resolution width. **Timing is a pileup tool, and PicoCal
+is the calorimeter that has it.**
+
 ## Headline result
 
 **Aggregate σ_eff on the minimum-bias test split: `0.0402`** (conservative least-squares calibration: `0.0411`),

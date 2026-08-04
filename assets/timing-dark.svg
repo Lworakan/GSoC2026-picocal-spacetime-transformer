@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 268" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif">
+  <style>
+    .ink{fill:#E6EDF3}.mut{fill:#9198A1}.grid{stroke:#3D444D;stroke-width:1}
+    .dumb{stroke-width:2.5;stroke-linecap:round;stroke-dasharray:600;stroke-dashoffset:600;
+          animation:draw 1.1s ease-out forwards}
+    .d1{animation-delay:.4s}.d2{animation-delay:1.0s}
+    @keyframes draw{to{stroke-dashoffset:0}}
+    .pt{stroke:#0d1117;stroke-width:2;opacity:0;animation:pop .4s ease-out forwards}
+    .lb{opacity:0;animation:pop .5s ease-out forwards}
+    .q1{animation-delay:.3s}.q2{animation-delay:1.3s}.q3{animation-delay:.9s}.q4{animation-delay:2.0s}
+    @keyframes pop{to{opacity:1}}
+    .hero{opacity:0;animation:hero .6s 2.2s cubic-bezier(.34,1.56,.64,1) forwards}
+    @keyframes hero{from{opacity:0}to{opacity:1}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;stroke-dashoffset:0!important;opacity:1!important}}
+  </style>
+  <text x="60" y="26" class="ink" font-size="15" font-weight="600">Does PicoCal's per-cell timing help? Same pipeline, &#177; time features (&#963;_eff, lower is better)</text>
+  <line x1="258" y1="52" x2="258" y2="208" class="grid"/>
+  <line x1="448" y1="52" x2="448" y2="208" class="grid"/>
+  <line x1="639" y1="52" x2="639" y2="208" class="grid"/>
+  <text x="258" y="226" class="mut" font-size="11" text-anchor="middle">0.040</text>
+  <text x="448" y="226" class="mut" font-size="11" text-anchor="middle">0.050</text>
+  <text x="639" y="226" class="mut" font-size="11" text-anchor="middle">0.060</text>
+  <text x="200" y="106" class="ink" font-size="13" text-anchor="end">clean (no pileup)</text>
+  <text x="200" y="178" class="ink" font-size="13" font-weight="700" text-anchor="end">minimum bias</text>
+  <line class="dumb d1" x1="251" y1="102" x2="284" y2="102" stroke="#9198A1"/>
+  <circle class="pt q1" cx="251" cy="102" r="7" fill="#12A594"/>
+  <circle class="pt q2" cx="289" cy="102" r="7" fill="#7C7AED"/>
+  <text x="243" y="84" class="ink lb q1" font-size="12" font-weight="600" text-anchor="middle">0.0397</text>
+  <text x="303" y="84" class="ink lb q2" font-size="12" font-weight="600" text-anchor="middle">0.0417</text>
+  <text x="330" y="106" class="mut lb q2" font-size="11.5">+5% &#8212; timing adds nothing without pileup (negative control)</text>
+  <line class="dumb d2" x1="774" y1="174" x2="534" y2="174" stroke="#9198A1"/>
+  <circle class="pt q3" cx="774" cy="174" r="7" fill="#12A594"/>
+  <circle class="pt q4" cx="526" cy="174" r="7" fill="#7C7AED"/>
+  <text x="774" y="156" class="ink lb q3" font-size="12" font-weight="600" text-anchor="middle">0.0671</text>
+  <text x="526" y="156" class="ink lb q4" font-size="12" font-weight="600" text-anchor="middle">0.0541</text>
+  <text x="641" y="196" class="ink hero" font-size="13" font-weight="700" text-anchor="middle">&#8722;19.4% from timing alone</text>
+  <g font-size="11">
+    <circle cx="66" cy="250" r="6" fill="#12A594"/>
+    <text x="80" y="254" class="mut">without cell time</text>
+    <circle cx="196" cy="250" r="6" fill="#7C7AED"/>
+    <text x="210" y="254" class="mut">with cell time</text>
+    <text x="820" y="254" class="mut lb q4" text-anchor="end">with gating + full stack: 0.0402 (see ladder below)</text>
+  </g>
+</svg>
