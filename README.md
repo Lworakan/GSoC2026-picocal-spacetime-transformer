@@ -35,6 +35,11 @@ Same token pipeline, one change — include the per-cell time features or not. O
 dead weight; under pileup it removes a fifth of the resolution width. **Timing is a pileup tool, and PicoCal
 is the calorimeter that has it.**
 
+> **How this connects to the numbers below:** 0.0541 isolates the effect of *timing alone* in a controlled
+> pair — nothing else differs. The optimization ladder below starts from a timing model and adds every other
+> lever (gated readout, quantile head, qd loss, EMA, TTA, calibration) to reach 0.0402:
+> `0.0671 ──(+time only)──▶ 0.0541 ──(+everything else)──▶ 0.0402`.
+
 ## Headline result
 
 **Aggregate σ_eff on the minimum-bias test split: `0.0402`** (conservative least-squares calibration: `0.0411`),
