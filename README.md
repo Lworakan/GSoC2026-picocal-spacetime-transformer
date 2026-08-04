@@ -71,6 +71,42 @@ differences below 0.002 are treated as noise throughout.
 | **Full stack: qd+EMA ×5 + D4 TTA + joint width calibration** | **0.0402** | LS-calibration variant: 0.0411 |
 | Clean-sample reference (no pileup) | 0.0397 | pileup penalty of the final model ≈ 0.003 |
 
+<details>
+<summary><b>Full benchmark — every model, every metric</b> (source: <code>reports/benchmark_master.csv</code>)</summary>
+
+Seed-averaged predictions on the fixed test split. `frac |r|≤2%` = fraction of events reconstructed within ±2%.
+nb19-era models use a slightly wider test population (12,227 vs 10,884 events) — compare trends, not third decimals, across eras.
+
+| dataset | model | seeds | σ_eff | bias | IQR | frac \|r\|≤2% | σ_eff E>17 |
+|---|---|---|---|---|---|---|---|
+| clean | MeanResidual | 5 | 0.0397 | 0.0037 | 0.0364 | 0.420 | 0.0347 |
+| clean | PairT | 5 | 0.0399 | 0.0019 | 0.0375 | 0.422 | 0.0350 |
+| clean | EfnResidual | 5 | 0.0400 | 0.0048 | 0.0369 | 0.413 | 0.0361 |
+| clean | Spacetime | 5 | 0.0417 | 0.0017 | 0.0383 | 0.409 | 0.0347 |
+| clean | GateHuber | 5 | 0.0443 | 0.0006 | 0.0420 | 0.377 | 0.0330 |
+| clean | CleanQuantW2NoTime | 2 | 0.0460 | 0.0028 | 0.0420 | 0.381 | 0.0313 |
+| clean | MeanDirect | 5 | 0.0463 | 0.0030 | 0.0441 | 0.354 | 0.0411 |
+| clean | CleanQuantW2 | 2 | 0.0476 | 0.0021 | 0.0436 | 0.370 | 0.0311 |
+| clean | CleanQuantGateOff | 2 | 0.0515 | 0.0034 | 0.0463 | 0.344 | 0.0342 |
+| clean | BDT | 1 | 0.0528 | 0.0007 | 0.0490 | 0.334 | 0.0432 |
+| clean | CleanHuberW4 | 2 | 0.0570 | 0.0067 | 0.0551 | 0.287 | 0.0411 |
+| clean | CalibratedSum | 1 | 0.0822 | 0.0018 | 0.0802 | 0.202 | 0.0561 |
+| minbias | **SubNetW4CleanAuxQdEma** | 5 | **0.0409** | −0.0056 | 0.0357 | 0.417 | 0.0343 |
+| minbias | SubNetW4CleanAuxQuant | 5 | 0.0426 | −0.0044 | 0.0376 | 0.414 | 0.0361 |
+| minbias | SubEnsembleTTA | 1 | 0.0440 | −0.0038 | 0.0389 | 0.398 | 0.0374 |
+| minbias | SubNetW4 | 5 | 0.0446 | −0.0042 | 0.0402 | 0.384 | 0.0380 |
+| minbias | SubNetW4CleanAux | 2 | 0.0452 | −0.0042 | 0.0399 | 0.387 | 0.0385 |
+| minbias | GateHuber | 5 | 0.0463 | −0.0088 | 0.0406 | 0.365 | 0.0394 |
+| minbias | Spacetime | 5 | 0.0541 | −0.0113 | 0.0463 | 0.321 | 0.0454 |
+| minbias | PairT | 5 | 0.0624 | −0.0137 | 0.0520 | 0.293 | 0.0533 |
+| minbias | EfnResidual | 5 | 0.0626 | −0.0122 | 0.0523 | 0.304 | 0.0536 |
+| minbias | MeanDirect | 5 | 0.0648 | −0.0155 | 0.0546 | 0.274 | 0.0552 |
+| minbias | MeanResidual | 5 | 0.0671 | −0.0126 | 0.0557 | 0.280 | 0.0575 |
+| minbias | BDT | 1 | 0.1253 | −0.0155 | 0.1150 | 0.145 | 0.1115 |
+| minbias | CalibratedSum | 1 | 0.1837 | −0.0938 | 0.2367 | 0.048 | 0.1404 |
+
+</details>
+
 ### Per-bin resolution vs. physics floor (final stack)
 
 | E bin (GeV) | 2.2–10.7 | 10.7–17.4 | 17.4–24.0 | 24.0–34.1 | 34.1–53.1 | 53.1–100 |
@@ -113,6 +149,42 @@ did **not** work — each with a measured mechanism, documented in its own noteb
   the information is already in the cells; the irreducible part is in-core overlap degeneracy.
 
 Full record: `reports/lever_matrix.md`, `reports/spec_road_to_0p0235.md`, and notebooks 21–62.
+
+<details>
+<summary><b>Every ablation, with numbers</b> (source: <code>reports/benchmark_ablations.csv</code>)</summary>
+
+Minimum-bias test σ_eff per hypothesis config; anchor for each block is stated in its notebook.
+Wins are rare by design — each row is a pre-registered experiment, not a tuning run.
+
+| notebook | config | seeds | σ_eff mean | ± std |
+|---|---|---|---|---|
+| nb43 | quant (H8 ✓) | 2 | 0.0446 | 0.0001 |
+| nb43 | fracquant | 2 | 0.0451 | 0.0006 |
+| nb43 | base (control) | 2 | 0.0466 | 0.0002 |
+| nb43 | frac (H7 ✗ hurts) | 2 | 0.0491 | 0.0014 |
+| nb45 | pull (H9 ✗) | 2 | 0.0460 | 0.0006 |
+| nb45 | pullgate (H9 ✗) | 2 | 0.0486 | 0.0003 |
+| nb46 | oot-tail (H9b ✗) | 2 | 0.0452 | 0.0009 |
+| nb48 | masked-pretrain (H10 ✗) | 2 | 0.0452 | 0.0010 |
+| nb50 | clean W=8 | 2 | 0.0500 | 0.0009 |
+| nb50 | clean W=4 | 2 | 0.0506 | 0.0008 |
+| nb50 | clean W=6 | 2 | 0.0528 | 0.0026 |
+| nb51 | containment-aux (H14 ✗) | 2 | 0.0446 | 0.0002 |
+| nb52 | EMA (H16b ✓) | 5 | 0.0425 | 0.0003 |
+| nb54 | qd loss (H18b ✓) | 2 | 0.0418 | 0.0000 |
+| nb54 | trimmed loss (H18a ✗) | 2 | 0.0688 | 0.0059 |
+| nb55 | ep300 | 2 | 0.0422 | 0.0004 |
+| nb55 | d256 | 2 | 0.0426 | 0.0004 |
+| nb55 | Muon (fixed lr, ✗) | 2 | 0.1437 | 0.0011 |
+| nb56 | lgpull (H20a ✗) | 2 | 0.0422 | 0.0003 |
+| nb56 | lgpull+late | 2 | 0.0424 | 0.0000 |
+| nb56 | late (H20b ✗) | 2 | 0.0429 | 0.0003 |
+| nb57 | conv-stem CNN (H21 ✗) | 2 | 0.0476 | 0.0002 |
+| nb58 | qd+EMA (champion base) | 5 | 0.0418 | 0.0005 |
+| nb62 | refine2 (H24b ✗) | 2 | 0.0417 | 0.0002 |
+| nb62 | deep6 (H24a ✗) | 2 | 0.0425 | 0.0001 |
+
+</details>
 
 ## Quick start
 
