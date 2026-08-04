@@ -94,6 +94,19 @@ plus ~0.005 reconstruction above floor.
 | EMA weight averaging (decay 0.999) | 0.0416 | single model ≈ previous 5-model ensemble |
 | coverage-width (qd) training loss | **0.0402** | trainable surrogate of the 68%-interval metric |
 
+## Architecture
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/architecture-dark.svg">
+  <img alt="Champion architecture: 81 cell tokens, transformer encoder x3, per-cell signal gate feeding a physics readout, quantile head, width-binned sigma-eff calibration; trained with qd loss + EMA, inferred with 5 seeds + D4 TTA" src="assets/architecture-light.svg" width="100%">
+</picture>
+
+The design principle is **physics-structured simplicity**: a compact transformer whose *readout* carries the
+physics (a learnable calibrated sum over a per-cell signal gate, plus a residual head), trained with a loss
+shaped like the evaluation metric. Deliberately simple wiring is a *result*, not a limitation — every fancier
+alternative (teacher–student distillation, GravNet, pairwise attention, Swin-style bias, CNN stems, double
+depth/width, iterative refinement) was trained on this data and measured flat or worse; see below.
+
 ## The falsification record
 
 The campaign tested **~24 hypotheses across every family** available without per-cell truth labels, all under one
