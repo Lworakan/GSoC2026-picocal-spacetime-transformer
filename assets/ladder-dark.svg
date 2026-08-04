@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 340" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif">
+  <style>
+    .ink{fill:#E6EDF3}.mut{fill:#9198A1}.grid{stroke:#3D444D;stroke-width:1}
+    .ln{fill:none;stroke:#7C7AED;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;
+        stroke-dasharray:800;stroke-dashoffset:800;animation:draw 1.9s .2s cubic-bezier(.4,0,.2,1) forwards}
+    @keyframes draw{to{stroke-dashoffset:0}}
+    .pt{fill:#7C7AED;stroke:#0d1117;stroke-width:2;opacity:0;animation:pop .4s ease-out forwards}
+    .lb{opacity:0;animation:pop .5s ease-out forwards}
+    .p1{animation-delay:.25s}.p2{animation-delay:.62s}.p3{animation-delay:.95s}
+    .p4{animation-delay:1.3s}.p5{animation-delay:1.62s}.p6{animation-delay:1.95s}
+    @keyframes pop{to{opacity:1}}
+    .halo{fill:none;stroke:#7C7AED;stroke-width:2;opacity:0;animation:pulse 2.6s 2.4s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:0;r:7}45%{opacity:.55;r:12}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;stroke-dashoffset:0!important;opacity:1!important}}
+  </style>
+  <text x="60" y="26" class="ink" font-size="15" font-weight="600">Optimization ladder — aggregate &#963;_eff on minimum-bias (lower is better)</text>
+  <line x1="60" y1="60" x2="820" y2="60" class="grid"/>
+  <line x1="60" y1="150" x2="820" y2="150" class="grid"/>
+  <line x1="60" y1="240" x2="820" y2="240" class="grid"/>
+  <text x="54" y="64" class="mut" font-size="11" text-anchor="end">0.048</text>
+  <text x="54" y="154" class="mut" font-size="11" text-anchor="end">0.044</text>
+  <text x="54" y="244" class="mut" font-size="11" text-anchor="end">0.040</text>
+  <path class="ln" d="M90,51 L236,150 L382,157 L528,196 L674,203 L820,234"/>
+  <circle class="pt p1" cx="90" cy="51" r="6"/>
+  <circle class="pt p2" cx="236" cy="150" r="6"/>
+  <circle class="pt p3" cx="382" cy="157" r="6"/>
+  <circle class="pt p4" cx="528" cy="196" r="6"/>
+  <circle class="pt p5" cx="674" cy="203" r="6"/>
+  <circle class="pt p6" cx="820" cy="234" r="7"/>
+  <circle class="halo" cx="820" cy="234" r="7"/>
+  <g font-size="12" font-weight="600">
+    <text x="90" y="38" class="ink lb p1" text-anchor="middle">0.0485</text>
+    <text x="236" y="137" class="ink lb p2" text-anchor="middle">0.0440</text>
+    <text x="382" y="144" class="ink lb p3" text-anchor="middle">0.0437</text>
+    <text x="528" y="183" class="ink lb p4" text-anchor="middle">0.0419</text>
+    <text x="674" y="190" class="ink lb p5" text-anchor="middle">0.0416</text>
+    <text x="806" y="221" class="ink lb p6" text-anchor="middle">0.0402</text>
+  </g>
+  <g font-size="11">
+    <text x="90" y="266" class="mut lb p1" text-anchor="middle">Huber baseline</text>
+    <text x="236" y="266" class="mut lb p2" text-anchor="middle">gated readout</text>
+    <text x="382" y="266" class="mut lb p3" text-anchor="middle">quantile head</text>
+    <text x="528" y="266" class="mut lb p4" text-anchor="middle">direct &#963; calib</text>
+    <text x="674" y="266" class="mut lb p5" text-anchor="middle">EMA weights</text>
+    <text x="806" y="266" class="mut lb p6" text-anchor="middle">qd loss</text>
+  </g>
+  <text x="60" y="300" class="mut lb p6" font-size="11">every step pre-registered · &#8805;2 seeds · differences &lt; 0.002 treated as noise · &#8722;17.1% total</text>
+</svg>

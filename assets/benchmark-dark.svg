@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 312" font-family="ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif">
+  <style>
+    .ink{fill:#E6EDF3}.mut{fill:#9198A1}
+    .bar{transform-origin:220px 0;transform:scaleX(0);animation:grow .9s cubic-bezier(.4,0,.2,1) forwards}
+    .b1{animation-delay:.15s}.b2{animation-delay:.35s}.b3{animation-delay:.55s}.b4{animation-delay:.75s}.b5{animation-delay:.95s}
+    @keyframes grow{to{transform:scaleX(1)}}
+    .lb{opacity:0;animation:fade .5s ease-out forwards}
+    .l1{animation-delay:.75s}.l2{animation-delay:.95s}.l3{animation-delay:1.15s}.l4{animation-delay:1.35s}.l5{animation-delay:1.55s}
+    @keyframes fade{to{opacity:1}}
+    .shine{opacity:0;animation:shine 3s 2s ease-in-out infinite}
+    @keyframes shine{0%,100%{opacity:0}50%{opacity:.28}}
+    @media (prefers-reduced-motion:reduce){*{animation:none!important;transform:none!important;opacity:1!important}}
+  </style>
+  <text x="60" y="26" class="ink" font-size="15" font-weight="600">Benchmark — minimum-bias test split, seed-averaged &#963;_eff (lower is better)</text>
+  <g font-size="12.5">
+    <text x="210" y="72" class="ink" text-anchor="end">BDT (features)</text>
+    <text x="210" y="116" class="ink" text-anchor="end">GateHuber</text>
+    <text x="210" y="160" class="ink" text-anchor="end">SubNet + clean-aux</text>
+    <text x="210" y="204" class="ink" text-anchor="end">qd + EMA (single)</text>
+    <text x="210" y="248" class="ink" text-anchor="end" font-weight="700">full stack</text>
+  </g>
+  <g>
+    <rect class="bar b1" x="220" y="56" width="598" height="24" rx="4" fill="#12A594"/>
+    <rect class="bar b2" x="220" y="100" width="221" height="24" rx="4" fill="#12A594"/>
+    <rect class="bar b3" x="220" y="144" width="216" height="24" rx="4" fill="#12A594"/>
+    <rect class="bar b4" x="220" y="188" width="197" height="24" rx="4" fill="#12A594"/>
+    <rect class="bar b5" x="220" y="232" width="192" height="24" rx="4" fill="#7C7AED"/>
+    <rect class="shine" x="220" y="232" width="192" height="24" rx="4" fill="#FFFFFF"/>
+  </g>
+  <g font-size="12" font-weight="600">
+    <text x="826" y="72" class="ink lb l1">0.1253</text>
+    <text x="449" y="116" class="ink lb l2">0.0463</text>
+    <text x="444" y="160" class="ink lb l3">0.0452</text>
+    <text x="425" y="204" class="ink lb l4">0.0413</text>
+    <text x="420" y="248" class="ink lb l5" font-weight="700">0.0402</text>
+  </g>
+  <g font-size="11">
+    <rect x="60" y="278" width="12" height="12" rx="3" fill="#12A594"/>
+    <text x="78" y="288" class="mut">baselines &amp; ablations</text>
+    <rect x="228" y="278" width="12" height="12" rx="3" fill="#7C7AED"/>
+    <text x="246" y="288" class="mut">this work (qd + EMA &#215;5 + TTA + joint calibration)</text>
+    <text x="820" y="288" class="mut lb l5" text-anchor="end">clean-sample reference (no pileup): 0.0397</text>
+  </g>
+</svg>
