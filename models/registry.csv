@@ -1,0 +1,10 @@
+name,arch,ng,sigma_eff_test,recorded,verified,file
+nb32_W4_s0,SubNet,5,0.0471,0.0471,True,models/nb32_W4_s0.pt
+nb32_W4_s1,SubNet,5,0.0459,0.0459,True,models/nb32_W4_s1.pt
+nb32_W4_s2,SubNet,5,0.0465,0.0465,True,models/nb32_W4_s2.pt
+nb34_pure_s3,SubNet,6,0.0465,0.0465,True,models/nb34_pure_s3.pt
+nb34_pure_s4,SubNet,6,0.0475,0.0475,True,models/nb34_pure_s4.pt
+nb34_cleanaux_s0,SubNet,6,0.0455,0.0455,True,models/nb34_cleanaux_s0.pt
+nb34_cleanaux_s1,SubNet,6,0.0469,0.0469,True,models/nb34_cleanaux_s1.pt
+SubEnsembleTTA,ens7+D4TTA,-1,0.044,0.044,True,(derived)
+SubNetW4CleanAuxQdEma,0-4,0.0413/0.0417/0.0412/0.0426/0.0421,0.0402 (direct calib) / 0.0411 (LS),"quant3q + qd loss(lam0.5,tau0.02) + cleanaux + EMA0.999 + D4 TTA + joint width-calib",python scripts/train_picocal.py --sample minbias --cleanaux --seeds 0 1 2 3 4,models/SubNetW4CleanAuxQdEma_s{0..4}.pt,nb58/nb52,2026-08-02
