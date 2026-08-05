@@ -20,7 +20,7 @@
       .encoder-title{font-size:16px;font-weight:600;fill:#FFFFFF}
       .node{fill:#4677BE;stroke:#152D3D;stroke-width:1.5}
       .box{stroke:#244F6B;stroke-width:1.7}
-      .weight{fill:none;stroke:#3E78B8;stroke-width:1.15;stroke-linecap:round}
+      .weight{fill:none;stroke:#3E78B8;stroke-width:3.2;stroke-linecap:round}
       .route{fill:none;stroke:#244F6B;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
       .flow{fill:none;stroke:#244F6B;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow)}
       .residual{fill:none;stroke:#748A96;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow-muted)}
@@ -145,6 +145,6 @@
   <text class="label" x="628" y="887">state / head</text>
   <rect class="box" x="790" y="858" width="50" height="43" rx="7" fill="#FFF7CF"/>
   <text class="label" x="853" y="887">transformer operation</text>
-  <path class="weight" d="M1005 880 L1080 880"/>
+  <path class="weight" d="M1038 880 L1080 880"/>
   <text class="label" x="1095" y="887">learned path</text>
 </svg>
