@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 85 1700 855" width="1700" height="855" role="img" aria-labelledby="title desc">
+  <title id="title">Photon Energy Transformer Architecture</title>
+  <desc id="desc">A hybrid technical diagram combining token and readout nodes, an embedding matrix, a conventional transformer encoder block with residual connections, and calibrated photon-energy output.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L9 5 L0 10 Z" fill="#244F6B"/>
+    </marker>
+    <marker id="arrow-muted" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4.5 L0 9 Z" fill="#748A96"/>
+    </marker>
+    <style>
+      text{font-family:Arial,Helvetica,sans-serif;fill:#163B55}
+      .main-title{font-size:43px;font-weight:700}
+      .section{font-size:27px;font-weight:400}
+      .layer{font-size:19px;font-weight:600}
+      .label{font-size:17px;font-weight:400}
+      .small{font-size:14px;font-weight:400;fill:#506A79}
+      .box-title{font-size:20px;font-weight:600}
+      .encoder-title{font-size:16px;font-weight:600;fill:#FFFFFF}
+      .node{fill:#4677BE;stroke:#152D3D;stroke-width:1.5}
+      .box{stroke:#244F6B;stroke-width:1.7}
+      .weight{fill:none;stroke:#3E78B8;stroke-width:1.15;stroke-linecap:round}
+      .route{fill:none;stroke:#244F6B;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+      .flow{fill:none;stroke:#244F6B;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow)}
+      .residual{fill:none;stroke:#748A96;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow-muted)}
+      .bypass{fill:none;stroke:#527FA4;stroke-width:1.6;stroke-dasharray:7 6;stroke-linecap:round;marker-end:url(#arrow)}
+      .divider{fill:none;stroke:#304753;stroke-width:1.4;stroke-dasharray:6 5}
+    </style>
+  </defs>
+
+  <rect y="85" width="1700" height="855" fill="#FFFFFF"/>
+
+  <!-- Major regions -->
+  <text class="section" x="150" y="130" text-anchor="middle">Input Layer</text>
+  <text class="section" x="680" y="130" text-anchor="middle">Hidden / Transformer Layers</text>
+  <text class="section" x="1370" y="130" text-anchor="middle">Output Layer</text>
+  <path class="divider" d="M290 105 L290 755"/>
+  <path class="divider" d="M1060 105 L1060 755"/>
+
+  <!-- Input nodes -->
+  <text class="label" x="38" y="278">Cell 1</text>
+  <path class="flow" d="M28 295 L111 295"/>
+  <text class="label" x="38" y="413">Cell 2</text>
+  <path class="flow" d="M28 430 L111 430"/>
+  <text class="label" x="28" y="653">Cell ≤81</text>
+  <path class="flow" d="M28 670 L111 670"/>
+  <circle class="node" cx="150" cy="275" r="39"/>
+  <circle class="node" cx="150" cy="410" r="39"/>
+  <circle class="node" cx="150" cy="650" r="39"/>
+  <text x="150" y="493" text-anchor="middle" font-size="29">·</text>
+  <text x="150" y="529" text-anchor="middle" font-size="29">·</text>
+  <text x="150" y="565" text-anchor="middle" font-size="29">·</text>
+  <text class="small" x="150" y="720" text-anchor="middle">≤81 cells · 16 features</text>
+
+  <!-- Embedding matrix -->
+  <text class="layer" x="435" y="213" text-anchor="middle">Linear Embedding</text>
+  <rect class="box" x="340" y="235" width="190" height="350" rx="18" fill="#D7E7E8"/>
+  <g fill="#5B91B3">
+    <rect x="365" y="285" width="27" height="27"/><rect x="402" y="285" width="27" height="27"/><rect x="439" y="285" width="27" height="27"/><rect x="476" y="285" width="27" height="27"/>
+    <rect x="365" y="322" width="27" height="27"/><rect x="402" y="322" width="27" height="27"/><rect x="439" y="322" width="27" height="27"/><rect x="476" y="322" width="27" height="27"/>
+    <rect x="365" y="359" width="27" height="27"/><rect x="402" y="359" width="27" height="27"/><rect x="439" y="359" width="27" height="27"/><rect x="476" y="359" width="27" height="27"/>
+    <rect x="365" y="396" width="27" height="27"/><rect x="402" y="396" width="27" height="27"/><rect x="439" y="396" width="27" height="27"/><rect x="476" y="396" width="27" height="27"/>
+    <rect x="365" y="433" width="27" height="27"/><rect x="402" y="433" width="27" height="27"/><rect x="439" y="433" width="27" height="27"/><rect x="476" y="433" width="27" height="27"/>
+    <rect x="365" y="470" width="27" height="27"/><rect x="402" y="470" width="27" height="27"/><rect x="439" y="470" width="27" height="27"/><rect x="476" y="470" width="27" height="27"/>
+    <rect x="365" y="507" width="27" height="27"/><rect x="402" y="507" width="27" height="27"/><rect x="439" y="507" width="27" height="27"/><rect x="476" y="507" width="27" height="27"/>
+  </g>
+  <text class="small" x="435" y="565" text-anchor="middle">d = 128</text>
+
+  <!-- Ordered token routes into the embedding; intentionally non-crossing -->
+  <path class="flow" d="M191 275 C245 275 286 320 338 320"/>
+  <path class="flow" d="M191 410 L338 410"/>
+  <path class="flow" d="M191 650 C248 650 286 520 338 520"/>
+
+  <!-- Conventional transformer encoder block -->
+  <rect class="box" x="600" y="170" width="420" height="570" rx="18" fill="#EAF3E6"/>
+  <rect x="688" y="153" width="244" height="39" rx="19" fill="#244F6B"/>
+  <text class="encoder-title" x="810" y="179" text-anchor="middle">TRANSFORMER ENCODER</text>
+  <text x="970" y="455" font-size="24" font-weight="600">×3</text>
+
+  <rect class="box" x="680" y="610" width="260" height="76" rx="10" fill="#EEDBEF"/>
+  <text class="box-title" x="810" y="641" text-anchor="middle">Multi-Head</text>
+  <text class="box-title" x="810" y="667" text-anchor="middle">Self-Attention</text>
+
+  <path class="flow" d="M810 608 L810 563"/>
+  <rect class="box" x="680" y="505" width="260" height="56" rx="10" fill="#FFF7CF"/>
+  <text class="box-title" x="810" y="540" text-anchor="middle">Add &amp; Norm</text>
+
+  <path class="flow" d="M810 503 L810 458"/>
+  <rect class="box" x="680" y="400" width="260" height="56" rx="10" fill="#FBE3C2"/>
+  <text class="box-title" x="810" y="435" text-anchor="middle">Feed Forward</text>
+
+  <path class="flow" d="M810 398 L810 353"/>
+  <rect class="box" x="680" y="295" width="260" height="56" rx="10" fill="#FFF7CF"/>
+  <text class="box-title" x="810" y="330" text-anchor="middle">Add &amp; Norm</text>
+
+  <path class="flow" d="M810 293 L810 225"/>
+  <path class="residual" d="M670 685 C625 683 625 532 670 532"/>
+  <path class="residual" d="M670 532 C630 529 630 323 670 323"/>
+  <text class="small" x="810" y="797" text-anchor="middle">attention-masked tokens · qd coverage-width loss · EMA 0.999</text>
+
+  <!-- Embedding enters attention from below without crossing residual paths -->
+  <path class="flow" d="M532 410 C570 410 570 770 610 770 L810 770 L810 690"/>
+
+  <!-- Encoder output trunk and non-crossing T-junction -->
+  <path class="route" d="M810 225 L1025 225 L1025 435 L1088 435"/>
+  <circle cx="1088" cy="435" r="4" fill="#244F6B"/>
+  <path class="flow" d="M1088 435 L1088 290 L1128 290"/>
+  <path class="flow" d="M1088 435 L1088 580 L1128 580"/>
+
+  <!-- Readout nodes -->
+  <circle class="node" cx="1180" cy="290" r="50"/>
+  <circle class="node" cx="1180" cy="580" r="50"/>
+  <text class="layer" x="1180" y="216" text-anchor="middle">Physics readout</text>
+  <text class="small" x="1180" y="238" text-anchor="middle">gate w = σ(f) · raw E bypass</text>
+  <text class="small" x="1160" y="365" text-anchor="middle">a · log(1 + Σw·E) + b</text>
+  <text class="layer" x="1180" y="655" text-anchor="middle">Quantile head</text>
+  <text class="small" x="1180" y="677" text-anchor="middle">mean-pool + LayerNorm ‖ 6 globals</text>
+  <text class="small" x="1180" y="699" text-anchor="middle">q₂₅, q₅₀, q₇₅</text>
+
+  <!-- Dedicated raw-energy entry to the physics head -->
+  <path class="bypass" d="M1103 342 C1112 330 1123 321 1139 315"/>
+
+  <!-- Fusion -->
+  <path class="flow" d="M1218 255 C1260 260 1285 320 1300 388"/>
+  <path class="flow" d="M1218 548 C1250 525 1270 480 1300 462"/>
+  <rect class="box" x="1260" y="390" width="160" height="70" rx="12" fill="#FFF0CA"/>
+  <text class="small" x="1340" y="413" text-anchor="middle">FUSION</text>
+  <text class="box-title" x="1340" y="442" text-anchor="middle">base + Δq</text>
+
+  <!-- Calibration node and final output -->
+  <path class="flow" d="M1422 425 L1461 425"/>
+  <circle class="node" cx="1510" cy="425" r="50"/>
+  <text class="layer" x="1510" y="335" text-anchor="middle">Width-binned</text>
+  <text class="layer" x="1510" y="359" text-anchor="middle">calibration</text>
+  <text class="small" x="1510" y="493" text-anchor="middle">3 bins by q₇₅ − q₂₅</text>
+  <path class="flow" d="M1562 425 L1605 425"/>
+  <text x="1645" y="418" text-anchor="middle" font-size="25" font-weight="600"><tspan font-style="italic">E&#770;</tspan><tspan baseline-shift="sub" font-size="16">&#947;</tspan></text>
+  <text class="small" x="1645" y="449" text-anchor="middle">photon energy</text>
+
+  <!-- Legend -->
+  <rect x="490" y="815" width="730" height="105" fill="#FFFFFF" stroke="#263C47" stroke-width="1.4"/>
+  <text x="850" y="846" text-anchor="middle" font-size="24">Legend</text>
+  <circle class="node" cx="590" cy="881" r="25"/>
+  <text class="label" x="628" y="887">state / head</text>
+  <rect class="box" x="790" y="858" width="50" height="43" rx="7" fill="#FFF7CF"/>
+  <text class="label" x="853" y="887">transformer operation</text>
+  <path class="weight" d="M1005 880 L1080 880"/>
+  <text class="label" x="1095" y="887">learned path</text>
+</svg>

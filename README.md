@@ -130,6 +130,18 @@ plus ~0.005 reconstruction above floor.
 | EMA weight averaging (decay 0.999) | 0.0416 | single model ≈ previous 5-model ensemble |
 | coverage-width (qd) training loss | **0.0402** | trainable surrogate of the 68%-interval metric |
 
+## Architecture
+
+<p align="center">
+<img alt="Photon Energy Transformer architecture: cell tokens, linear embedding, transformer encoder x3 with residual connections, physics readout with raw-energy bypass, quantile head, fusion base + Delta-q, width-binned calibration, photon energy output" src="assets/architecture.svg" width="100%">
+</p>
+
+The design principle is **physics-structured simplicity**: a compact transformer whose *readout* carries the
+physics (a learnable calibrated sum over a per-cell signal gate applied to the raw cell energies, plus a
+quantile head), trained with a loss shaped like the evaluation metric. The plain wiring is a *result*, not a
+limitation — teacher–student distillation, GravNet, pairwise attention, Swin-style bias, CNN stems, double
+depth/width, and iterative refinement were all trained on this data and measured flat or worse; see below.
+
 ## The falsification record
 
 The campaign tested **~24 hypotheses across every family** available without per-cell truth labels, all under one
