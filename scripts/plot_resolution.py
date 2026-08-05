@@ -12,6 +12,39 @@ from run_experiments import resolution
 
 pio.templates.default = 'plotly_white'
 
+INK = '#1F2328'
+MUT = '#59636E'
+GRID = '#E6E9EF'
+
+
+def polish(fig, title, xlabel, ylabel):
+    fig.update_layout(
+        font=dict(family="ui-sans-serif, system-ui, 'Segoe UI', Helvetica, Arial", size=13, color=INK),
+        title=dict(text=title, font=dict(size=16), x=0.02, xanchor='left'),
+        plot_bgcolor='white', paper_bgcolor='white',
+        margin=dict(l=70, r=30, t=70, b=60),
+        legend=dict(orientation='h', yanchor='bottom', y=1.0, xanchor='right', x=1.0,
+                    font=dict(size=12), bgcolor='rgba(0,0,0,0)'),
+        hovermode='x unified')
+    for ax in (fig.update_xaxes, fig.update_yaxes):
+        ax(gridcolor=GRID, zeroline=False, linecolor=GRID, ticks='outside',
+           tickcolor=GRID, title_font=dict(size=13, color=MUT), tickfont=dict(size=12, color=MUT))
+    fig.update_xaxes(title_text=xlabel)
+    fig.update_yaxes(title_text=ylabel, tickformat='.3f')
+    return fig
+
+
+def export(fig, out):
+    out.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_html(out, include_plotlyjs='cdn')
+    print('wrote', out)
+    try:
+        png = out.with_suffix('.png')
+        fig.write_image(png, width=1100, height=560, scale=2)
+        print('wrote', png)
+    except Exception as e:
+        print(f'(png export skipped: {e})')
+
 
 def parse_args():
     ap = argparse.ArgumentParser(
@@ -77,22 +110,23 @@ def main():
     for i, d in enumerate(data):
         x = d['true'] if args.x == 'E' else d['ET']
         xs, ys, es = qbin(x, d['true'], d['pred'], args.bins, args.min_n)
-        fig.add_scatter(x=xs, y=ys, error_y=dict(type='data', array=es), mode='lines+markers',
-                        name=d['name'], line=dict(color=palette[i % len(palette)]))
+        fig.add_scatter(x=xs, y=ys, mode='lines+markers', name=d['name'],
+                        error_y=dict(type='data', array=es, thickness=1.2, width=3),
+                        line=dict(color=palette[i % len(palette)], width=2.5),
+                        marker=dict(size=8, line=dict(color='white', width=1.5)))
     if args.ideal is not None:
         a, b, c = args.ideal
         allx = np.concatenate([(d['true'] if args.x == 'E' else d['ET']) for d in data])
         xe = np.linspace(np.quantile(allx, 0.01), np.quantile(allx, 0.99), 200)
         ideal = np.sqrt((a / np.sqrt(xe)) ** 2 + (b / xe) ** 2 + c ** 2)
         fig.add_scatter(x=xe, y=ideal, mode='lines', name='design resolution',
-                        line=dict(color='black', dash='dot'))
-    xlabel = 'true energy [GeV]' if args.x == 'E' else 'ET [GeV]'
-    fig.update_layout(height=500, title=args.title or f'sigma_eff vs {xlabel} ({args.bins} bins, split={args.split})',
-                      xaxis_title=xlabel, yaxis_title='sigma_eff', legend_title='model')
+                        line=dict(color=MUT, dash='dot', width=2))
+    xlabel = 'true energy [GeV]' if args.x == 'E' else 'E_T [GeV]'
+    polish(fig, args.title or f'&#963;_eff vs {xlabel} &#183; {args.bins} bins &#183; {args.split} split',
+           xlabel, 'sigma_eff  (lower is better)')
+    fig.update_layout(height=560)
     out = Path(args.out) if args.out else Path.cwd() / f'resolution_{args.x}_{args.bins}bins.html'
-    out.parent.mkdir(parents=True, exist_ok=True)
-    fig.write_html(out, include_plotlyjs='cdn')
-    print('wrote', out)
+    export(fig, out)
 
     if args.residuals:
         fig2 = go.Figure()
@@ -100,11 +134,9 @@ def main():
             res = (d['pred'] - d['true']) / d['true']
             fig2.add_histogram(x=np.clip(res, -0.5, 0.5), nbinsx=120, name=d['name'],
                                opacity=0.55, marker_color=palette[i % len(palette)])
-        fig2.update_layout(barmode='overlay', height=500, title='(E_pred - E_true) / E_true',
-                           xaxis_title='relative residual', yaxis_title='events', legend_title='model')
-        out2 = out.with_name(out.stem + '_residuals.html')
-        fig2.write_html(out2, include_plotlyjs='cdn')
-        print('wrote', out2)
+        polish(fig2, '(E_pred &#8722; E_true) / E_true', 'relative residual', 'events')
+        fig2.update_layout(barmode='overlay', height=560, yaxis_tickformat='d')
+        export(fig2, out.with_name(out.stem + '_residuals.html'))
 
 
 if __name__ == '__main__':
