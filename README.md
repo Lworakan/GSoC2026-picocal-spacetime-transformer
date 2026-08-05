@@ -249,6 +249,9 @@ data/                    ROOT files (git-ignored, provided by mentors)
 - Every exported model carries its normalization statistics and configuration inside the checkpoint;
   `models/registry.csv` maps each registry entry to its training command and source notebook.
 - Every training run checkpoints per epoch and resumes losslessly (survives crashes and reboots).
+- Contract tests guard the pipeline (`pytest tests/test_pipeline.py`): metric correctness, split determinism,
+  model forward/save-load round-trip, calibration behavior, data-shape contracts, and a regression canary that
+  fails if the champion's σ_eff ever drifts.
 
 ## Data
 
