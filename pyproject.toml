@@ -19,6 +19,8 @@ dependencies = [
     "awkward",
     "matplotlib",
     "plotly",
+    "kaleido",
+    "scikit-learn",
     "pandas",
     "pyyaml",
     "bokeh>=3.9,<4",
@@ -30,6 +32,14 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "ruff", "mypy"]
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [tool.setuptools.packages.find]
 where = ["src"]

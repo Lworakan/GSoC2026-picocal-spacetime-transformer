@@ -46,20 +46,65 @@ def export(fig, out):
         print(f'(png export skipped: {e})')
 
 
+EXAMPLES = """\
+examples:
+  # single model, resolution vs true energy
+  uv run scripts/plot_resolution.py reports/predictions/minbias__SubNetW4CleanAuxQdEma.csv
+
+  # model evolution: every development round on one plot
+  uv run scripts/plot_resolution.py \\
+      reports/predictions/minbias__GateHuber.csv \\
+      reports/predictions/minbias__SubNetW4.csv \\
+      reports/predictions/minbias__SubNetW4CleanAux.csv \\
+      reports/predictions/minbias__SubNetW4CleanAuxQuant.csv \\
+      reports/predictions/minbias__SubNetW4CleanAuxQdEma.csv \\
+      --labels "Huber baseline" "+physics readout" "+clean-aux" "+quantile head" "+qd loss & EMA" \\
+      --title "Model evolution on minimum bias" --out reports/figures/evolution.html
+
+  # vs transverse energy, 10 bins, with an ideal-resolution reference curve
+  uv run scripts/plot_resolution.py reports/predictions/minbias__SubNetW4CleanAuxQdEma.csv \\
+      --x ET --bins 10 --ideal 0.10 0.0 0.01
+
+  # add residual histograms alongside the resolution curves
+  uv run scripts/plot_resolution.py reports/predictions/minbias__SubNetW4CleanAuxQdEma.csv --residuals
+
+input CSV schema (one row per cluster per seed, written by scripts/train_picocal.py):
+  model,dataset,seed,split,true_energy,pred_energy,pred_bias,region,region_name,ET
+
+output: interactive HTML plus a static PNG next to it (also printed: an aggregate
+sigma_eff / bias summary table for every input file).
+"""
+
+
 def parse_args():
     ap = argparse.ArgumentParser(
-        description='Overlay sigma_eff curves from a list of prediction CSVs (schema: model,dataset,seed,split,true_energy,pred_energy,pred_bias,region,region_name,ET)')
-    ap.add_argument('csvs', nargs='+')
-    ap.add_argument('--bins', type=int, default=8)
-    ap.add_argument('--x', choices=['E', 'ET'], default='E')
-    ap.add_argument('--split', default='test')
-    ap.add_argument('--min-n', type=int, default=50)
-    ap.add_argument('--labels', nargs='*', default=None)
-    ap.add_argument('--title', default=None)
+        description='Compare energy resolution across models: overlay sigma_eff curves '
+                    'from any number of prediction CSVs, with per-bin statistical '
+                    'uncertainty 0.96*sigma_eff/sqrt(n). Seeds are averaged per file.',
+        epilog=EXAMPLES, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('csvs', nargs='+',
+                    help='one or more prediction CSVs (each becomes one curve)')
+    ap.add_argument('--bins', type=int, default=8,
+                    help='number of quantile bins along the x axis (default: 8)')
+    ap.add_argument('--x', choices=['E', 'ET'], default='E',
+                    help="x axis: 'E' = true energy, 'ET' = transverse energy (default: E)")
+    ap.add_argument('--split', default='test',
+                    help="which data split to plot: train / val / test (default: test)")
+    ap.add_argument('--min-n', type=int, default=50,
+                    help='skip bins with fewer clusters than this (default: 50)')
+    ap.add_argument('--labels', nargs='*', default=None,
+                    help='legend label per CSV, same order as the file list '
+                         '(default: "<model> (<dataset>)" from the CSV itself)')
+    ap.add_argument('--title', default=None,
+                    help='plot title (default: auto-generated from axis and split)')
     ap.add_argument('--ideal', type=float, nargs=3, metavar=('A', 'B', 'C'), default=None,
-                    help='ideal curve sigma/E = A/sqrt(E) (+) B/E (+) C, as fractions')
-    ap.add_argument('--residuals', action='store_true')
-    ap.add_argument('--out', default=None)
+                    help='overlay the design resolution sigma/E = A/sqrt(E) (+) B/E (+) C '
+                         '(quadrature sum, fractions; e.g. --ideal 0.10 0.0 0.01)')
+    ap.add_argument('--residuals', action='store_true',
+                    help='also write a (E_pred-E_true)/E_true histogram figure')
+    ap.add_argument('--out', default=None,
+                    help='output HTML path; a PNG is written next to it '
+                         '(default: ./resolution_<x>_<bins>bins.html)')
     return ap.parse_args()
 
 
