@@ -60,3 +60,4 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+reports/**/*.html
