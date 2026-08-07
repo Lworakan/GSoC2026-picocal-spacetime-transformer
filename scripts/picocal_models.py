@@ -77,7 +77,7 @@ def save_model(path, model, extras):
 
 
 def load_model(path, device='cpu'):
-    st = torch.load(path, map_location=device)
+    st = torch.load(path, map_location=device, weights_only=False)
     model = SubNetFQ(st['in_dim'], st['la0'], st['lb0'], ng=st.get('ng', NG)).to(device)
     model.load_state_dict(st['state_dict'])
     model.eval()
