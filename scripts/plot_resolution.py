@@ -146,10 +146,14 @@ def main():
             d['name'] = lab
     palette = px.colors.qualitative.D3 + px.colors.qualitative.Set2
 
-    print(f"{'model':40s} {'n':>7s} {'seeds':>5s} {'sigma_eff':>9s} {'bias':>8s}")
+    print(f"{'model':40s} {'n':>7s} {'seeds':>5s} {'sigma_eff':>9s} {'rob_sigma':>9s} {'bias':>8s}")
     for d in data:
         r = resolution(d['pred'], d['true'])
-        print(f"{d['name']:40s} {len(d['true']):7d} {d['n_seeds']:5d} {r['sigma_eff']:9.4f} {r['bias']:8.4f}")
+        res = (d['pred'] - d['true']) / d['true']
+        d['sigma_eff'] = r['sigma_eff']
+        d['rob_sigma'] = 1.4826 * float(np.median(np.abs(res - np.median(res))))
+        print(f"{d['name']:40s} {len(d['true']):7d} {d['n_seeds']:5d} "
+              f"{r['sigma_eff']:9.4f} {d['rob_sigma']:9.4f} {r['bias']:8.4f}")
 
     fig = go.Figure()
     for i, d in enumerate(data):
@@ -177,9 +181,10 @@ def main():
         fig2 = go.Figure()
         for i, d in enumerate(data):
             res = (d['pred'] - d['true']) / d['true']
-            fig2.add_histogram(x=np.clip(res, -0.5, 0.5), nbinsx=120, name=d['name'],
+            lab = f"{d['name']}  &#963;_eff={d['sigma_eff']:.4f}  rob&#963;={d['rob_sigma']:.4f}"
+            fig2.add_histogram(x=np.clip(res, -0.5, 0.5), nbinsx=120, name=lab,
                                opacity=0.55, marker_color=palette[i % len(palette)])
-        polish(fig2, '(E_pred &#8722; E_true) / E_true', 'relative residual', 'events')
+        polish(fig2, '&#916;E/E distribution &#183; (E_pred &#8722; E_true) / E_true', 'relative residual', 'events')
         fig2.update_layout(barmode='overlay', height=560, yaxis_tickformat='d')
         export(fig2, out.with_name(out.stem + '_residuals.html'))
 

@@ -203,18 +203,45 @@ Wins are rare by design — each row is a pre-registered experiment, not a tunin
 ```bash
 git clone https://github.com/Lworakan/GSoC2026-picocal-spacetime-transformer.git
 cd GSoC2026-picocal-spacetime-transformer
-# environment: torch >= 2.6, uproot, awkward, numpy, pandas, scipy, plotly, nbformat
+uv sync   # one command: cpu torch, plotly + kaleido, everything pinned by uv.lock
 
 # reproduce the champion (5 seeds, GPU, ~3 h) — checkpointed and resumable
-python scripts/train_picocal.py --sample minbias --cleanaux --seeds 0 1 2 3 4
+uv run scripts/train_picocal.py --sample minbias --cleanaux --seeds 0 1 2 3 4
 
 # train on the clean sample instead — same script, one flag
-python scripts/train_picocal.py --sample clean --seeds 0 1
+uv run scripts/train_picocal.py --sample clean --seeds 0 1
 
 # compare any set of prediction files, configurable binning
-python scripts/plot_resolution.py reports/predictions/minbias__*.csv --bins 9 --residuals \
+uv run scripts/plot_resolution.py reports/predictions/minbias__*.csv --bins 9 --residuals \
     --ideal 0.10 0 0.01
 ```
+
+### Two plots that tell the whole story
+
+```bash
+# 1 — model evolution: every development round on one plot, plus the ΔE/E distribution
+uv run scripts/plot_resolution.py \
+    reports/predictions/minbias__GateHuber.csv \
+    reports/predictions/minbias__SubNetW4.csv \
+    reports/predictions/minbias__SubNetW4CleanAux.csv \
+    reports/predictions/minbias__SubNetW4CleanAuxQuant.csv \
+    reports/predictions/minbias__SubNetW4CleanAuxQdEma.csv \
+    --labels "Huber baseline" "+physics readout" "+clean-aux" "+quantile head" "+qd loss & EMA" \
+    --title "Model evolution on minimum bias" --residuals \
+    --out reports/figures/evolution.html
+
+# 2 — pileup penalty: the final model on minimum bias vs the pileup-free reference
+uv run scripts/plot_resolution.py \
+    reports/predictions/clean__GateHuber.csv \
+    reports/predictions/minbias__GateHuber.csv \
+    reports/predictions/minbias__SubNetW4CleanAuxQdEma.csv \
+    --labels "clean sample (no pileup)" "minbias — Huber baseline" "minbias — final model" \
+    --title "Pileup penalty: clean reference vs minimum bias" \
+    --out reports/figures/pileup_penalty.html
+```
+
+Each command prints an aggregate table (σ_eff, robust σ, bias per model) and writes interactive
+HTML + static PNG. Run `uv run scripts/plot_resolution.py --help` for every option with examples.
 
 Prediction CSVs share one schema — `model, dataset, seed, split, true_energy, pred_energy, pred_bias,
 region, region_name, ET` — so any model (including external baselines) drops into the same plots.
