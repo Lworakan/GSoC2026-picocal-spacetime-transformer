@@ -68,6 +68,13 @@ examples:
   # add residual histograms alongside the resolution curves
   uv run scripts/plot_resolution.py reports/predictions/minbias__SubNetW4CleanAuxQdEma.csv --residuals
 
+  # one figure per calorimeter region (cell pitch), minbias vs clean superimposed
+  uv run scripts/plot_resolution.py \\
+      reports/predictions/minbias__SubNetW4CleanAuxQdEma.csv \\
+      reports/predictions/clean__CleanQuantW2.csv \\
+      --labels "minimum bias" "clean (no pileup)" --by-region \\
+      --out reports/figures/regions.html
+
 input CSV schema (one row per cluster per seed, written by scripts/train_picocal.py):
   model,dataset,seed,split,true_energy,pred_energy,pred_bias,region,region_name,ET
 
@@ -102,6 +109,9 @@ def parse_args():
                          '(quadrature sum, fractions; e.g. --ideal 0.10 0.0 0.01)')
     ap.add_argument('--residuals', action='store_true',
                     help='also write a (E_pred-E_true)/E_true histogram figure')
+    ap.add_argument('--by-region', action='store_true',
+                    help='also write one resolution figure per calorimeter region '
+                         '(region_name column, i.e. cell pitch), curves superimposed per CSV')
     ap.add_argument('--out', default=None,
                     help='output HTML path; a PNG is written next to it '
                          '(default: ./resolution_<x>_<bins>bins.html)')
@@ -119,7 +129,8 @@ def load(path, split):
     pred = np.mean([b['pred_energy'].to_numpy() for b in blocks], axis=0)
     b0 = blocks[0]
     name = f"{b0['model'].iloc[0]} ({b0['dataset'].iloc[0]})"
-    return dict(true=t0, pred=pred, ET=b0['ET'].to_numpy(), name=name, n_seeds=len(seeds))
+    return dict(true=t0, pred=pred, ET=b0['ET'].to_numpy(), name=name, n_seeds=len(seeds),
+                region=b0['region_name'].to_numpy())
 
 
 def qbin(x, true, pred, nbins, min_n):
@@ -176,6 +187,33 @@ def main():
     fig.update_layout(height=560)
     out = Path(args.out) if args.out else Path.cwd() / f'resolution_{args.x}_{args.bins}bins.html'
     export(fig, out)
+
+    if args.by_region:
+        regions = sorted({r for d in data for r in np.unique(d['region'])},
+                         key=lambda s: float(str(s).rstrip('m')))
+        print(f"\n{'region':>8s}  " + '  '.join(f"{d['name'][:28]:>28s}" for d in data))
+        for reg in regions:
+            figr = go.Figure()
+            row = []
+            for i, d in enumerate(data):
+                sel = d['region'] == reg
+                if int(sel.sum()) < args.min_n:
+                    row.append(float('nan'))
+                    continue
+                s = resolution(d['pred'][sel], d['true'][sel])['sigma_eff']
+                row.append(s)
+                x = (d['true'] if args.x == 'E' else d['ET'])[sel]
+                xs, ys, es = qbin(x, d['true'][sel], d['pred'][sel], args.bins, args.min_n)
+                figr.add_scatter(x=xs, y=ys, mode='lines+markers',
+                                 name=f"{d['name']}  &#963;_eff={s:.4f}",
+                                 error_y=dict(type='data', array=es, thickness=1.2, width=3),
+                                 line=dict(color=palette[i % len(palette)], width=2.5),
+                                 marker=dict(size=8, line=dict(color='white', width=1.5)))
+            print(f"{str(reg):>8s}  " + '  '.join(f"{v:28.4f}" for v in row))
+            polish(figr, f'region {reg} &#183; &#963;_eff vs {xlabel} &#183; {args.split} split',
+                   xlabel, 'sigma_eff  (lower is better)')
+            figr.update_layout(height=560)
+            export(figr, out.with_name(f'{out.stem}_region_{reg}.html'))
 
     if args.residuals:
         fig2 = go.Figure()
