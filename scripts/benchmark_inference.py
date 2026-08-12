@@ -55,6 +55,14 @@ def parse_args():
                     help='torch CPU thread count (default: torch default)')
     ap.add_argument('--device', default='cpu',
                     help="inference device (default: cpu; e.g. cuda, cuda:0)")
+    for f in ('extra', 'dens', 'orho', 'tpull', 'depth', 'phys', 'occ', 'rho'):
+        ap.add_argument(f'--{f}', action='store_true',
+                        help=f'checkpoint was trained with --{f} (older checkpoints do not '
+                             'record their feature flags; newer ones do and override this)')
+    ap.add_argument('--baselines', action='store_true',
+                    help='also time the non-transformer model types: the analytic calibrated '
+                         'sum a*log(1+sum E)+b and a boosted-tree regressor on the same '
+                         'aggregate features the transformer receives')
     ap.add_argument('--out', default=None,
                     help='optional CSV path for the results table')
     return ap.parse_args()
@@ -68,6 +76,20 @@ def cpu_name():
     except OSError:
         pass
     return platform.processor() or platform.machine()
+
+
+def time_numpy(fn, x, bs, repeats, warmup):
+    n = len(x)
+    for _ in range(warmup):
+        for j in range(0, n, bs):
+            fn(x[j:j + bs])
+    ts = []
+    for _ in range(repeats):
+        t0 = time.perf_counter()
+        for j in range(0, n, bs):
+            fn(x[j:j + bs])
+        ts.append(time.perf_counter() - t0)
+    return n / float(np.median(ts))
 
 
 def timed_pass(model, T, bs, device):
@@ -96,10 +118,12 @@ def main():
             raise SystemExit(f'checkpoint not found: {p}')
         model, st = load_model(path, device)
         ckpts.append((path.stem, model, st))
-    windows = {st.get('window', 4) for _, _, st in ckpts}
-    if len(windows) != 1:
-        raise SystemExit(f'mixed window sizes across checkpoints: {sorted(windows)}')
-    window = windows.pop()
+    shapes = {(st.get('window', 4), st['in_dim'], st.get('ng', NG)) for _, _, st in ckpts}
+    if len(shapes) != 1:
+        raise SystemExit('checkpoints expect different input shapes (window, in_dim, ng): '
+                         f'{sorted(shapes)}\nbenchmark one feature configuration at a time.')
+    window, in_dim, ng = shapes.pop()
+    occ = ng > NG
 
     sub = 'minimum_bias' if args.sample == 'minbias' else 'full'
     pat = '*.root' if args.sample == 'minbias' else 'matched_*.root'
@@ -107,7 +131,19 @@ def main():
     if not files:
         raise SystemExit(f'no ROOT files under data/{sub}')
     ev = build_grid(files, args.sample)
-    D = prep(window, ev, None, ng=NG)
+    rec = {}
+    for _, _, st in ckpts:
+        rec.update(st.get('feats') or {})
+    def flag(name):
+        return bool(rec[name]) if name in rec else bool(getattr(args, name))
+    D = prep(window, ev, None, ng=ng, phys=flag('phys'), occ=occ, extra=flag('extra'),
+             dens=flag('dens'), rho=flag('rho'), tpull=flag('tpull'), depth=flag('depth'),
+             orho=flag('orho'))
+    if D['IN_DIM'] != in_dim:
+        raise SystemExit(
+            f'built {D["IN_DIM"]}-feature tokens but the checkpoint expects {in_dim}. '
+            'Pass the feature flags the model was trained with (--extra --dens ...); '
+            'checkpoints written before 2026-08-12 do not record them.')
     T = dict(X=torch.from_numpy(D['X']).to(device), M=torch.from_numpy(D['M']).to(device),
              G=torch.from_numpy(D['G']).to(device), E=torch.from_numpy(D['Eraw']).to(device))
     n = T['X'].shape[0]
@@ -135,6 +171,31 @@ def main():
                              n_clusters=n, repeats=args.repeats))
             print(f'{name:34s} {nparams:8d} {bs:6d} {cps:11.0f} {1e3 / cps:10.3f} '
                   f'{cps / 5:9.0f} {cps / 40:9.0f}', flush=True)
+
+    if args.baselines:
+        from sklearn.ensemble import HistGradientBoostingRegressor
+        ktr = D['ktr']
+        sumE = D['Eraw'].sum(1)
+        a, b = np.polyfit(np.log(sumE[ktr] + 1e-6), D['y'][ktr], 1)
+        gsum = D['G'].astype(np.float64)
+        bdt = HistGradientBoostingRegressor(max_iter=300, random_state=0)
+        bdt.fit(gsum[ktr], D['y'][ktr])
+        print()
+        specs = [('CalibratedSum (analytic)', 0,
+                  lambda z: np.exp(a * np.log(z.sum(1) + 1e-6) + b), D['Eraw']),
+                 ('BDT on aggregate features',
+                  int(sum(len(t.nodes) for s in bdt._predictors for t in s)),
+                  lambda z: np.exp(bdt.predict(z)), gsum)]
+        for name, np_, fn, x in specs:
+            for bs in args.batch_sizes:
+                cps = time_numpy(fn, x, bs, args.repeats, args.warmup)
+                rows.append(dict(model=name, params=np_, batch=bs, clusters_per_s=cps,
+                                 ms_per_cluster=1e3 / cps, ensemble5_per_s=cps / 5,
+                                 ensemble5_tta_per_s=cps / 40, device='cpu',
+                                 threads=torch.get_num_threads(), n_clusters=len(x),
+                                 repeats=args.repeats))
+                print(f'{name:34s} {np_:8d} {bs:6d} {cps:11.0f} {1e3 / cps:10.3f} '
+                      f'{cps / 5:9.0f} {cps / 40:9.0f}', flush=True)
 
     if args.out:
         import pandas as pd
