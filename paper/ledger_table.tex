@@ -1,0 +1,139 @@
+\begin{longtable}{lrlll}
+\caption{Complete experiment ledger: every configuration with a saved
+prediction set on the minimum-bias sample, scored identically (seed-ensemble
+\seff; $\pm$ is the spread across seeds). Configuration names are the run
+identifiers from the training script; one- and two-seed rows are screening
+runs.}\label{tab:ledger}\\
+\toprule
+configuration & seeds & aggregate & 15\,mm low-E & 30\,mm low-E\\
+\midrule
+\endfirsthead
+\toprule
+configuration & seeds & aggregate & 15\,mm low-E & 30\,mm low-E\\
+\midrule
+\endhead
+\texttt{BDT} & 1 & $0.1253$ & $0.3453$ & $0.3039$\\
+\texttt{CalibratedSum} & 1 & $0.1837$ & $0.5955$ & $0.5320$\\
+\texttt{EfnResidual} & 5 & $0.0623$ & $0.2969\pm0.0059$ & $0.2021\pm0.0068$\\
+\texttt{GateHuber} & 5 & $0.0462$ & $0.2157\pm0.0095$ & $0.1667\pm0.0082$\\
+\texttt{MeanDirect} & 5 & $0.0650$ & $0.2946\pm0.0089$ & $0.2202\pm0.0054$\\
+\texttt{MeanResidual} & 5 & $0.0675$ & $0.2885\pm0.0103$ & $0.2259\pm0.0097$\\
+\texttt{PairT} & 5 & $0.0627$ & $0.2936\pm0.0093$ & $0.2186\pm0.0056$\\
+\texttt{Spacetime} & 5 & $0.0543$ & $0.2429\pm0.0099$ & $0.1871\pm0.0052$\\
+\texttt{SubEnsembleTTA} & 1 & $0.0440$ & $0.1721$ & $0.1059$\\
+\texttt{SubNetW10CleanAuxExDnQdEma} & 1 & $0.0394$ & $0.1019$ & $0.0841$\\
+\texttt{SubNetW2CleanAuxExDnQdEma} & 1 & $0.0412$ & $0.1857$ & $0.1152$\\
+\texttt{SubNetW2CleanAuxExDnTpQdEma} & 1 & $0.0420$ & $0.1752$ & $0.1253$\\
+\texttt{SubNetW4} & 5 & $0.0443$ & $0.1838\pm0.0156$ & $0.1102\pm0.0036$\\
+\texttt{SubNetW4CleanAux} & 2 & $0.0451$ & $0.1656\pm0.0002$ & $0.1108\pm0.0002$\\
+\texttt{SubNetW4CleanAuxD4QdEma} & 1 & $0.0416$ & $0.1696$ & $0.1071$\\
+\texttt{SubNetW4CleanAuxDnQdEma} & 2 & $0.0416$ & $0.1661\pm0.0064$ & $0.1025\pm0.0009$\\
+\texttt{SubNetW4CleanAuxExDnAbsQdEma} & 1 & $0.0407$ & $0.1652$ & $0.1030$\\
+\texttt{SubNetW4CleanAuxExDnAuxQdEma} & 2 & $0.0395$ & $0.1646\pm0.0004$ & $0.1016\pm0.0030$\\
+\texttt{SubNetW4CleanAuxExDnDepQdEma} & 2 & $0.0391$ & $0.1724\pm0.0017$ & $0.0994\pm0.0024$\\
+\texttt{SubNetW4CleanAuxExDnF6QdEma} & 2 & $0.0401$ & $0.1820\pm0.0123$ & $0.1187\pm0.0035$\\
+\texttt{SubNetW4CleanAuxExDnFmQdEma} & 1 & $0.0406$ & $0.1621$ & $0.0984$\\
+\texttt{SubNetW4CleanAuxExDnGs10PtQdEma} & 2 & $0.0410$ & $0.1704\pm0.0082$ & $0.1186\pm0.0058$\\
+\texttt{SubNetW4CleanAuxExDnGs10QdEma} & 2 & $0.0386$ & $0.1526\pm0.0056$ & $0.0939\pm0.0039$\\
+\texttt{SubNetW4CleanAuxExDnGs50PtQdEma} & 2 & $0.0421$ & $0.1858\pm0.0145$ & $0.1209\pm0.0007$\\
+\texttt{SubNetW4CleanAuxExDnGs50QdEma} & 2 & $0.0383$ & $0.1686\pm0.0043$ & $0.0950\pm0.0026$\\
+\texttt{SubNetW4CleanAuxExDnNoTimeQdEma} & 2 & $0.0485$ & $0.2033\pm0.0180$ & $0.1556\pm0.0077$\\
+\texttt{SubNetW4CleanAuxExDnOrhAbsQdEma} & 2 & $0.0397$ & $0.1689\pm0.0091$ & $0.0967\pm0.0041$\\
+\texttt{SubNetW4CleanAuxExDnOrhQdEma} & 1 & $0.0409$ & $0.1657$ & $0.1052$\\
+\texttt{SubNetW4CleanAuxExDnPfQdEma} & 2 & $0.0395$ & $0.1599\pm0.0160$ & $0.1027\pm0.0014$\\
+\texttt{SubNetW4CleanAuxExDnQdEma} & 5 & $0.0390$ & $0.1654\pm0.0047$ & $0.0957\pm0.0038$\\
+\texttt{SubNetW4CleanAuxExDnR12QdEma} & 1 & $0.0397$ & $0.1760$ & $0.1079$\\
+\texttt{SubNetW4CleanAuxExDnR15QdEma} & 1 & $0.0407$ & $0.1591$ & $0.0997$\\
+\texttt{SubNetW4CleanAuxExDnRcAcQdEma} & 5 & $0.0385$ & $0.0761\pm0.0047$ & $0.0714\pm0.0044$\\
+\texttt{SubNetW4CleanAuxExDnRcK0AcQdEma} & 1 & $0.0384$ & $0.0858$ & $0.0779$\\
+\texttt{SubNetW4CleanAuxExDnRcK1AcQdEma} & 1 & $0.0392$ & $0.0714$ & $0.0793$\\
+\texttt{SubNetW4CleanAuxExDnRcK2AcQdEma} & 1 & $0.0382$ & $0.0790$ & $0.0730$\\
+\texttt{SubNetW4CleanAuxExDnRcK3AcQdEma} & 1 & $0.0387$ & $0.0756$ & $0.0738$\\
+\texttt{SubNetW4CleanAuxExDnRcK4AcQdEma} & 1 & $0.0388$ & $0.0851$ & $0.0749$\\
+\texttt{SubNetW4CleanAuxExDnRcK5AcQdEma} & 1 & $0.0408$ & $0.0885$ & $0.0886$\\
+\texttt{SubNetW4CleanAuxExDnRcK6AcQdEma} & 1 & $0.0408$ & $0.0901$ & $0.0824$\\
+\texttt{SubNetW4CleanAuxExDnRcK7AcQdEma} & 1 & $0.0407$ & $0.0930$ & $0.0746$\\
+\texttt{SubNetW4CleanAuxExDnRcK8AcQdEma} & 1 & $0.0416$ & $0.0851$ & $0.0850$\\
+\texttt{SubNetW4CleanAuxExDnRcK9AcQdEma} & 1 & $0.0406$ & $0.0881$ & $0.0770$\\
+\texttt{SubNetW4CleanAuxExDnRhoQdEma} & 2 & $0.0395$ & $0.1583\pm0.0018$ & $0.0997\pm0.0000$\\
+\texttt{SubNetW4CleanAuxExDnSxQdEma} & 2 & $0.0398$ & $0.1734\pm0.0056$ & $0.0989\pm0.0050$\\
+\texttt{SubNetW4CleanAuxExDnTpAuxQdEma} & 2 & $0.0397$ & $0.1720\pm0.0020$ & $0.1054\pm0.0042$\\
+\texttt{SubNetW4CleanAuxExDnTpOrhFmQdEma} & 2 & $0.0404$ & $0.1847\pm0.0074$ & $0.1016\pm0.0079$\\
+\texttt{SubNetW4CleanAuxExDnTpQdEma} & 1 & $0.0403$ & $0.1826$ & $0.1047$\\
+\texttt{SubNetW4CleanAuxExDnTr10QdEma} & 2 & $0.0513$ & $0.2309\pm0.0587$ & $0.1617\pm0.0461$\\
+\texttt{SubNetW4CleanAuxExDnTr20QdEma} & 2 & $0.0565$ & $0.2636\pm0.0494$ & $0.1705\pm0.0161$\\
+\texttt{SubNetW4CleanAuxExDnW04QdEma} & 2 & $0.0399$ & $0.1641\pm0.0033$ & $0.1029\pm0.0070$\\
+\texttt{SubNetW4CleanAuxExDnW05QdEma} & 1 & $0.0407$ & $0.1772$ & $0.0974$\\
+\texttt{SubNetW4CleanAuxExDnW07QdEma} & 2 & $0.0410$ & $0.1631\pm0.0186$ & $0.1087\pm0.0071$\\
+\texttt{SubNetW4CleanAuxExDnW1QdEma} & 1 & $0.0431$ & $0.1868$ & $0.1225$\\
+\texttt{SubNetW4CleanAuxExGxQdEma} & 2 & $0.0393$ & $0.1577\pm0.0025$ & $0.1049\pm0.0031$\\
+\texttt{SubNetW4CleanAuxExQdEma} & 2 & $0.0394$ & $0.1761\pm0.0052$ & $0.1033\pm0.0015$\\
+\texttt{SubNetW4CleanAuxGeoQdEma} & 1 & $0.0420$ & $0.1804$ & $0.1117$\\
+\texttt{SubNetW4CleanAuxGeoQpQdEma} & 1 & $0.0414$ & $0.1684$ & $0.1083$\\
+\texttt{SubNetW4CleanAuxNoTimeQdEma} & 2 & $0.0508$ & $0.2559\pm0.0001$ & $0.1837\pm0.0007$\\
+\texttt{SubNetW4CleanAuxPhysOccExQdEma} & 2 & $0.0393$ & $0.1755\pm0.0019$ & $0.1023\pm0.0004$\\
+\texttt{SubNetW4CleanAuxPhysOccQdEma} & 2 & $0.0408$ & $0.1698\pm0.0117$ & $0.1051\pm0.0077$\\
+\texttt{SubNetW4CleanAuxPhysOccQpQdEma} & 5 & $0.0408$ & $0.1681\pm0.0079$ & $0.0935\pm0.0055$\\
+\texttt{SubNetW4CleanAuxQdEma} & 5 & $0.0408$ & $0.1726\pm0.0041$ & $0.1059\pm0.0041$\\
+\texttt{SubNetW4CleanAuxQpQdEma} & 1 & $0.0426$ & $0.1747$ & $0.1098$\\
+\texttt{SubNetW4CleanAuxQuant} & 5 & $0.0427$ & $0.1641\pm0.0090$ & $0.1119\pm0.0043$\\
+\texttt{SubNetW4CleanAuxSgnExDnQdEma} & 4 & $0.0395$ & $0.1578\pm0.0027$ & $0.1028\pm0.0037$\\
+\texttt{SubNetW4CleanAuxTgateQdEma} & 2 & $0.0413$ & $0.1744\pm0.0001$ & $0.1113\pm0.0099$\\
+\texttt{SubNetW5CleanAuxExDnQdEma} & 1 & $0.0393$ & $0.1531$ & $0.0932$\\
+\texttt{SubNetW6CleanAuxExDnOrhQdEma} & 1 & $0.0404$ & $0.1489$ & $0.0953$\\
+\texttt{SubNetW6CleanAuxExDnQdEma} & 3 & $0.0389$ & $0.1189\pm0.0027$ & $0.0905\pm0.0003$\\
+\texttt{SubNetW6CleanAuxExDnR15QdEma} & 1 & $0.0399$ & $0.1452$ & $0.0945$\\
+\texttt{SubNetW6CleanAuxExDnTpQdEma} & 1 & $0.0403$ & $0.1328$ & $0.0988$\\
+\texttt{SubNetW6CleanAuxPhysOccQdEma} & 2 & $0.0407$ & $0.1682\pm0.0030$ & $0.0964\pm0.0001$\\
+\texttt{SubNetW7CleanAuxExDnOrhQdEma} & 1 & $0.0402$ & $0.1200$ & $0.0867$\\
+\texttt{SubNetW7CleanAuxExDnQdEma} & 5 & $0.0383$ & $0.1131\pm0.0065$ & $0.0866\pm0.0034$\\
+\texttt{SubNetW7CleanAuxExDnR15QdEma} & 1 & $0.0394$ & $0.1240$ & $0.0893$\\
+\texttt{SubNetW7CleanAuxExDnTpQdEma} & 1 & $0.0411$ & $0.1427$ & $0.0956$\\
+\texttt{SubNetW8CleanAuxExDnB192RcQdEma} & 1 & $0.0429$ & $0.0860$ & $0.0837$\\
+\texttt{SubNetW8CleanAuxExDnB48RcQdEma} & 1 & $0.0425$ & $0.0899$ & $0.0858$\\
+\texttt{SubNetW8CleanAuxExDnCj0p2RcQdEma} & 1 & $0.0426$ & $0.0837$ & $0.0838$\\
+\texttt{SubNetW8CleanAuxExDnCj0p5RcQdEma} & 1 & $0.0422$ & $0.0865$ & $0.0820$\\
+\texttt{SubNetW8CleanAuxExDnCosRcQdEma} & 1 & $0.0424$ & $0.0842$ & $0.0817$\\
+\texttt{SubNetW8CleanAuxExDnD256L6RcQdEma} & 1 & $0.1179$ & $0.2983$ & $0.2662$\\
+\texttt{SubNetW8CleanAuxExDnD64L2RcQdEma} & 1 & $0.0463$ & $0.1110$ & $0.0996$\\
+\texttt{SubNetW8CleanAuxExDnLr0p0001RcQdEma} & 1 & $0.0462$ & $0.1076$ & $0.0984$\\
+\texttt{SubNetW8CleanAuxExDnLr0p0005RcQdEma} & 1 & $0.0434$ & $0.0915$ & $0.0829$\\
+\texttt{SubNetW8CleanAuxExDnMmQdEma} & 3 & $0.0386$ & $0.1049\pm0.0023$ & $0.0807\pm0.0027$\\
+\texttt{SubNetW8CleanAuxExDnQdEma} & 5 & $0.0386$ & $0.1156\pm0.0075$ & $0.0779\pm0.0024$\\
+\texttt{SubNetW8CleanAuxExDnR15QdEma} & 5 & $0.0382$ & $0.0997\pm0.0109$ & $0.0854\pm0.0058$\\
+\texttt{SubNetW8CleanAuxExDnR15RcRr01QdEma} & 3 & $0.0386$ & $0.0725\pm0.0037$ & $0.0762\pm0.0023$\\
+\texttt{SubNetW8CleanAuxExDnRcFmQdEma} & 3 & $0.0390$ & $0.0757\pm0.0037$ & $0.0745\pm0.0020$\\
+\texttt{SubNetW8CleanAuxExDnRcK0QdEma} & 3 & $0.0380$ & $0.0781\pm0.0025$ & $0.0788\pm0.0028$\\
+\texttt{SubNetW8CleanAuxExDnRcK0Rr01QdEma} & 1 & $0.0388$ & $0.0854$ & $0.0788$\\
+\texttt{SubNetW8CleanAuxExDnRcK1QdEma} & 3 & $0.0378$ & $0.0780\pm0.0048$ & $0.0778\pm0.0023$\\
+\texttt{SubNetW8CleanAuxExDnRcK1Rr01QdEma} & 1 & $0.0398$ & $0.0746$ & $0.0797$\\
+\texttt{SubNetW8CleanAuxExDnRcK2QdEma} & 3 & $0.0383$ & $0.0720\pm0.0020$ & $0.0775\pm0.0026$\\
+\texttt{SubNetW8CleanAuxExDnRcK2Rr01QdEma} & 1 & $0.0386$ & $0.0694$ & $0.0798$\\
+\texttt{SubNetW8CleanAuxExDnRcK3QdEma} & 3 & $0.0381$ & $0.0787\pm0.0018$ & $0.0787\pm0.0014$\\
+\texttt{SubNetW8CleanAuxExDnRcK3Rr01QdEma} & 1 & $0.0385$ & $0.0757$ & $0.0761$\\
+\texttt{SubNetW8CleanAuxExDnRcK4QdEma} & 3 & $0.0382$ & $0.0813\pm0.0065$ & $0.0695\pm0.0039$\\
+\texttt{SubNetW8CleanAuxExDnRcK4Rr01QdEma} & 1 & $0.0381$ & $0.0764$ & $0.0761$\\
+\texttt{SubNetW8CleanAuxExDnRcK5QdEma} & 3 & $0.0396$ & $0.0836\pm0.0063$ & $0.0855\pm0.0039$\\
+\texttt{SubNetW8CleanAuxExDnRcK5Rr01QdEma} & 1 & $0.0406$ & $0.0881$ & $0.0875$\\
+\texttt{SubNetW8CleanAuxExDnRcK6QdEma} & 3 & $0.0392$ & $0.0805\pm0.0073$ & $0.0830\pm0.0025$\\
+\texttt{SubNetW8CleanAuxExDnRcK6Rr01QdEma} & 1 & $0.0402$ & $0.0732$ & $0.0795$\\
+\texttt{SubNetW8CleanAuxExDnRcK7QdEma} & 3 & $0.0393$ & $0.0924\pm0.0041$ & $0.0685\pm0.0032$\\
+\texttt{SubNetW8CleanAuxExDnRcK7Rr01QdEma} & 1 & $0.0402$ & $0.0945$ & $0.0783$\\
+\texttt{SubNetW8CleanAuxExDnRcK8QdEma} & 3 & $0.0397$ & $0.0713\pm0.0054$ & $0.0816\pm0.0005$\\
+\texttt{SubNetW8CleanAuxExDnRcK8Rr01QdEma} & 1 & $0.0406$ & $0.0731$ & $0.0789$\\
+\texttt{SubNetW8CleanAuxExDnRcK9QdEma} & 3 & $0.0398$ & $0.0760\pm0.0021$ & $0.0781\pm0.0021$\\
+\texttt{SubNetW8CleanAuxExDnRcK9Rr01QdEma} & 1 & $0.0410$ & $0.0728$ & $0.0810$\\
+\texttt{SubNetW8CleanAuxExDnRcMmRr01QdEma} & 3 & $0.0388$ & $0.0756\pm0.0060$ & $0.0754\pm0.0018$\\
+\texttt{SubNetW8CleanAuxExDnRcQdEma} & 5 & $0.0388$ & $0.0711\pm0.0059$ & $0.0717\pm0.0009$\\
+\texttt{SubNetW8CleanAuxExDnRcRr01QdEma} & 5 & $0.0389$ & $0.0700\pm0.0033$ & $0.0734\pm0.0029$\\
+\texttt{SubNetW8CleanAuxExDnRcTcQdEma} & 3 & $0.0413$ & $0.0843\pm0.0046$ & $0.0786\pm0.0016$\\
+\texttt{SubNetW8CleanAuxExDnTpRcMmQdEma} & 1 & $0.0417$ & $0.0975$ & $0.0886$\\
+\texttt{SubNetW8CleanAuxExDnTpRcQdEma} & 1 & $0.0409$ & $0.0874$ & $0.0817$\\
+\texttt{SubNetW8CleanAuxGravExDnRcQdEma} & 2 & $0.0420$ & $0.0842\pm0.0045$ & $0.0937\pm0.0040$\\
+\texttt{SubNetW8CleanAuxMxrExDnRcQdEma} & 1 & $0.0654$ & $0.2325$ & $0.1485$\\
+\texttt{SubNetW8CleanAuxPnetExDnRcQdEma} & 2 & $0.0410$ & $0.0755\pm0.0003$ & $0.0832\pm0.0052$\\
+\texttt{SubNetW8CleanAuxSgnExDnRcQdEma} & 5 & $0.0392$ & $0.0800\pm0.0012$ & $0.0850\pm0.0036$\\
+\texttt{SubNetW8CleanAuxStExDnQdEma} & 3 & $0.0442$ & $0.1173\pm0.0154$ & $0.1015\pm0.0039$\\
+\texttt{SubNetW9CleanAuxExDnQdEma} & 1 & $0.0395$ & $0.1074$ & $0.0871$\\
+\bottomrule
+\end{longtable}
