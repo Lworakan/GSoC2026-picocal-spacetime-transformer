@@ -10,7 +10,15 @@ We present the first per-cell signal-fraction readout for calorimeter energy reg
 
 **N1 — Per-cell SIGNAL-FRACTION regression from event-level labels (core).** Adversarially validated 2026-07-30 (12+ refutation searches): HIGH confidence **when worded as signal-fraction**, MEDIUM if worded loosely as "per-cell weights" — CALICE software compensation (classic 1202.6184; EdgeConv NN 2403.04632, verified from full text) already learns unbounded per-cell energy-correction weights from a purely event-level χ² loss. The two prior-art flanks and the mandatory distinguishing sentence:
 
-> "Unlike CALICE software compensation [1202.6184, 2403.04632], which learns unbounded per-cell energy-correction weights from event-level labels to equalize the hadronic response of a single shower, and unlike Belle II fuzzy clustering [2306.04179], which regresses per-crystal signal fractions but requires per-crystal simulation truth, our gate is a bounded per-cell signal-fraction estimate under pileup that emerges (r = 0.92 with held-out per-cell truth) from event-level energy supervision alone."
+> "Unlike CALICE software compensation [1202.6184, 2403.04632], which learns unbounded per-cell energy-correction weights from event-level labels to equalize the hadronic response of a single shower, and unlike Belle II fuzzy clustering [2306.04179], which regresses per-crystal signal fractions but requires per-crystal simulation truth, our gate is a bounded per-cell signal-fraction estimate under pileup, learned from event-level energy supervision alone."
+
+**The parenthetical "(r = 0.92 with held-out per-cell truth)" was removed on 2026-08-16 and must not be
+reinstated.** That 0.92 was an aggregate-level correlation from an earlier measurement, not a per-cell
+one. The paired synthetic sample built in `make_overlay.py` gives genuine per-cell truth, and against
+it the learned gate correlates **r = 0.211** (see `reports/gatesup_2026-08-16.md`). The novelty claim
+does not depend on the correlation — it rests on the bounded fraction semantics, the pileup setting and
+the absence of per-cell labels — so the sentence stands without it. Any per-cell correlation quoted in
+future must cite the overlay measurement.
 
 Everything else in the family trains on per-cell/per-particle sim truth (PUMML 1707.08600, PUPPIML 1810.07988, ABCNet 2001.05311, PUMA 2107.02779, Belle II 2306.04179/2604.20518, PhyGHT 2602.20475) or operates per-collection (TOTAL 2211.02029, WOTAN ML4PS 2024). Theory frame: learning-from-aggregate-observations (2004.06316). Caveat: do not claim attention-truth emergence itself as novel (documented generically, 2406.04612) — the claim is the bounded fraction semantics + pileup setting + label-free supervision.
 

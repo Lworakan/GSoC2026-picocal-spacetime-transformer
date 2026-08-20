@@ -4,7 +4,7 @@ Pre-submission literature sweep for the two headline claims. Two parallel search
 
 ## Claim 1 — Label-free emergent per-cell pileup subtraction
 
-Readout `a*log(1+sum sigma(f_i)*E_i)+b`; gate trained only by event-level energy objective; recovers true photon fraction at r=0.92; explicit per-cell supervision (aux loss, DANN, distillation) underperforms the emergent gate.
+Readout `a*log(1+sum sigma(f_i)*E_i)+b`; gate trained only by event-level energy objective; recovers true photon fraction at r=0.211 per cell (the r=0.92 quoted here until 2026-08-16 was an aggregate-level figure, superseded by the paired-sample measurement in `reports/gatesup_2026-08-16.md`); explicit per-cell supervision (aux loss, DANN, distillation) underperforms the emergent gate.
 
 **Verdict: novel — confidence HIGH** for the combined claim. The supervision-underperforms-emergence result (d) appears entirely unclaimed anywhere.
 
