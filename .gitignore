@@ -62,3 +62,12 @@ htmlcov/
 .vscode/
 reports/**/*.html
 .venv-gpu/
+
+# screening artefacts and build files
+reports/predictions/*_smoke.csv
+models/*_smoke_s*.pt
+texput.log
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/spacetformer_raw.png
