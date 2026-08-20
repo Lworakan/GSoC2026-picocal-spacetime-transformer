@@ -1,0 +1,3 @@
+model,tokens,clusters_per_s,ensemble5_per_s,device,batch,note
+SubNetW8Rc (random-init same arch),289,555,111,cpu-i9-13900HX,64,forward-pass rate; weights do not affect compute
+SubNetW4 (same harness check),81,5110,1022,cpu-i9-13900HX,64,validates against benchmark_inference.csv 4958
