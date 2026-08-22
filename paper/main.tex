@@ -41,7 +41,10 @@ of ParticleNet and GravNet in every measured cell at every seed, at
 $1.8$--$3.6\times$ their training speed --- a margin that survives a
 per-baseline hyperparameter sweep. The main contribution is a
 diagnosis: the resolution ceiling was set by the input window, not the
-model. The starting window held under half of the innermost region's cluster
+model. A seed-centred $9{\times}9$ window already holds $99.8\%$ of the
+photon, so the width was not buying shower coverage: it was buying
+robustness to a window centre that pileup displaces by three cells, and
+above that, cells that sample the pileup field rather than the photon. The starting window held under half of the innermost region's cluster
 energy, and fixing the window's size and centring cut the worst
 region--energy bin by $53\%$ ($0.165 \to 0.078$), while ten encoder
 families, four gate-supervision protocols, five timing constructions, a
@@ -106,8 +109,8 @@ the code).
 
 The thesis this discipline produced can be stated in one sentence: \emph{on
 pileup-dominated PicoCal data, the resolution ceiling was set by the input
-window, not the model --- fixing the window's containment and centring cut
-the worst bin by $53\%$, while every architectural alternative measured
+window, not the model --- widening it until it tolerated the centring error,
+and then improving the centre, cut the worst bin by $53\%$, while every architectural alternative measured
 null except one that attacks the window itself (a learned two-stage
 pointing window, Section~\ref{sec:pointing}), leaving training-set size as
 the dominant open lever.} The paper presents
@@ -597,13 +600,45 @@ that subtraction is the whole measurement.}
 The window half-width had been fixed at $w{=}4$ ($9{\times}9$ cells) from
 the start of the project and never varied. Figure~\ref{fig:containment}
 shows the measurement that broke this: the mean contained fraction of
-cluster energy versus window half-width, per region. At $w{=}4$ the
+\emph{cluster} energy versus window half-width, per region. At $w{=}4$ the
 seed-centred window holds $41\%$ of the 15\,mm cluster's energy against
 $\geq 92\%$ in the three outer regions --- one shared window width had been
-silently tuned for the abundant outer regions. The physics behind the
-asymmetry: the shower has a single physical width ($99.7$--$100\%$ of photon
-energy within 120\,mm in every region on the clean sample), so its width
-\emph{in cells} varies eightfold across regions.
+silently tuned for the abundant outer regions.
+
+Reading that figure as photon containment would be a mistake, and
+separating the two is what explains the size of the gain. The cluster is
+photon plus pileup. The \emph{photon} on its own is compact: measured on
+the pileup-free clean sample with the window on the seed cell, its median
+contained fraction is $94.4\%$ at $w{=}1$ and $99.8\%$ at $w{=}4$ in the
+15\,mm region, and at least that in every other region. A seed-centred
+$9{\times}9$ window would already hold all of the signal.
+
+The window is not seed-centred, though: it is placed on the reconstructed
+barycentre, which pileup drags a median $3.1$ cells away from the photon at
+15\,mm. Measured on the paired sample, where the photon's contribution to
+each cell is known, a \emph{barycentre}-centred window at 15\,mm holds a
+median $1.2\%$ of the photon at $w{=}1$, $56\%$ at $w{=}2$, $97\%$ at
+$w{=}3$ and $99.6\%$ at $w{=}4$ --- and the tail matters more than the
+median: the fraction of events keeping less than $90\%$ of the photon is
+$73\%$, $38\%$, $7.8\%$ and $0\%$ at $w{=}2,3,4,6$. The wide window is
+therefore not compensating for a wide shower. It is making the aperture
+robust to an imprecise centre, and the region where the centre is worst in
+cell units is exactly the region the window fixed.
+
+Above $w{=}6$ the photon is fully contained in every event, yet the window
+scan below keeps improving to $w{=}8$--$10$. That remaining part is not
+coverage: the extra cells carry no signal, and what they carry is the
+pileup field the estimate has to subtract --- at 15\,mm the $17{\times}17$
+window holds $3.6$ times the photon's own energy, over a median of 160
+fired cells (Figure~\ref{fig:regions}). Two controls separate the roles.
+For a plain calibrated sum with no model, widening the window makes the
+15\,mm low-energy bin monotonically \emph{worse} ($0.36 \to 0.53$ from
+$w{=}1$ to $w{=}8$), so the outer cells are not signal to be added. And
+restricting the network's gated sum to a central core while the encoder
+still attends over the whole window costs $15\,$mm low-E $0.0863$ at
+core $w{=}4$ and $0.1270$ at core $w{=}2$ against $0.0755$ for the full
+sum --- tracking the truncation tail above almost exactly. The window
+plays both roles, and the measurements say where each one takes over.
 
 \begin{figure}[t]
 \centering
@@ -672,9 +707,9 @@ directly comparable and both are shown deliberately.}
 \toprule
 step & 15\,mm low-E & protocol & mechanism\\
 \midrule
-$9{\times}9$ seed-centred window & 0.1654 & fixed split & 41\% containment (Fig.~\ref{fig:containment})\\
-widen to $17{\times}17$ & 0.1156 & fixed split & coverage\\
-+ re-centre on barycentre & 0.0711 & fixed split & coverage again (see text)\\
+$9{\times}9$ seed-centred window & 0.1654 & fixed split & centre error truncates signal\\
+widen to $17{\times}17$ & 0.1156 & fixed split & robust aperture + pileup context\\
++ re-centre on barycentre & 0.0711 & fixed split & smaller centre error (see text)\\
 cross-validated ensemble & 0.0783(22) & CV & primary protocol\\
 \bottomrule
 \end{tabular}
@@ -686,8 +721,10 @@ cross-validated ensemble & 0.0783(22) & CV & primary protocol\\
 \caption{Distance of the two window-centre candidates from the true photon
 entry point, 15\,mm region. The seed cell is the better photon locator by
 $7\times$ in the median, yet centring on the barycentre gives the better
-resolution --- direct evidence that the window's job is coverage of the
-energy field, not photon localisation.}
+resolution. The seed points at the photon but is wrong catastrophically in
+the tail (p90 $= 8.3$ cells), while the barycentre is wrong by a few cells
+almost always; with a window wide enough to absorb a few cells of error,
+the estimator that never fails badly is the better centre.}
 \label{fig:misseed}
 \end{figure}
 
@@ -695,7 +732,7 @@ energy field, not photon localisation.}
 \label{sec:pointing}
 
 The centring analysis leaves an open question: the barycentre-centred
-window gains through coverage while the seed is the better locator
+window gains through error-tolerant coverage while the seed is the better locator
 (Figure~\ref{fig:misseed}) --- what would a window centred on the
 \emph{true} photon entry add? Retraining the final configuration with the
 window centred on the true entry point (a diagnostic bound: truth is not
@@ -1086,6 +1123,7 @@ slot decomposition & $K{=}4$ competing readout queries & 0.0406 vs 0.0402, neutr
 time-gated readout & multiplicative time gate on the final window & 0.0399 vs 0.0399 mean, neutral\\
 train-time augmentation & D4 transforms of the window & 0.0401 vs 0.0402, neutral\\
 quality selection & cut on predicted quantile width & worse at every efficiency (see text)\\
+core-restricted sum & gated sum over $w{=}4$; $w{=}2$ core & 0.0404; 0.0436 vs 0.0399\\
 \bottomrule
 \end{tabular}
 \end{table}

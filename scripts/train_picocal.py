@@ -198,6 +198,13 @@ def parse_args():
     ap.add_argument('--preln', action='store_true')
     ap.add_argument('--knn', type=int, default=0)
     ap.add_argument('--tfour', type=int, default=0)
+    ap.add_argument('--sum-core', type=int, default=0,
+                    help='restrict the gated energy sum to cells within Chebyshev SUM_CORE of '
+                         'the window centre, while the encoder still attends over the whole '
+                         'window. Measured on the clean sample, the photon is 99.8%% contained '
+                         'by w=4 already, so the outer cells of a w=8 window carry no signal to '
+                         'sum -- they carry the pileup field the estimate has to subtract. This '
+                         'separates the two roles instead of letting one weighted sum do both.')
     ap.add_argument('--slots', type=int, default=0,
                     help='slot-decomposition readout with SLOTS competing queries: each cell '
                          'energy is split by a softmax responsibility over the slots and only '
@@ -474,7 +481,7 @@ def main():
         args.name = (base + ('CleanAux' if args.cleanaux else '') +
                      ('Phys' if args.phys else '') + ('Occ' if args.occ else '') +
                      ('Tgate' if args.gate == 'time' else '') + ('Sgn' if args.gate == 'signed' else '') +
-                     ('D4' if args.d4aug else '') + ('Geo' if args.arch == 'geo' else '') + ('Cnn' if args.arch == 'cnn' else '') + ('Cnx' if args.arch == 'convnext' else '') + ('St' if args.arch == 'spacetime' else '') + ('Pnet' if args.arch == 'pnet' else '') + ('Grav' if args.arch == 'gravnet' else '') + ('Mxr' if args.arch == 'mixer' else '') + (f'Fr{int(round(args.frac*100))}' if args.frac and args.frac < 1.0 else '') + (f'Wu{args.warmup}' if args.warmup else '') + ('Pln' if args.preln else '') + (f'Nn{args.knn}' if args.knn else '') + (f'Tf{args.tfour}' if args.tfour else '') + (f'Sk{args.slots}' if args.slots else '') + ('Ds' if args.distill else '') + ('Ex' if args.extra else '') + ('Dn' if args.dens else '') + ('Gx' if args.gx else '') + ('Rho' if args.rho else '') + ('Tp' if args.tpull else '') + ('Aux' if args.aux else '') + (f'Gs{int(args.gatesup*10)}' if args.gatesup > 0 else '') + ('Sx' if args.synaux else '') + ('Pf' if args.prior_feat else '') + ('Pt' if args.prior_teach else '') + (f'R{args.rings}' if args.rings else '') + (f'Rg{args.only_region}' if args.only_region is not None else '') + (f'H{args.halo}' if args.halo else '') + (f'P{args.patch}s{args.patch_side}' if args.patch else '') + (f'Gp{args.globpe}' if args.globpe else '') + (f'D{args.dim}' if args.dim else '') + (f'Lr{args.lr:g}'.replace('.','p').replace('-','m') if args.lr else '') + (f'B{args.batch}' if args.batch else '') + ('Cos' if args.cosine else '') + (f'Cj{args.cjit:g}'.replace('.','p') if args.cjit else '') + (f'L{args.layers}' if args.layers else '') + (({'oracle': 'Ro', 'pred': 'Rp'}.get(args.rc_mode, 'Rc')) if args.recenter else '') + (f'K{args.fold}' if args.fold is not None else '') + ('Mm' if args.mmgeo else '') + ('Tc' if args.tcomb else '') + ('Ac' if args.allcells else '') + (('Rr' + ''.join(map(str, args.rc_regions))) if args.rc_regions else '') + ('Dep' if args.depth else '') + ('Orh' if args.orho else '') + ('Abs' if args.abst else '') + (f'W{args.wlow:g}'.replace('.', '') if args.wlow > 0 else '') +
+                     ('D4' if args.d4aug else '') + ('Geo' if args.arch == 'geo' else '') + ('Cnn' if args.arch == 'cnn' else '') + ('Cnx' if args.arch == 'convnext' else '') + ('St' if args.arch == 'spacetime' else '') + ('Pnet' if args.arch == 'pnet' else '') + ('Grav' if args.arch == 'gravnet' else '') + ('Mxr' if args.arch == 'mixer' else '') + (f'Fr{int(round(args.frac*100))}' if args.frac and args.frac < 1.0 else '') + (f'Wu{args.warmup}' if args.warmup else '') + ('Pln' if args.preln else '') + (f'Nn{args.knn}' if args.knn else '') + (f'Tf{args.tfour}' if args.tfour else '') + (f'Sc{args.sum_core}' if args.sum_core else '') + (f'Sk{args.slots}' if args.slots else '') + ('Ds' if args.distill else '') + ('Ex' if args.extra else '') + ('Dn' if args.dens else '') + ('Gx' if args.gx else '') + ('Rho' if args.rho else '') + ('Tp' if args.tpull else '') + ('Aux' if args.aux else '') + (f'Gs{int(args.gatesup*10)}' if args.gatesup > 0 else '') + ('Sx' if args.synaux else '') + ('Pf' if args.prior_feat else '') + ('Pt' if args.prior_teach else '') + (f'R{args.rings}' if args.rings else '') + (f'Rg{args.only_region}' if args.only_region is not None else '') + (f'H{args.halo}' if args.halo else '') + (f'P{args.patch}s{args.patch_side}' if args.patch else '') + (f'Gp{args.globpe}' if args.globpe else '') + (f'D{args.dim}' if args.dim else '') + (f'Lr{args.lr:g}'.replace('.','p').replace('-','m') if args.lr else '') + (f'B{args.batch}' if args.batch else '') + ('Cos' if args.cosine else '') + (f'Cj{args.cjit:g}'.replace('.','p') if args.cjit else '') + (f'L{args.layers}' if args.layers else '') + (({'oracle': 'Ro', 'pred': 'Rp'}.get(args.rc_mode, 'Rc')) if args.recenter else '') + (f'K{args.fold}' if args.fold is not None else '') + ('Mm' if args.mmgeo else '') + ('Tc' if args.tcomb else '') + ('Ac' if args.allcells else '') + (('Rr' + ''.join(map(str, args.rc_regions))) if args.rc_regions else '') + ('Dep' if args.depth else '') + ('Orh' if args.orho else '') + ('Abs' if args.abst else '') + (f'W{args.wlow:g}'.replace('.', '') if args.wlow > 0 else '') +
                      ('Qp' if args.qpool else '') + ('Tta' if args.tta else '') + (f'Tr{int(args.trim*100)}' if args.trim > 0 else '') + ('Fm' if args.film else '') + (f'F{args.nfour}' if args.nfour else '') + suffix)
     if args.mode == 'smoke':
         args.name += '_smoke'
@@ -542,6 +549,13 @@ def main():
         print(f'frac {args.frac}: train {len(D["ktr"])} main + {len(D["ctr"])} aux')
     if args.no_time:
         D['X'][:, :, 7:11] = 0.0
+    if args.sum_core:
+        S = D['S']
+        gi, gj = np.divmod(np.clip(D['POS'], 0, S * S - 1), S)
+        core = (np.maximum(np.abs(gi - args.window), np.abs(gj - args.window)) <= args.sum_core)
+        D['Eraw'] = D['Eraw'] * (core & D['M'])
+        print(f'sum-core {args.sum_core}: energy sum over '
+              f'{(2*args.sum_core+1)**2} of {S*S} grid positions', flush=True)
     T = dict(X=torch.from_numpy(D['X']).to(device), M=torch.from_numpy(D['M']).to(device),
              G=torch.from_numpy(D['G']).to(device), Y=torch.from_numpy(D['y']).unsqueeze(1).to(device),
              E=torch.from_numpy(D['Eraw']).to(device),
@@ -579,7 +593,7 @@ def main():
                         objective=args.objective, sample=args.sample, cleanaux=args.cleanaux,
                         gate=args.gate, arch=args.arch, qpool=args.qpool, gx=args.gx,
                         aux=args.aux, film=args.film, nfour=args.nfour, tfour=args.tfour,
-                        slots=args.slots, seed=seed,
+                        slots=args.slots, sum_core=args.sum_core, seed=seed,
                         feats=dict(extra=args.extra, dens=args.dens, orho=args.orho,
                                    tpull=args.tpull, depth=args.depth, phys=args.phys,
                                    occ=args.occ, rho=args.rho)))
