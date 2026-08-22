@@ -572,6 +572,27 @@ tail-reshaping interventions do not move it.}
 The improvement over the starting configuration came from two
 reconstruction-level corrections, and this subsection presents the
 measurements that found them, in the order they happened.
+Figure~\ref{fig:regions} first shows why the difficulty is not shared
+equally across the calorimeter.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/regions_3d.pdf}
+\caption{Why the inner regions are the hard ones. Each column is a cell
+pitch; each panel shows one low-energy event of that region in the
+$17{\times}17$ window, with the true photon entry marked. Top: the
+pileup-free clean sample, so the bars are the photon alone. Bottom: the
+minimum-bias sample, the same region under pileup. Annotations are medians
+over the whole sample, not properties of the displayed event. The photon
+itself is compact everywhere --- $94$--$100\%$ of its energy falls within
+$3{\times}3$ cells of the seed on the clean sample --- so what changes
+across regions is the \emph{load}: the window collects $3.6\times$ the
+photon's energy at 15\,mm and $1.1\times$ at 120\,mm, spread over $160$
+against $9$ fired cells. At 15 and 30\,mm the estimator therefore has to
+subtract about three quarters of what it is given, and at low photon energy
+that subtraction is the whole measurement.}
+\label{fig:regions}
+\end{figure}
 
 The window half-width had been fixed at $w{=}4$ ($9{\times}9$ cells) from
 the start of the project and never varied. Figure~\ref{fig:containment}
