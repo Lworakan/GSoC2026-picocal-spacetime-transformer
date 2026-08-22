@@ -253,7 +253,7 @@ class MixerBlock(nn.Module):
 
 class SubNetFQ(nn.Module):
     def __init__(self, in_dim, la0, lb0, ng=NG, cfg=CFG, gate='learned', arch='std', qpool=False,
-                 gx=False, aux=False, film=False, nfour=0, tfour=0):
+                 gx=False, aux=False, film=False, nfour=0, tfour=0, slots=0):
         super().__init__()
         self.gate_mode = gate
         self.signed = gate == 'signed'
@@ -264,6 +264,7 @@ class SubNetFQ(nn.Module):
         self.tfour = tfour
         self.arch = arch
         self.qpool = qpool
+        self.k_slots = slots
         d = cfg['d']
         # Fourier features on the two in-cell offset channels. Our own measurement says the
         # sub-cell impact position is the hidden variable that fixed estimators cannot use
@@ -313,6 +314,18 @@ class SubNetFQ(nn.Module):
             self.q = nn.Parameter(torch.randn(1, 1, d) * 0.02)
             self.pool_attn = nn.MultiheadAttention(d, cfg['nhead'], dropout=cfg['dropout'],
                                                    batch_first=True)
+        if slots:
+            # The event is physically a SUM of showers (the photon plus pileup vertices), but no
+            # encoder in the ledger carries that superposition as structure: every readout pools
+            # all cells into one vector. K slot queries cross-attend to the cells, each cell's
+            # energy is then split by a softmax RESPONSIBILITY over the slots, and only slot 0
+            # feeds the energy sum and the head. Unlike --gatesup/--prior-teach, nothing forces
+            # slot 0 to be the photon: the energy loss alone decides what the slots specialise to,
+            # which is the same freedom that let the unsupervised gate beat every supervised one.
+            self.slot_q = nn.Parameter(torch.randn(1, slots, d) * 0.02)
+            self.slot_attn = nn.MultiheadAttention(d, cfg['nhead'], dropout=cfg['dropout'],
+                                                   batch_first=True)
+            self.slot_score = nn.Linear(d, d)
         self.norm = nn.LayerNorm(d)
         self.head = nn.Sequential(nn.Linear(d + ng, d), nn.ReLU(), nn.Dropout(cfg['dropout']),
                                   nn.Linear(d, 3 + (3 if aux else 0)))
@@ -386,6 +399,17 @@ class SubNetFQ(nn.Module):
 
     def forward(self, x, m, g, ecell, pos=None, sl=None):
         h = self.encode(x, m, g, sl)
+        if self.k_slots:
+            s, _ = self.slot_attn(self.slot_q.expand(h.shape[0], -1, -1), h, h,
+                                  key_padding_mask=~m, need_weights=False)
+            sc = torch.einsum('bnd,bkd->bnk', self.slot_score(h), s) / h.shape[-1] ** 0.5
+            w = torch.softmax(sc, -1)[:, :, 0] * m.float()
+            self.last_w = w
+            tot = (w * ecell).sum(1, keepdim=True)
+            base = self.la * torch.log1p(tot.clamp(min=1e-3)) + self.lb
+            out = self.head(torch.cat([self.norm(s[:, 0]), g], 1))
+            q = base + out[:, :3]
+            return torch.cat([q, out[:, 3:]], 1) if self.aux else q
         if self.gate_mode == 'off':
             w = m.float()
         elif self.signed:
@@ -465,7 +489,8 @@ def load_model(path, device='cpu'):
                      gate=st.get('gate', 'learned'), arch=st.get('arch', 'std'),
                      qpool=st.get('qpool', False), gx=st.get('gx', False),
                      aux=st.get('aux', False), film=st.get('film', False),
-                     nfour=st.get('nfour', 0), tfour=st.get('tfour', 0)).to(device)
+                     nfour=st.get('nfour', 0), tfour=st.get('tfour', 0),
+                     slots=st.get('slots', 0)).to(device)
     model.load_state_dict(st['state_dict'])
     model.eval()
     return model, st

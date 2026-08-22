@@ -87,7 +87,12 @@ def parse_args():
                          'two raw time channels with (combined residual, log sigma). ~0.82x on '
                          'per-cell sigma_t from the measured resolution table; the one timing item '
                          'never implemented, and the only one that stays raw rather than engineered.')
-    ap.add_argument('--rc-mode', choices=['centroid', 'oracle'], default='centroid',
+    ap.add_argument('--rc-pred', default='',
+                    help='pickle with {"main": (N,2), "aux": (N,2)} predicted photon offsets '
+                         'from the seed in cells (scripts/gen_pointer.py), aligned to the raw '
+                         'event lists. Used by --rc-mode pred: the two-stage architecture where '
+                         'a first pass points at the photon and the window is re-cut around it.')
+    ap.add_argument('--rc-mode', choices=['centroid', 'oracle', 'pred'], default='centroid',
                     help='oracle centres the window on the TRUE photon entry. Diagnostic only: '
                          'it bounds what any centre estimator could achieve, and it separates the '
                          'coverage theory of the recentring gain from the localisation theory.')
@@ -193,6 +198,17 @@ def parse_args():
     ap.add_argument('--preln', action='store_true')
     ap.add_argument('--knn', type=int, default=0)
     ap.add_argument('--tfour', type=int, default=0)
+    ap.add_argument('--slots', type=int, default=0,
+                    help='slot-decomposition readout with SLOTS competing queries: each cell '
+                         'energy is split by a softmax responsibility over the slots and only '
+                         'slot 0 enters the energy sum. The event is physically a sum of showers, '
+                         'and no ledger encoder carries that superposition as structure.')
+    ap.add_argument('--distill', default='',
+                    help='path to a teacher .npy of shape (N, 3): the seed-averaged raw quantile '
+                         'outputs of the 5-seed ensemble over every event (scripts/gen_teacher.py). '
+                         'The ensemble scores 0.0388 against the single member 0.0402; this trains '
+                         'a single member toward the average it would otherwise need 5 passes for.')
+    ap.add_argument('--distill-w', type=float, default=1.0)
     ap.add_argument('--device', default=None)
     ap.add_argument('--name', default=None)
     ap.add_argument('--out', default=None)
@@ -269,7 +285,7 @@ def build_model(D, args, device):
                       side=D['S'], modern=args.arch == 'convnext').to(device)
     return SubNetFQ(D['IN_DIM'], D['la0'], D['lb0'], ng=D['G'].shape[1], gate=args.gate,
                     arch=args.arch, qpool=args.qpool, gx=args.gx, aux=args.aux, film=args.film,
-                    nfour=args.nfour, tfour=args.tfour).to(device)
+                    nfour=args.nfour, tfour=args.tfour, slots=args.slots).to(device)
 
 
 def train_one(T, D, seed, args, device):
@@ -321,6 +337,8 @@ def train_one(T, D, seed, args, device):
                 mm = T['M'][b].float() * hf.unsqueeze(1)
                 d2 = ((model.last_w - T['FR'][b]) ** 2 * mm).sum() / mm.sum().clamp(min=1.0)
                 extra = extra + args.gatesup * d2
+        if args.distill and b is not None:
+            extra = extra + args.distill_w * nn.functional.huber_loss(q, T['TD'][b], delta=0.1)
         return base_loss(q, yb, w) + extra
 
     def base_loss(q, yb, w=None):
@@ -456,7 +474,7 @@ def main():
         args.name = (base + ('CleanAux' if args.cleanaux else '') +
                      ('Phys' if args.phys else '') + ('Occ' if args.occ else '') +
                      ('Tgate' if args.gate == 'time' else '') + ('Sgn' if args.gate == 'signed' else '') +
-                     ('D4' if args.d4aug else '') + ('Geo' if args.arch == 'geo' else '') + ('Cnn' if args.arch == 'cnn' else '') + ('Cnx' if args.arch == 'convnext' else '') + ('St' if args.arch == 'spacetime' else '') + ('Pnet' if args.arch == 'pnet' else '') + ('Grav' if args.arch == 'gravnet' else '') + ('Mxr' if args.arch == 'mixer' else '') + (f'Fr{int(round(args.frac*100))}' if args.frac and args.frac < 1.0 else '') + (f'Wu{args.warmup}' if args.warmup else '') + ('Pln' if args.preln else '') + (f'Nn{args.knn}' if args.knn else '') + (f'Tf{args.tfour}' if args.tfour else '') + ('Ex' if args.extra else '') + ('Dn' if args.dens else '') + ('Gx' if args.gx else '') + ('Rho' if args.rho else '') + ('Tp' if args.tpull else '') + ('Aux' if args.aux else '') + (f'Gs{int(args.gatesup*10)}' if args.gatesup > 0 else '') + ('Sx' if args.synaux else '') + ('Pf' if args.prior_feat else '') + ('Pt' if args.prior_teach else '') + (f'R{args.rings}' if args.rings else '') + (f'Rg{args.only_region}' if args.only_region is not None else '') + (f'H{args.halo}' if args.halo else '') + (f'P{args.patch}s{args.patch_side}' if args.patch else '') + (f'Gp{args.globpe}' if args.globpe else '') + (f'D{args.dim}' if args.dim else '') + (f'Lr{args.lr:g}'.replace('.','p').replace('-','m') if args.lr else '') + (f'B{args.batch}' if args.batch else '') + ('Cos' if args.cosine else '') + (f'Cj{args.cjit:g}'.replace('.','p') if args.cjit else '') + (f'L{args.layers}' if args.layers else '') + (('Ro' if args.rc_mode == 'oracle' else 'Rc') if args.recenter else '') + (f'K{args.fold}' if args.fold is not None else '') + ('Mm' if args.mmgeo else '') + ('Tc' if args.tcomb else '') + ('Ac' if args.allcells else '') + (('Rr' + ''.join(map(str, args.rc_regions))) if args.rc_regions else '') + ('Dep' if args.depth else '') + ('Orh' if args.orho else '') + ('Abs' if args.abst else '') + (f'W{args.wlow:g}'.replace('.', '') if args.wlow > 0 else '') +
+                     ('D4' if args.d4aug else '') + ('Geo' if args.arch == 'geo' else '') + ('Cnn' if args.arch == 'cnn' else '') + ('Cnx' if args.arch == 'convnext' else '') + ('St' if args.arch == 'spacetime' else '') + ('Pnet' if args.arch == 'pnet' else '') + ('Grav' if args.arch == 'gravnet' else '') + ('Mxr' if args.arch == 'mixer' else '') + (f'Fr{int(round(args.frac*100))}' if args.frac and args.frac < 1.0 else '') + (f'Wu{args.warmup}' if args.warmup else '') + ('Pln' if args.preln else '') + (f'Nn{args.knn}' if args.knn else '') + (f'Tf{args.tfour}' if args.tfour else '') + (f'Sk{args.slots}' if args.slots else '') + ('Ds' if args.distill else '') + ('Ex' if args.extra else '') + ('Dn' if args.dens else '') + ('Gx' if args.gx else '') + ('Rho' if args.rho else '') + ('Tp' if args.tpull else '') + ('Aux' if args.aux else '') + (f'Gs{int(args.gatesup*10)}' if args.gatesup > 0 else '') + ('Sx' if args.synaux else '') + ('Pf' if args.prior_feat else '') + ('Pt' if args.prior_teach else '') + (f'R{args.rings}' if args.rings else '') + (f'Rg{args.only_region}' if args.only_region is not None else '') + (f'H{args.halo}' if args.halo else '') + (f'P{args.patch}s{args.patch_side}' if args.patch else '') + (f'Gp{args.globpe}' if args.globpe else '') + (f'D{args.dim}' if args.dim else '') + (f'Lr{args.lr:g}'.replace('.','p').replace('-','m') if args.lr else '') + (f'B{args.batch}' if args.batch else '') + ('Cos' if args.cosine else '') + (f'Cj{args.cjit:g}'.replace('.','p') if args.cjit else '') + (f'L{args.layers}' if args.layers else '') + (({'oracle': 'Ro', 'pred': 'Rp'}.get(args.rc_mode, 'Rc')) if args.recenter else '') + (f'K{args.fold}' if args.fold is not None else '') + ('Mm' if args.mmgeo else '') + ('Tc' if args.tcomb else '') + ('Ac' if args.allcells else '') + (('Rr' + ''.join(map(str, args.rc_regions))) if args.rc_regions else '') + ('Dep' if args.depth else '') + ('Orh' if args.orho else '') + ('Abs' if args.abst else '') + (f'W{args.wlow:g}'.replace('.', '') if args.wlow > 0 else '') +
                      ('Qp' if args.qpool else '') + ('Tta' if args.tta else '') + (f'Tr{int(args.trim*100)}' if args.trim > 0 else '') + ('Fm' if args.film else '') + (f'F{args.nfour}' if args.nfour else '') + suffix)
     if args.mode == 'smoke':
         args.name += '_smoke'
@@ -485,6 +503,19 @@ def main():
     aux_ev = (cached_grid(clean_files, 'clean-aux' + ('_smoke' if args.mode == 'smoke' else ''),
                           cdir, args.no_cache)
               if (args.cleanaux and args.sample == 'minbias') else None)
+    if args.rc_mode == 'pred':
+        if not args.rc_pred:
+            raise SystemExit('--rc-mode pred needs --rc-pred (scripts/gen_pointer.py output)')
+        with open(args.rc_pred, 'rb') as f:
+            rp = pickle.load(f)
+        for evs, key in ((main_ev, 'main'), (aux_ev or [], 'aux')):
+            arr = rp[key]
+            if len(arr) != len(evs):
+                raise SystemExit(f'--rc-pred {key} rows {len(arr)} != events {len(evs)}: '
+                                 'regenerate the pointer file against the current caches')
+            for e, (px, py) in zip(evs, arr):
+                e['px'], e['py'] = float(px), float(py)
+        print(f'pointer offsets attached from {args.rc_pred}', flush=True)
     if syn_ev:
         aux_ev = (aux_ev or []) + syn_ev
     if args.only_region is not None and aux_ev:
@@ -519,9 +550,14 @@ def main():
              YA=torch.from_numpy(D['YA']).to(device),
              FR=torch.from_numpy(D['FR']).to(device),
              HASF=torch.from_numpy(D['HASF']).to(device),
+             TD=(torch.from_numpy(np.load(args.distill).astype(np.float32)).to(device)
+                 if args.distill else torch.zeros(1)),
              W=torch.from_numpy(sample_weights(D, args.wlow)).to(device),
              mean=torch.from_numpy(np.asarray(D['mean'], np.float32)).to(device),
              std=torch.from_numpy(np.asarray(D['std'], np.float32)).to(device))
+    if args.distill and T['TD'].shape[0] != D['X'].shape[0]:
+        raise SystemExit(f'teacher rows {T["TD"].shape[0]} != events {D["X"].shape[0]}: the '
+                         'teacher file was generated against a different prep configuration')
     print(f'device {device} | {args.name} | objective {args.objective} | seeds {args.seeds}')
 
     csvp = args.out / f'{args.sample}__{args.name}.csv'
@@ -542,7 +578,8 @@ def main():
                         mean=D['mean'], std=D['std'], cfg=CFG, window=args.window,
                         objective=args.objective, sample=args.sample, cleanaux=args.cleanaux,
                         gate=args.gate, arch=args.arch, qpool=args.qpool, gx=args.gx,
-                        aux=args.aux, film=args.film, nfour=args.nfour, seed=seed,
+                        aux=args.aux, film=args.film, nfour=args.nfour, tfour=args.tfour,
+                        slots=args.slots, seed=seed,
                         feats=dict(extra=args.extra, dens=args.dens, orho=args.orho,
                                    tpull=args.tpull, depth=args.depth, phys=args.phys,
                                    occ=args.occ, rho=args.rho)))

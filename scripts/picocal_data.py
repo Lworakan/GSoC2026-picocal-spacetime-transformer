@@ -233,6 +233,14 @@ def make_windows(W, EVS, phys=False, extra=False, dens=False, rho=False, tpull=F
                     cj = int(np.rint((ay - ev.get('ys', 0.0)) / ev['ps']))
                 else:
                     ci = cj = 0
+            elif rc_mode == 'pred':
+                # Learned pointer: the aux head's predicted photon offset FROM THE SEED, in
+                # cells (the same frame ya is defined in), attached to the event by the caller.
+                # Median pointer error is 0.13-0.20 cells against the seed's 0.43 and the
+                # centroid's 3.08 at 15mm, and unlike the seed it has no wrong-photon tail.
+                px, py = ev.get('px', 0.0), ev.get('py', 0.0)
+                ci = int(np.rint(px)) if np.isfinite(px) else 0
+                cj = int(np.rint(py)) if np.isfinite(py) else 0
             else:
                 ci = int(np.rint((ev.get('xc', 0.0) - ev.get('xs', 0.0)) / ev['ps']))
                 cj = int(np.rint((ev.get('yc', 0.0) - ev.get('ys', 0.0)) / ev['ps']))
@@ -468,8 +476,9 @@ def prep(W, main_events, aux_events=None, ng=6, phys=False, occ=False, extra=Fal
     ktr, kva, kte = splits_for(keep, len(main_events), fold, nfold)
     n_mb = len(rows)
     ctr = np.array([], int)
+    keep_aux = np.array([], int)
     if aux_events is not None:
-        crows, _ = make_windows(W, aux_events, phys, extra, dens, rho, tpull, depth, orho, abst,
+        crows, keep_aux = make_windows(W, aux_events, phys, extra, dens, rho, tpull, depth, orho, abst,
                                 prior, rings, halo, patch, patch_side, recenter, mmgeo, rc_regions, rc_mode, tcomb,
                               allcells)
         rows = rows + crows
@@ -553,8 +562,9 @@ def prep(W, main_events, aux_events=None, ng=6, phys=False, occ=False, extra=Fal
     X[~M] = 0.0
     print(f'W={W}: N {N} (main {n_mb} + aux {len(ctr)}), tr/va/te {len(ktr)}/{len(kva)}/{len(kte)}, IN_DIM {IN_DIM}')
     YA[:, 2] -= YA[ktr, 2].mean()
-    YA /= (YA[ktr].std(0) + EPS)
+    ya_std = YA[ktr].std(0) + EPS
+    YA /= ya_std
     return dict(X=X, M=M, G=G, y=y, Et=Et, ET=ET, reg=reg, Eraw=Eraw, POS=POS, S=S, YA=YA,
-                FR=FR, HASF=HASF, SL=SL,
+                FR=FR, HASF=HASF, SL=SL, YA_std=ya_std, keep=keep, keep_aux=keep_aux,
                 ktr=ktr, kva=kva, kte=kte, ctr=ctr, IN_DIM=IN_DIM,
                 la0=float(la0), lb0=float(lb0), mean=mean, std=std)
