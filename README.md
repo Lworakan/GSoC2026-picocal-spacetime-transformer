@@ -156,29 +156,53 @@ plus ~0.005 reconstruction above floor.
 ## Architecture
 
 <p align="center">
-<img alt="Photon Energy Transformer architecture: cell tokens, linear embedding, transformer encoder x3 with residual connections, physics readout with raw-energy bypass, quantile head, fusion base + Delta-q, width-binned calibration, photon energy output" src="assets/architecture.svg" width="100%">
+<img alt="SpaceTformer architecture: a 17x17 window centred on the cluster barycentre, one token per cell carrying energy, local coordinates, raw front and back timestamps and has-timestamp indicators; linear embedding to d=128; three plain transformer encoder layers over cell tokens only; a per-cell gate feeding a calibrated log energy sum plus a small MLP correction that takes the pooled state and the cluster-level global features; width-binned calibration; per-event median over ensemble members. A dashed branch shows the auxiliary position head and the two-stage path that re-cuts the window around the predicted photon position." src="paper/spacetformer.png" width="100%">
 </p>
 
 The design principle is **physics-structured simplicity**: a compact transformer whose *readout* carries the
-physics (a learnable calibrated sum over a per-cell signal gate applied to the raw cell energies, plus a
-quantile head), trained with a loss shaped like the evaluation metric. The plain wiring is a *result*, not a
-limitation — teacher–student distillation, GravNet, pairwise attention, Swin-style bias, CNN stems, double
-depth/width, and iterative refinement were all trained on this data and measured flat or worse; see below.
+physics — a per-cell gate over the raw cell energies feeding a calibrated log sum, plus a small correction
+from the pooled state and the cluster-level globals — trained with a loss shaped like the evaluation metric.
+The encoder itself sees per-cell information only; the globals enter at the readout.
+
+The plain wiring is a *result*, not a limitation. Ten encoder families (GravNet, ParticleNet, pairwise
+attention, time-sliced attention, CNN and ConvNeXt stems, patch tokens, a masked MLP-Mixer, an energy-flow
+network), four gate-supervision protocols, five engineered-timing constructions, and capacity and recipe
+sweeps were all trained on this data and measured flat or worse.
+
+Two mechanisms did survive measurement, both of them about *what the model is allowed to see* rather than
+how it reads it:
+
+- **the window** — widening it to 17×17 and centring it on the cluster barycentre cut the worst
+  region–energy bin by 53%, more than every architectural idea combined;
+- **the two-stage window** (dashed branch in the figure) — an auxiliary head predicts the photon position to
+  a median 0.16 cells, the window is re-cut around it, and a second pass measures the energy: 0.0388 → 0.0378
+  on the development split, better in 400 of 400 paired bootstrap resamples.
+
+Distillation from the seed ensemble reaches the same margin by a different route (0.0383, better in 98% of
+resamples) and matters for deployment, since one distilled member runs five times faster than the ensemble
+it imitates.
 
 ## The falsification record
 
-The campaign tested **~24 hypotheses across every family** available without per-cell truth labels, all under one
-protocol (fixed splits, pre-registered win criterion, ≥2 seeds, validation-only selection). Highlights of what
-did **not** work — each with a measured mechanism, documented in its own notebook:
+The campaign measured **148 configurations** under one protocol (fixed splits, a pre-registered win criterion,
+≥2 seeds, validation-only selection), each with a saved per-event prediction set. Highlights of what did **not**
+work — each with a measured mechanism:
 
-- **Supervision pressure** — synthetic overlay labels, DANN, feature distillation, aggregate-fraction (LLP)
-  supervision, containment auxiliary head: all flat or harmful. The *free-learned* gate reaches r = 0.92 with the
-  true per-cell signal fraction without ever seeing one.
-- **Time representations** — pairwise Δt attention, TOF-corrected pulls, out-of-time tail features, one-sided
-  hadron-TOF veto, longitudinal (front–back) EM-development pull: all flat. Measured cause: the in-window pileup
-  is predominantly **photonic** and in-time — indistinguishable from signal at σ_t ≈ 0.25 ns.
-- **Architectures** — GravNet, pairwise attention, Swin-style relative bias, width ×2, depth ×2, CNN/conv-stem
-  hybrid, iterative refinement, DRN-class ideas: 0-for-10. Every gain came from objective/training, not wiring.
+- **Supervision pressure** — synthetic overlay labels, direct gate supervision, an auxiliary fraction head, and
+  distillation from a fitted per-cell estimator: all flat or harmful. The measurement behind that: the learned
+  gate correlates only **0.211** with the true per-cell photon fraction, while a gradient-boosted estimator on
+  the *same* observables reaches **0.945** — the information is in the inputs and the network routes it around
+  the gate rather than through it. The gate is an attention weight inside an integral, not a physical quantity.
+- **Engineered time representations** — three time-pull constructions, hard timing cuts, time-sliced attention,
+  an inverse-variance front/back combination, and a Fourier basis on the time channels: all match or lose to
+  handing the network the **raw** timestamps. Timing itself is far from flat: removing it costs 20% of the
+  aggregate and 38% in the weak bins under pileup, while being neutral on the pileup-free sample.
+- **Architectures** — ten encoder families (ParticleNet, GravNet, pairwise-bias attention, time-sliced
+  attention, CNN and ConvNeXt stems, patch tokens, a masked MLP-Mixer, an energy-flow network), plus capacity
+  and recipe sweeps: none beat the plain transformer. The one architectural mechanism that *did* win attacks
+  the input window rather than the wiring (the two-stage pointing window above).
+- **Selection** — cutting events on the model's own predicted interval width makes σ_eff **worse** at every
+  efficiency, because σ_eff is already a robust 68.3% interval and the flagged tails sit outside it.
 - **Physics-template deblending** — a Lednev/Grindhammer 2-blob fit (template measured from clean data) *does*
   recover per-event pileup energy (partial corr 0.637 | ΣE), but feeding its outputs to the network adds nothing:
   the information is already in the cells; the irreducible part is in-core overlap degeneracy.
@@ -333,10 +357,15 @@ python scripts/run_explorer.py   # then open http://127.0.0.1:8000
 
 ## Roadmap
 
-- **Blocked on data** (the measured remaining ~0.010): per-event context columns (N clusters, total ECAL energy,
-  N PV) for ρ-conditioning, and/or the minbias-only sample for real-pileup positional overlays.
-- Manuscript in preparation: label-free per-cell signal-fraction readout + the systematic falsification record.
-  Verified novelty positioning in `reports/novelty_sota_positioning.md`.
+- **Blocked on data.** The measured scaling curve is σ_eff ∝ N^−0.18 over four within-protocol subsample
+  points, so tripling the simulated minimum-bias sample predicts ≈ 0.033 — larger than everything the
+  architecture campaign bought put together. Also pending from the collaboration: the simulated ν / luminosity,
+  the simulated timestamp resolution, and per-event truth flags (overlapping-cluster count, photon-match
+  quality) to turn the catastrophic-tail hypothesis into a measurement.
+- **Next on our side**: applying the pointer in the inner regions only (it costs resolution at 120 mm, where
+  the seed already is the photon), a DRN baseline to close the published-architecture comparison, and an
+  end-to-end version of the two-stage window in a single forward pass.
+- **Paper**: [`paper/main.pdf`](paper/main.pdf), draft, four placeholders awaiting mentor answers.
 
 ## Contributing · License · Citation
 
