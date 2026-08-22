@@ -13,8 +13,8 @@
                 <mxCell id="tok" value="&lt;b&gt;cell tokens&lt;/b&gt; (≤ 289)&lt;br&gt;&lt;font&gt;space &lt;b&gt;and&lt;/b&gt; raw time per cell&lt;/font&gt;" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#FFE8D9;strokeColor=#E8B396;fontSize=13;strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="140" y="490" width="190" height="55" as="geometry"/>
                 </mxCell>
-                <mxCell id="tok-note" value="(E&lt;sub&gt;i&lt;/sub&gt;, Δx&lt;sub&gt;i&lt;/sub&gt;, Δy&lt;sub&gt;i&lt;/sub&gt;, t&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;front&lt;/sup&gt;, t&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;back&lt;/sup&gt;)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=13;align=center;strokeWidth=2;" vertex="1" parent="1">
-                    <mxGeometry x="-55" y="490" width="170" height="40" as="geometry"/>
+                <mxCell id="tok-note" value="(E&lt;sub&gt;i&lt;/sub&gt;, Δx&lt;sub&gt;i&lt;/sub&gt;, Δy&lt;sub&gt;i&lt;/sub&gt;, t&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;front&lt;/sup&gt;, t&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;back&lt;/sup&gt;, h&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;front&lt;/sup&gt;, h&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;back&lt;/sup&gt;)&lt;br&gt;&lt;font color=&quot;#6B7280&quot;&gt;h: has-timestamp indicators&lt;/font&gt;" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=13;align=center;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="-190" y="479" width="210" height="60" as="geometry"/>
                 </mxCell>
                 <mxCell id="tok-note-e" style="endArrow=none;dashed=1;html=1;strokeColor=#C7BFA6;entryX=0.009;entryY=0.406;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=13;exitX=0.995;exitY=0.541;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="tok-note" target="tok">
                     <mxGeometry relative="1" as="geometry">
@@ -27,8 +27,22 @@
                 <mxCell id="plus" value="+" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=13;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
                     <mxGeometry x="220" y="350" width="30" height="30" as="geometry"/>
                 </mxCell>
+                <mxCell id="poshead" value="&lt;b&gt;position head&lt;/b&gt; (auxiliary)&lt;br&gt;&lt;font&gt;&lt;i&gt;predicts the photon offset, 0.16 cells&lt;/i&gt;&lt;/font&gt;" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#EBE6F7;strokeColor=#B7A9E0;dashed=1;fontSize=13;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="-140" y="90" width="215" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-pos" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7C3AED;strokeWidth=2;dashed=1;endArrow=blockThin;endFill=1;fontSize=12;" edge="1" parent="1" source="addnorm2" target="poshead">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e-recut" value="two-stage:&lt;br&gt;re-cut the window" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7C3AED;strokeWidth=2;dashed=1;endArrow=blockThin;endFill=1;fontSize=12;fontColor=#7C3AED;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="poshead" target="win">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="-230" y="117"/>
+                            <mxPoint x="-230" y="627"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
                 <mxCell id="glob" value="&lt;b&gt;global features&lt;/b&gt;&lt;br&gt;&lt;font&gt;cluster-level reconstruction (position, sum, multiplicity)&lt;/font&gt;" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#FFE8D9;strokeColor=#E8B396;dashed=1;fontSize=13;strokeWidth=2;" parent="1" vertex="1">
-                    <mxGeometry x="360" y="337.5" width="165" height="55" as="geometry"/>
+                    <mxGeometry x="800" y="150" width="175" height="65" as="geometry"/>
                 </mxCell>
                 <mxCell id="encbox" value="" style="rounded=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9CA3AF;strokeWidth=2;fontSize=13;" vertex="1" parent="1">
                     <mxGeometry x="100" y="60" width="270" height="275" as="geometry"/>
@@ -96,7 +110,7 @@
                 <mxCell id="e-emb" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1A1A1A;strokeWidth=2;endArrow=block;endFill=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=13;" edge="1" parent="1" source="emb" target="plus">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e-glob" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#9CA3AF;strokeWidth=2;dashed=1;endArrow=block;endFill=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" edge="1" parent="1" source="glob" target="plus">
+                <mxCell id="e-glob" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#9CA3AF;strokeWidth=2;dashed=1;endArrow=block;endFill=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" edge="1" parent="1" source="glob" target="read">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="e-qkv2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#1A1A1A;strokeWidth=2;endArrow=block;endFill=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;fontSize=13;" edge="1" parent="1" source="plus" target="mhsa">
