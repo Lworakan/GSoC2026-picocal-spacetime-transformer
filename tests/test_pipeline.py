@@ -135,7 +135,8 @@ def test_build_grid_and_prep_contract():
     assert 0 <= e0['reg'] < len(PITCH)
     assert np.isfinite(e0['ET']) and e0['ET'] > 0
     rows, keep = make_windows(4, ev)
-    assert len(rows[0]) == 6
+    # (tok, sum_e, max_e, Etrue, region, ET, extra_globals, aux_targets, cell_frac, time_slice)
+    assert len(rows[0]) == 10
     tok = rows[0][0]
     assert tok.shape[1] == 16
     assert (np.expm1(tok[:, 0]) >= THRESH - 1e-3).all()

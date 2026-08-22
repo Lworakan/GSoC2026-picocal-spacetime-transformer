@@ -16,5 +16,5 @@ keywords:
   - transformer
   - graph neural network
   - GSoC
-license: Apache-2.0
+license: MIT
 version: 0.1.0
