@@ -295,11 +295,11 @@ shell of cells at Chebyshev distance $r$ from the window centre.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.9\textwidth]{spacetformer.pdf}
+\includegraphics[width=\textwidth]{spacetformer.pdf}
 \caption{The SpaceTformer pipeline. Each cell is a token in detector space
 and time; the encoder is a plain transformer over cell tokens only; the
-cluster-level global features enter at the readout, which is a gated energy
-sum in log space plus a small correction; the loss is a three-quantile
+cluster-level global features $g$ enter only at the readout, which is a gated
+energy sum in log space plus a small correction $h$; the loss is a three-quantile
 pinball loss with EMA weights; predictions are the per-event median over
 ensemble members. The decisive components are the window's size and
 centring at the bottom (Section~\ref{sec:gain}). Dashed purple: the
