@@ -154,7 +154,8 @@ using per-cell time as the axis, and it loses --- video frames are dense and
 redundant along time, calorimeter timestamps are one noisy scalar per token.
 Patch-hierarchical attention for jets~\cite{patchjets} cuts attention cost
 by grouping tokens into patches --- there consecutive chunks of a
-$p_\mathrm{T}$-ordered particle list, explicitly not spatial regions. We
+particle list ordered by $p_\mathrm{T}$ by default, explicitly not spatial
+regions. We
 transplanted the cost argument to a geometry where the hierarchy can be
 spatial: individual cells in the core, coarse ring summaries outside. It is
 the one transplanted idea that survives measurement.
@@ -162,10 +163,12 @@ ClusTEX~\cite{clustex} separates global from local detector coordinates; the
 same separation measured here is neutral.
 
 \paragraph{Set, flow, and mixing methods.}
-Deep Sets~\cite{deepsets} pool per-particle embeddings additively and
-Energy Flow Networks~\cite{efn} pool them in an energy-weighted sum, which
-is what makes them infrared- and collinear-safe; our EFN arm confirms that
-a linear pooling of this kind is too weak when the task is subtractive --- separating overlapping
+Deep Sets~\cite{deepsets} pool per-particle embeddings additively; Energy
+Flow Networks~\cite{efn} restrict that pooling to an energy-weighted sum
+over angular directions, which is what makes them infrared- and
+collinear-safe --- the unrestricted Deep Sets form is not. Our EFN arm
+confirms that a linear pooling of this kind is too weak when the task is
+subtractive --- separating overlapping
 energy fields rather than summarising one. MLP-Mixer-style token
 mixing~\cite{mixer} replaces attention with a learned but
 input-independent MLP across tokens; a masked Mixer arm measured here loses heavily
@@ -197,11 +200,12 @@ graph-based architectures have been explored for calorimeter energy
 regression in the CMS context --- dynamic graph reduction~\cite{drn} and
 deep-learning clustering studies in the ECAL~\cite{cmsecaldl}.
 Those works subtract pileup or regress energy; ours does both in one model
-and reports where the ceiling comes from. The design of the CMS HGCAL~\cite{hgcal} rests on the same premise as our
-per-bin pattern: fine transverse granularity and per-cell timing were chosen
-specifically so that overlapping deposits can be separated under HL-LHC
-pileup, which is where our own improvements concentrate. The quantile (pinball) loss goes back to~\cite{koenker} and was carried
-into neural networks by the forecasting literature~\cite{qrnn}; the
+and reports where the ceiling comes from. The design of the CMS HGCAL~\cite{hgcal,hgcaltiming} rests on the same
+premise as our per-bin pattern: fine transverse granularity and per-cell
+timing were chosen so that overlapping showers can be separated under HL-LHC
+pileup~\cite{hgcaltiming}, which is where our own improvements concentrate. The quantile (pinball) loss goes back to~\cite{koenker} and was carried
+into neural networks by the statistics and forecasting
+literature~\cite{white92,qrnn}; the
 exponential moving average of weights used here follows the mean-teacher
 form~\cite{meanteacher}, of which the equal-weight iterate averaging
 of~\cite{polyak} is the classical ancestor; deep ensembles
@@ -971,7 +975,7 @@ variance that ensembling removes is of order $(0.87/3.76)^2 \approx 5\%$ of the
 budget and most of it is already gone. Members disagree with each other far
 less than they disagree with the truth: the remaining error is common-mode.
 
-\paragraph{Selection cannot help, by construction.} $8.3\%$ of events sit
+\paragraph{Selection cannot help, by construction.} $8.2\%$ of events sit
 beyond $3\seff$ and carry $21\%$ of the aggregate --- perfect treatment of them
 alone would give $0.0296$. The model flags them (AUC~$0.93$ from its own
 predicted width), but \emph{removing} them does not narrow \seff{}: cutting to
@@ -1536,6 +1540,13 @@ arXiv:1712.00409 (2017).
 \bibitem{preln} R.~Xiong et al.,
 \emph{On Layer Normalization in the Transformer Architecture},
 ICML 2020, arXiv:2002.04745.
+\bibitem{white92} H.~White,
+\emph{Nonparametric Estimation of Conditional Quantiles Using Neural
+Networks}, Computing Science and Statistics: Proceedings of the 23rd
+Symposium on the Interface (1992) 190.
+\bibitem{hgcaltiming} CMS Collaboration,
+\emph{Precision timing calorimetry with the CMS HGCAL},
+arXiv:2005.13324 (2020).
 \bibitem{meanteacher} A.~Tarvainen, H.~Valpola,
 \emph{Mean teachers are better role models: Weight-averaged consistency
 targets improve semi-supervised deep learning results},
