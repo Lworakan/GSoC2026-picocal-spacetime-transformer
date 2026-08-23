@@ -120,7 +120,8 @@ the window itself, did not reproduce across protocols
 open lever.} The paper presents
 the primary result and its uncertainty protocol
 (Section~\ref{sec:primary}), the diagnosis with its mechanism measurements
-(Sections~\ref{sec:gain}--\ref{sec:anatomy}), the controlled architecture
+(Sections~\ref{sec:gain}--\ref{sec:anatomy}), a quantitative account of what
+now limits the measurement (Section~\ref{sec:ceiling}), the controlled architecture
 campaign (Section~\ref{sec:encoders}), the record of measured negative
 results (Sections~\ref{sec:gate}--\ref{sec:closed}), deployment cost
 (Section~\ref{sec:cost}), and the scaling case (Section~\ref{sec:scaling}).
@@ -909,6 +910,95 @@ timing coverage vs $0.0823$ below), consistent with the timing ablation
 (Section~\ref{sec:timing}) --- denser timing coverage in the detector
 design would feed this model directly.
 
+\subsection{What limits the measurement}
+\label{sec:ceiling}
+
+The four measurements above say what the residual is made of. This subsection
+prices it: how much of the aggregate each part carries, how much of each part
+any estimator could remove, and what is therefore left. All values here use the
+development protocol on the pooled 31-member ensemble ($0.0376$ aggregate,
+10{,}877 events), because it is the largest set of members we have; the
+conclusions are ratios and carry over.
+
+\paragraph{Where the aggregate comes from.} Table~\ref{tab:budget} gives, per
+region--energy bin, its share of the sample and what the aggregate would become
+if that bin were predicted perfectly. The bins with the worst resolution are
+not the ones that matter most: 15\,mm low-E is $3.8\%$ of the sample and worth
+$0.0022$ on the aggregate, while 60\,mm low-E is $11.3\%$ and worth $0.0057$.
+Every window, centring and pointing measurement in this paper was developed
+against the inner regions; the aggregate is carried by the middle ones.
+
+\begin{table}[h]
+\centering
+\caption{Error budget by bin, development protocol. ``Aggregate if perfect''
+replaces that bin's residuals with zero and rescores everything; it is an upper
+bound on what any improvement to that bin can buy. ``Sampling part'' is
+$a/\sqrt{E}$ from a per-region fit of $\sigma(E) = \sqrt{a^2/E + b^2 + c^2/E^2}$
+evaluated at the bin's median energy --- the part no estimator can remove.}
+\label{tab:budget}
+\begin{tabular}{lccccc}
+\toprule
+bin & share & bin \seff{} & aggregate if perfect & sampling part & headroom\\
+\midrule
+60\,mm low-E & 11.3\% & 0.0513 & 0.0319 & 0.0226 & large\\
+40\,mm low-E & 9.6\% & 0.0583 & 0.0321 & 0.0469 & small\\
+30\,mm low-E & 6.7\% & 0.0699 & 0.0335 & 0.0513 & small\\
+15\,mm low-E & 3.8\% & 0.0675 & 0.0354 & 0.0417 & moderate\\
+120\,mm low-E & 2.0\% & 0.0540 & 0.0366 & 0.0291 & moderate\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Two of the three big bins are near their physics floor.} At 40\,mm
+the stochastic term alone is $0.0469$ of the bin's $0.0583$, and at 30\,mm
+$0.0513$ of $0.0699$: $80$ and $73$ per cent of the width is sampling
+fluctuation of the shower itself, which is a property of the detector, not of
+the estimator. Only 60\,mm low-E has real room --- its sampling term is
+$0.0226$ against a measured $0.0513$ --- and there the dominant term is
+$c/E = 0.0387$, an absolute error of $c \approx 0.29$\,GeV at that bin's
+$7.5$\,GeV, which is the scale of the pileup fluctuation the window carries
+($E_{\rm win}/E_\gamma = 1.25$ at 60\,mm). We tested the obvious handle: the
+residual there correlates $+0.17$ with the observable window energy, but
+removing a linear dependence on it, fitted on half the events and applied to
+all, makes every bin $7$--$10\%$ worse. The window energy is already a global
+input; the network has consumed it.
+
+\paragraph{The variance component is exhausted.} Across 28 single members the
+mean is $0.0394$ and the best $0.0386$; pooling all 31 gives $0.0376$, only
+$4.7\%$ below the member mean. The median member-to-member spread on a single
+event is $0.87\%$ of the prediction against a total error of $3.76\%$, so the
+variance that ensembling removes is of order $(0.87/3.76)^2 \approx 5\%$ of the
+budget and most of it is already gone. Members disagree with each other far
+less than they disagree with the truth: the remaining error is common-mode.
+
+\paragraph{Selection cannot help, by construction.} $8.3\%$ of events sit
+beyond $3\seff$ and carry $21\%$ of the aggregate --- perfect treatment of them
+alone would give $0.0296$. The model flags them (AUC~$0.93$ from its own
+predicted width), but \emph{removing} them does not narrow \seff{}: cutting to
+$80\%$ efficiency on a width threshold fitted per region and validation-energy
+decile takes the aggregate from $0.0383$ to $0.0412$. \seff{} is the minimal
+$68.3\%$ interval, and the flagged tails already lie outside it. Width-based
+flags are useful for analysis-level purity; they cannot improve a quoted
+resolution.
+
+\paragraph{Two upper bounds are closed.} A window centred on the true photon
+entry --- unavailable at inference, measured as a diagnostic --- is worth $4\%$
+on the aggregate, and the learned pointer takes most of it on the development
+split. A per-cell gate given truth is worth $10$--$12\%$ more than one fitted
+from observables, and four supervision protocols failed to move the network
+toward it because the information is already reaching the answer by another
+route. Both of the mechanisms that a reader would propose first are therefore
+bounded, and the bounds are small.
+
+\paragraph{What is left.} Adding the pieces: the sampling floors of the two
+most populous weak bins are fixed by the calorimeter; the variance component is
+$5\%$ of the budget and largely removed; selection is a null by construction;
+and the two structural bounds are worth a few per cent between them, most of it
+taken. Within this sample we estimate the reachable floor at
+$\seff \approx 0.038$, against the $0.0388$ reported. The one lever measured to
+be worth more than a few per cent is the training-set size
+(Section~\ref{sec:scaling}), which is not a modelling choice at all.
+
 \subsection{Comparison of encoder architectures}
 \label{sec:encoders}
 
@@ -1319,8 +1409,13 @@ reproduce that margin, and we report both. What does hold under either
 protocol is the auxiliary position head, at about $1\%$. Everything else we tried is reported with its numbers in
 Sections~\ref{sec:encoders}--\ref{sec:closed} and the scored
 ledger versioned with the code, so it does not have to be re-tried silently.
-The measured scaling curve, $\seff \propto N^{-0.18}$, makes the path below
-$\seff = 0.035$ a data request rather than an architecture search.
+Pricing the residual bin by bin (Section~\ref{sec:ceiling}) puts the reachable
+floor on this sample at $\seff \approx 0.038$: the two most populous weak bins
+are $73$--$80\%$ sampling fluctuation, the variance ensembling removes is $5\%$
+of the budget and largely gone, selection cannot narrow a robust interval, and
+the two structural bounds a reader would propose first are worth a few per cent
+between them. The measured scaling curve, $\seff \propto N^{-0.18}$, therefore
+makes the path below that a data request rather than an architecture search.
 
 \section*{Acknowledgements}
 
