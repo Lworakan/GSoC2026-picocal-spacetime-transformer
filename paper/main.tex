@@ -637,8 +637,16 @@ $w{=}1$ to $w{=}8$), so the outer cells are not signal to be added. And
 restricting the network's gated sum to a central core while the encoder
 still attends over the whole window costs $15\,$mm low-E $0.0863$ at
 core $w{=}4$ and $0.1270$ at core $w{=}2$ against $0.0755$ for the full
-sum --- tracking the truncation tail above almost exactly. The window
-plays both roles, and the measurements say where each one takes over.
+sum --- tracking the truncation tail above almost exactly. That the damage
+is truncation and not the core idea is confirmed by repeating it on a
+window centred by the learned pointer of Section~\ref{sec:pointing}, whose
+median error is $0.16$ cells: there a $w{=}2$ core scores $0.0389$, equal
+to the same configuration with the full sum, where on a barycentre-centred
+window it scores $0.0436$. With an accurate centre the energy sum needs 25
+of the 289 cells and the rest are read but never summed --- no resolution
+is gained, but the readout becomes a much smaller object than the window it
+sits in. The window plays both roles, and the measurements say where each
+one takes over.
 
 \begin{figure}[t]
 \centering
@@ -1124,6 +1132,7 @@ time-gated readout & multiplicative time gate on the final window & 0.0399 vs 0.
 train-time augmentation & D4 transforms of the window & 0.0401 vs 0.0402, neutral\\
 quality selection & cut on predicted quantile width & worse at every efficiency (see text)\\
 core-restricted sum & gated sum over $w{=}4$; $w{=}2$ core & 0.0404; 0.0436 vs 0.0399\\
+core sum on a pointed window & $w{=}2$ core, learned centre & 0.0389, equal to full sum\\
 \bottomrule
 \end{tabular}
 \end{table}
