@@ -24,6 +24,11 @@ def main():
     ap.add_argument('--repo', default=str(Path(__file__).resolve().parents[1]))
     ap.add_argument('--name', default='SubNetW8CleanAuxExDnAuxRcQdEma')
     ap.add_argument('--seeds', type=int, nargs='+', default=[0, 1, 2, 3, 4])
+    ap.add_argument('--fold', type=int, default=None,
+                    help='build the pointer under the k-fold split rather than the fixed one. '
+                         'The stage-1 members must be the ones trained on THIS fold, or the '
+                         'photon position leaks from training into the fold test set.')
+    ap.add_argument('--nfold', type=int, default=10)
     ap.add_argument('--smoke', action='store_true')
     ap.add_argument('--device', default=None)
     ap.add_argument('--out', default='.scratch/pointer.pkl')
@@ -39,7 +44,8 @@ def main():
     main_ev = cached_grid(mb, 'minbias' + sfx, cdir)
     aux_ev = cached_grid(cl, 'clean-aux' + sfx, cdir)
     D = prep(8, main_ev, aux_ev, prior=None, rings=0, halo=0, globpe=0, patch=0, patch_side=3,
-             recenter=True, fold=None, nfold=5, mmgeo=False, rc_regions=None, rc_mode='centroid',
+             recenter=True, fold=args.fold, nfold=args.nfold, mmgeo=False, rc_regions=None,
+             rc_mode='centroid',
              tcomb=False, allcells=False, ng=NG + 8, phys=False, occ=False, extra=True,
              dens=True, rho=False, tpull=False, aux=True, depth=False, orho=False, abst=False)
     X = torch.from_numpy(D['X']).to(device)
