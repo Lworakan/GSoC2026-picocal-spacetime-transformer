@@ -49,12 +49,15 @@ energy, and fixing the window's size and centring cut the worst
 region--energy bin by $53\%$ ($0.165 \to 0.078$), while ten encoder
 families, four gate-supervision protocols, five timing constructions, a
 capacity sweep and a recipe sweep all measured null against the same bins.
-One architectural mechanism survives the campaign: a learned two-stage
-window --- a first pass points at the photon (median error $0.16$ cells),
-the window is re-cut around it, a second pass measures --- takes the
-development-protocol ensemble from $0.0388$ to $0.0378$, better in every
-one of $400$ paired resamples, and captures over half of the measured
-bound that a perfectly centred window sets. A directly measured
+Two mechanisms move the number at the per-cent level: an auxiliary head
+that regresses the photon's position alongside the energy, and a learned
+two-stage window built on it --- a first pass points at the photon (median
+error $0.16$ cells), the window is re-cut around it, a second pass
+measures. On the development protocol the two-stage ensemble reads
+$0.0378$ against $0.0388$, better in every one of $400$ paired resamples;
+under cross-validation the same construction does not reproduce that gain,
+while the auxiliary head is worth about $1\%$ under both protocols. We
+report both measurements. A directly measured
 data-scaling curve, $\seff \propto N^{-0.18}$ over four within-protocol
 subsample points, predicts that tripling the simulated sample would bring
 the aggregate to $\approx 0.033$, leaving training data as the only open
@@ -110,10 +113,11 @@ the code).
 The thesis this discipline produced can be stated in one sentence: \emph{on
 pileup-dominated PicoCal data, the resolution ceiling was set by the input
 window, not the model --- widening it until it tolerated the centring error,
-and then improving the centre, cut the worst bin by $53\%$, while every architectural alternative measured
-null except one that attacks the window itself (a learned two-stage
-pointing window, Section~\ref{sec:pointing}), leaving training-set size as
-the dominant open lever.} The paper presents
+and then improving the centre, cut the worst bin by $53\%$, while every
+architectural alternative measured null or, in the one case that attacked
+the window itself, did not reproduce across protocols
+(Section~\ref{sec:pointing}), leaving training-set size as the dominant
+open lever.} The paper presents
 the primary result and its uncertainty protocol
 (Section~\ref{sec:primary}), the diagnosis with its mechanism measurements
 (Sections~\ref{sec:gain}--\ref{sec:anatomy}), the controlled architecture
@@ -815,14 +819,30 @@ budget of Section~\ref{sec:cost}). The two routes do not stack
 ($-0.0003$, $P{=}0.73$ between them): both recover the same
 centring-and-averaging margin, one structurally and one by imitation.
 
-Two caveats apply. First, all values in this subsection are
-development-protocol numbers; promoting the two-stage result to a
-primary result requires re-running the ten-fold protocol on it. Second, the
-$2.6\%$ aggregate gain is small --- its significance is that it is the
-\emph{measured majority of the measured maximum}: the true-entry bound
-bounds the gain available to any centring mechanism at $4\%$; the
-two-stage mechanism recovers over half of it, and no other architectural
-change on this sample produced a measurable gain.
+\paragraph{The gain does not survive cross-validation.} Every value above
+is a development-protocol number, and we ran the obvious check: repeat the
+construction inside the ten-fold protocol, training the position head on
+each fold and building that fold's pointer from it, so nothing about the
+photon position leaks into the fold's test events. Three folds were
+completed before the run was stopped. The pointer is unaffected --- its
+median error is $0.174$ cells per fold against $0.164$ on the development
+split --- but the energy gain is not there. Scored on identical events, the
+two-stage member reads $0.0388$ and $0.0387$ on folds 0 and 1 against the
+auxiliary-head member's $0.0383$ and $0.0385$; pooling the three
+cross-validated families reaches $0.0378$ where the primary recipe reads
+$0.0381$ on the same events, a $0.8\%$ difference rather than the $2.6\%$
+the development split showed.
+
+We report this rather than quietly keeping the favourable protocol. The
+development-split measurement is correct as made --- five members, a paired
+bootstrap better in $400/400$ resamples --- and it does not transfer. The
+most likely reading is that the fixed split's test set is both smaller and
+easier than the full sample, so a mechanism worth a genuine but small
+margin can look larger there than it is. The auxiliary position head, by
+contrast, is worth about $1\%$ under both protocols, which is the level at
+which we would now describe both mechanisms. The centring bound of $4\%$
+stands; what is uncertain is how much of it any estimator can actually
+take.
 
 \subsection{Decomposition of the remaining error}
 \label{sec:anatomy}
@@ -1250,7 +1270,7 @@ predicted aggregate of $\approx 0.033$.}
 \section{Limitations and future work}
 \label{sec:limits}
 
-Four limitations bound the claims. (1) Everything is measured on one
+Five limitations bound the claims. (0) The clearest one is recent: the two-stage window's development-split gain does not reproduce under cross-validation (Section~\ref{sec:pointing}), which is a warning about every development-split number in this paper. They are labelled wherever they appear, but a margin of a few per cent measured on the fixed split should be treated as a hypothesis until the ten-fold protocol confirms it. (1) Everything is measured on one
 simulated sample of one detector concept; the diagnosis method transfers,
 the numbers may not. Two internal transfers partially mitigate this: the
 pileup-free clean sample is a second distribution on which the timing
@@ -1292,11 +1312,11 @@ The improvement over our own starting point --- $53\%$ in the worst
 region--energy bin --- came entirely
 from measuring and fixing the input representation: window containment and
 window centring. The same diagnosis, pushed one step further, produced the
-one architectural mechanism that survives the campaign: the learned
-two-stage window of Section~\ref{sec:pointing}, which points before it
-measures and takes the development-protocol ensemble to $0.0378$,
-capturing most of the margin a perfectly centred window is measured to
-allow. Everything else we tried is reported with its numbers in
+learned two-stage window of Section~\ref{sec:pointing}, which points
+before it measures and takes the development-protocol ensemble to
+$0.0378$; a cross-validated re-run of the same construction does not
+reproduce that margin, and we report both. What does hold under either
+protocol is the auxiliary position head, at about $1\%$. Everything else we tried is reported with its numbers in
 Sections~\ref{sec:encoders}--\ref{sec:closed} and the scored
 ledger versioned with the code, so it does not have to be re-tried silently.
 The measured scaling curve, $\seff \propto N^{-0.18}$, makes the path below
