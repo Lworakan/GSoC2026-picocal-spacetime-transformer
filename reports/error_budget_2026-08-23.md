@@ -92,3 +92,59 @@ Expected landing point: $0.0388 \times 0.974$ (two-stage) $\times 0.956$
 (90% training) $\approx 0.0361$, with the 60 mm arm and bias correction the
 plausible best case is $\approx 0.0355$. **0.035 remains out of reach without
 either the truth flags that would let us attack the 8% tail, or more data.**
+
+## 7. Pre-test of the proposed 60 mm arm — it did not survive
+
+Section 6 added "a 60 mm-low-targeted arm" on the strength of section 2. Before
+queueing it, three checks:
+
+**What 0.0319 actually means.** It is the aggregate if that bin were predicted
+*perfectly*, which is not a target. Scaling the bin's residuals to plausible
+levels instead:
+
+| 60 mm low goes to | meaning | aggregate |
+|---|---|---|
+| 0.0000 | bound, unreachable | 0.0319 |
+| 0.0225 | everything but sampling removed | 0.0345 |
+| 0.0350 | noise term halved | 0.0361 |
+| 0.0430 | a 15% improvement on the bin | 0.0370 |
+
+**What the bin is made of.** At its median 7.5 GeV the fitted terms are
+sampling $0.0226$, constant $0.0164$ and noise $c/E = 0.0387$. The bin is
+**noise-dominated**: an absolute error of $c \approx 0.29$ GeV, which is the
+size of the pileup fluctuation the window carries at that energy
+($E_{\rm win}/E_\gamma = 1.25$ at 60 mm).
+
+**Whether that noise is still addressable.** Residuals in this bin correlate
+$+0.25$ with the pileup excess $E_{\rm win} - E_{\rm true}$ and $+0.17$ with
+the observable window energy alone, which looked like an uncorrected
+systematic. Removing a linear dependence on $\log E_{\rm win}$ per bin, fitted
+on half the rows and applied to all, makes every bin **worse** by 7–10%. The
+window energy is already a global input; the network has used it, and a
+post-hoc correction on the same variable only adds noise.
+
+Two caveats on those correlations: only 46% of test rows could be matched back
+to the event cache by $(E_{\rm true}, E_T, {\rm region})$, and that matched
+subset scores 0.0427 rather than 0.0376, so it is not a fair sample. The
+correlation figures are indicative at best.
+
+**Conclusion: the 60 mm arm is cut too.** The bin is the largest aggregate
+lever, but its dominant term is pileup noise in absolute energy, the one
+observable that would predict it is already consumed by the model, and the only
+correction I could construct from existing predictions is harmful. Proposing a
+GPU run for it would be spending on a hunch.
+
+## 8. What is left that I would pay for
+
+| item | confidence | cost | expected |
+|---|---|---|---|
+| two-stage configuration under 10-fold CV (trains on 90% rather than 70%) | **high** — measured $-2.6\%$ and a measured scaling exponent | ~15 GPU-h | $0.0388 \to \approx 0.0361$ |
+| `--rc-regions 0 1 2 3` | medium — fixes a measured 120 mm regression | ~2 GPU-h | $-0.0002$ |
+| per-bin bias removal in calibration | high, free | none | $-0.0002$ |
+
+Everything else in the earlier plan is now cut: more ensemble members (variance
+exhausted), snapshot ensembling (same mechanism), the 60 mm arm (section 7).
+
+**Honest expectation: 0.036 is reachable, 0.035 is not.** The remaining gap to
+0.035 sits in the 8% tail, and nothing in the current inputs identifies what
+those events are.
