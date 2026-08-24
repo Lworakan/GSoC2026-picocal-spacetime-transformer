@@ -1,0 +1,78 @@
+import sys
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from run_experiments import resolution
+
+# The headline "3.2x over a gradient-boosted reference" compared a ten-fold ensemble
+# scored on 72,533 events with a single-seed tree scored on the 12,227 events of the
+# fixed split. That is the cross-protocol comparison the rest of the paper forbids.
+# This script scores both estimators on the events they share, and pairs the bootstrap
+# so the difference carries an uncertainty rather than the two widths separately.
+
+D = Path(__file__).resolve().parents[1] / 'reports' / 'predictions'
+MEMBERS = ('minbias__SubNetW8CleanAuxExDnRcK{f}QdEma.csv',
+           'minbias__SubNetW8CleanAuxExDnRcK{f}Rr01QdEma.csv',
+           'minbias__SubNetW4CleanAuxExDnRcK{f}AcQdEma.csv')
+KEY = ['true_energy', 'region_name']
+NBOOT = 400
+
+
+def cv_ensemble():
+    out = []
+    for f in range(10):
+        tabs = [pd.read_csv(D / p.format(f=f)) for p in MEMBERS if (D / p.format(f=f)).exists()]
+        allm = pd.concat(tabs)
+        out.append(allm.groupby(KEY, sort=False).agg(pred=('pred_energy', 'median')).reset_index())
+    return pd.concat(out, ignore_index=True)
+
+
+def paired(a_pred, b_pred, truth, rng):
+    n = len(truth)
+    da, db = [], []
+    for _ in range(NBOOT):
+        idx = rng.integers(0, n, n)
+        da.append(resolution(a_pred[idx], truth[idx])['sigma_eff'])
+        db.append(resolution(b_pred[idx], truth[idx])['sigma_eff'])
+    return np.array(da), np.array(db)
+
+
+def main():
+    bdt = pd.read_csv(D / 'minbias__BDT.csv')
+    ens = cv_ensemble()
+    n_bdt, n_ens = len(bdt), len(ens)
+
+    # the tree writes the target at double precision and the network at single, so an
+    # exact join on the energy finds nothing; both are put on the network's grid first
+    for t in (bdt, ens):
+        t['true_energy'] = t['true_energy'].astype(np.float32)
+
+    m = bdt.merge(ens, on=KEY, how='inner', suffixes=('_bdt', ''))
+    m = m.drop_duplicates(subset=KEY)
+    truth = m['true_energy'].values
+    print(f'BDT rows {n_bdt}, ensemble rows {n_ens}, shared events {len(m)}')
+
+    r_ens = resolution(m['pred'].values, truth)['sigma_eff']
+    r_bdt = resolution(m['pred_energy'].values, truth)['sigma_eff']
+    print(f'on the shared events: SpaceTformer {r_ens:.4f}  BDT {r_bdt:.4f}  '
+          f'ratio {r_bdt / r_ens:.2f}x')
+
+    rng = np.random.default_rng(0)
+    da, db = paired(m['pred'].values, m['pred_energy'].values, truth, rng)
+    d = db - da
+    print(f'paired difference {d.mean():.4f} +/- {d.std():.4f}, '
+          f'BDT worse in {(d > 0).sum()}/{NBOOT} resamples')
+    print(f'ratio {np.mean(db / da):.2f} +/- {np.std(db / da):.2f}')
+
+    for reg, sub in m.groupby('region_name'):
+        t = sub['true_energy'].values
+        print(f'  {reg:>8s} n={len(sub):6d} '
+              f'ST {resolution(sub["pred"].values, t)["sigma_eff"]:.4f} '
+              f'BDT {resolution(sub["pred_energy"].values, t)["sigma_eff"]:.4f}')
+
+
+if __name__ == '__main__':
+    main()

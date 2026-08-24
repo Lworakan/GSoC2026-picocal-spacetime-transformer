@@ -35,8 +35,10 @@ a token transformer over calorimeter cells --- each token a point in detector
 space and time --- with a physics-constrained readout, reaches an aggregate
 relative resolution $\seff = 0.0388 \pm 0.0002$, measured fully out-of-sample
 under a complete ten-fold cross-validation protocol (every event predicted by
-models that never saw it), a $3.2\times$ improvement over a six-feature
-gradient-boosted reference on the same sample. In a paired comparison with
+models that never saw it). Scored against a six-feature gradient-boosted
+reference on the events the two share, the improvement is a factor
+$3.15 \pm 0.05$, with the tree behind in every one of $400$ paired
+resamples and in every region separately. In a paired comparison with
 the encoder as the only varied component, it outperforms re-implementations
 of ParticleNet and GravNet in every measured cell at every seed, at
 $1.8$--$3.6\times$ their training speed --- a margin that survives a
@@ -155,7 +157,8 @@ using per-cell time as the axis, and it loses --- video frames are dense and
 redundant along time, calorimeter timestamps are one noisy scalar per token.
 Patch-hierarchical attention for jets~\cite{patchjets} cuts attention cost
 by grouping tokens into patches --- there consecutive chunks of a
-particle list ordered by $p_\mathrm{T}$ by default, explicitly not spatial
+particle list under a fixed sequence ordering ($k_\mathrm{T}$ in their
+experiments), explicitly not spatial
 regions. We
 transplanted the cost argument to a geometry where the hierarchy can be
 spatial: individual cells in the core, coarse ring summaries outside. It is
@@ -202,9 +205,11 @@ regression in the CMS context --- dynamic graph reduction~\cite{drn} and
 deep-learning clustering studies in the ECAL~\cite{cmsecaldl}.
 Those works subtract pileup or regress energy; ours does both in one model
 and reports where the ceiling comes from. The design of the CMS HGCAL~\cite{hgcal,hgcaltiming} rests on the same
-premise as our per-bin pattern: fine transverse granularity and per-cell
-timing were chosen so that overlapping showers can be separated under HL-LHC
-pileup~\cite{hgcaltiming}, which is where our own improvements concentrate. The quantile (pinball) loss goes back to~\cite{koenker} and was carried
+premise as our per-bin pattern: fine transverse granularity is there to
+resolve showers in a dense environment~\cite{hgcal}, and per-cell timing at
+the tens-of-picoseconds level is there so that deposits from pileup vertices
+can be rejected~\cite{hgcaltiming} --- which is where our own improvements
+concentrate. The quantile (pinball) loss goes back to~\cite{koenker} and was carried
 into neural networks by the statistics and forecasting
 literature~\cite{white92,qrnn}; the
 exponential moving average of weights used here follows the mean-teacher
@@ -246,7 +251,11 @@ terciles, with tercile edges anchored to the starting configuration's energy
 distribution per region: 46.8/73.8\,GeV (15\,mm), 31.7/57.5\,GeV (30\,mm),
 19.2/34.0\,GeV (40\,mm), 12.1/21.5\,GeV (60\,mm), 9.4/16.5\,GeV (120\,mm) ---
 plus the event-weighted aggregate, and continuously versus energy in
-Figure~\ref{fig:resve}.
+Figure~\ref{fig:resve}. The terciles are computed per region and are
+therefore not comparable across regions: the median photon energy falls from
+$59.8$\,GeV at 15\,mm to $12.5$\,GeV at 120\,mm, so the 15\,mm ``low''
+bin ($20$--$47$\,GeV) sits above the entire 120\,mm spectrum. Rows of
+Table~\ref{tab:primary} should be read down a column, not across one.
 
 \paragraph{Evaluation protocol.} The primary protocol is ten-fold
 cross-validation with a 5\% validation slice, so each model trains on
@@ -260,7 +269,9 @@ split with larger seed ensembles; that protocol biases the weak bins optimistica
 roughly $0.009$ (15\,mm low-E: $0.0691$ fixed-split vs $0.0783$
 cross-validated), so we do not quote fixed-split numbers as primary results and we
 label the protocol wherever one appears. Against selection effects across
-the $134$-configuration campaign (scored ledger versioned with the code): the
+the $134$-configuration campaign (counted as in the introduction,
+with cross-validated arms counted once; the scored ledger is versioned with
+the code): the
 primary protocol was fixed before the final measurement, screening runs
 never enter the primary claims, and the half-sample preview and its correction
 ($0.0379 \to 0.0388$) are reported rather than absorbed.
@@ -279,9 +290,14 @@ histogram-based gradient-boosted regressor (300 iterations) on six summary
 features per cluster --- log summed window energy, front/back energy ratio,
 cell multiplicity, log seed-cell energy, energy-weighted lateral width, and
 region --- trained on the same events with a log-energy target, single model,
-fixed split. It reaches aggregate $\seff = 0.1253$ on this sample
-(per-region curves in Figure~\ref{fig:resve}); the same-protocol
-transformer improves on it by $3.2\times$. It is a fast-baseline reference,
+fixed split. It reaches aggregate $\seff = 0.1253$ on its own test set
+(per-region curves in Figure~\ref{fig:resve}). That set is neither the
+development split nor the cross-validated sample, so the two numbers are not
+divided directly; instead both estimators are scored on the $10{,}865$ events
+they share, where the tree reads $0.1189$ against the ensemble's $0.0377$, a
+factor $3.15 \pm 0.05$ with the tree behind in $400$ of $400$ paired
+resamples and in every region separately (worst margin $120$\,mm,
+$0.1021$ against $0.0410$). It is a fast-baseline reference,
 not a tuned competitor, and we label it as such. One substitution relative
 to the original project plan is made explicit: the LHCb production
 clustering algorithms (the Cellular Automaton and its graph-clustering
@@ -314,38 +330,56 @@ around the predicted photon position (Section~\ref{sec:pointing}).}
 \end{figure}
 
 \paragraph{Tokens.} Each fired calorimeter cell $i$ of the window becomes one
-token of sixteen channels,
+token. Sixteen channels are the detector reading itself,
 \begin{equation}
-\mathbf{x}_i = \Big(
+\mathbf{x}^{0}_i = \Big(
   \log(1{+}E_i),\;
   \log(1{+}E_i^{\mathrm{f}}),\;
   \log(1{+}E_i^{\mathrm{b}}),\;
-  \delta_i,\; \delta_j,\; r_i,\;
+  \delta^u_i,\; \delta^v_i,\; r_i,\;
   \log p,\;
   \Delta t_i^{\mathrm{f}},\; \Delta t_i^{\mathrm{b}},\;
-  h_i^{\mathrm{f}},\; h_i^{\mathrm{b}},\;
+  m_i^{\mathrm{f}},\; m_i^{\mathrm{b}},\;
   \mathbf{1}_\rho
 \Big) \;\in\; \mathbb{R}^{16},
 \label{eq:token}
 \end{equation}
 where $E_i$ is the cell energy and $E_i^{\mathrm{f}}, E_i^{\mathrm{b}}$ its
-front and back longitudinal samples; $(\delta_i, \delta_j)$ is the offset from
-the window centre in cells and $r_i$ its modulus; $p$ is the cell pitch;
+front and back longitudinal samples; $(\delta^u_i, \delta^v_i)$ is the offset from
+the window centre in cells and $r_i$ its Chebyshev modulus; $p$ is the cell pitch;
 $\Delta t_i^{\mathrm{f},\mathrm{b}} = t_i^{\mathrm{f},\mathrm{b}} -
 \mathrm{med}_j\, t_j^{\mathrm{f},\mathrm{b}}$ are the two timestamps with the
 window median removed and clipped to $\pm 5$\,ns;
-$h_i^{\mathrm{f}}, h_i^{\mathrm{b}} \in \{0,1\}$ record whether each timestamp
+$m_i^{\mathrm{f}}, m_i^{\mathrm{b}} \in \{0,1\}$ record whether each timestamp
 exists; and $\mathbf{1}_\rho$ is a five-way one-hot of the calorimeter region.
 The two time channels are arrival times, not an engineered pull: subtracting
 the window median removes only the event's overall time offset. A cell with no
-usable timestamp carries $h=0$ beside a zero, which after the linear embedding
+usable timestamp carries $m=0$ beside a zero, which after the linear embedding
 is equivalent to a learnable missing-value embedding.
+
+Every member of the primary result carries five further channels, added
+because the ablation of Section~\ref{sec:closed} measured them worth
+$0.0409 \to 0.0389$ together: the cell's offset from the reconstructed
+cluster centroid in units of the pitch, $(x_i-x_c)/p$ and $(y_i-y_c)/p$, and
+the same three energies again normalised for the cell area,
+$\log(1{+}E_i) - 2\log(p/15\,\mathrm{mm})$ and its two longitudinal
+counterparts, so that a deposit means the same thing in a $15$\,mm cell as in
+a $120$\,mm one. The token the encoder actually embeds is therefore
+$\mathbf{x}_i \in \mathbb{R}^{21}$, and a reader reproducing
+Table~\ref{tab:primary} needs all twenty-one.
 The whole set $\{\mathbf{x}_i\}$ is what the encoder attends over; nothing is
 aggregated before it.
-Cluster-level reconstruction quantities enter as global features, together
-with one indicator marking events drawn from the clean auxiliary sample rather
-than from minimum bias. All inputs come from the standard reconstruction or
-from that sample label; none uses generator truth.
+Cluster-level reconstruction quantities enter as global features. There are
+fourteen: five describing the window itself ($\log(1{+}\sum_i E_i)$, the seed
+energy, $\log n$ for $n$ fired cells, the front/back energy ratio, and the
+energy-weighted lateral width), eight relating the window to the cluster the
+standard reconstruction found (its total energy, the fraction of it the window
+captures, the same fraction front and back separately, the cluster's own
+front/back ratio, the number of reconstructed clusters in the event, and the
+two components of the window centre's offset from the cluster centroid), and
+one indicator marking events drawn from the clean auxiliary sample rather than
+from minimum bias. All inputs come from the standard reconstruction or from
+that sample label; none uses generator truth.
 Figures~\ref{fig:input3d} and~\ref{fig:input} show the same real input from
 two views: the token set as the detector produces it --- one box per fired
 cell, in space, in time, and split over the two longitudinal segments ---
@@ -357,7 +391,8 @@ centres of Section~\ref{sec:gain} are read off directly.
 \centering
 \includegraphics[width=\textwidth]{figs/event_3d.pdf}
 \caption{One minimum-bias cluster as the model receives it
-($15$\,mm region, $E_\gamma = 37$\,GeV, 424 fired cells). (a)~Each fired
+($15$\,mm region, $E_\gamma = 37$\,GeV, 424 fired cells in the cluster,
+of which the window admits at most 289). (a)~Each fired
 cell is one token: its position in the $17{\times}17$ window, its energy
 (bar height) and its timestamp relative to the window median (colour;
 grey bars carry no timestamp). Pileup deposits fill the window at all
@@ -371,8 +406,8 @@ separates the start of the shower from its tail.}
 \centering
 \includegraphics[width=0.96\textwidth]{figs/input_example.pdf}
 \caption{One real minimum-bias input to SpaceTformer: a 15\,mm-region
-cluster ($E_\gamma = 37$\,GeV, 424 cells) shown in the recentred
-$17{\times}17$ window. Left: per-cell energies --- pileup deposits
+cluster ($E_\gamma = 37$\,GeV, 424 fired cells in all, of which the
+$17{\times}17$ window admits at most 289) shown in the recentred window. Left: per-cell energies --- pileup deposits
 everywhere, with $74\%$ of the cluster energy outside the starting
 $9{\times}9$ window (red dashed). Right: front timestamps, carried by only
 $39\%$ of the fired cells. Markers: true photon entry (star), seed cell
@@ -393,7 +428,7 @@ Section~\ref{sec:gain} presents the measurements behind both choices.
 \paragraph{Encoder.} SpaceTformer's encoder is a plain token
 transformer~\cite{vaswani}: $d=128$, 4 heads, 3 layers, feed-forward width
 $4d$, dropout 0.1, full self-attention over the cell tokens. The
-six cluster-level global features do not enter the encoder; they are
+fourteen cluster-level global features do not enter the encoder; they are
 concatenated to the pooled state at the readout. Attention therefore operates
 on per-cell channels, with the caveat that two of them --- the cell pitch and
 the region one-hot --- are constant within an event and tell the encoder which
@@ -576,6 +611,12 @@ energy-independent contamination in GeV --- is largest by far in the 15\,mm
 region ($b = 2.1$\,GeV against $0.16$--$0.34$\,GeV in the outer regions),
 while the constant terms sit below $2.5\%$ everywhere. The residual low-energy
 weakness of the inner regions is pileup energy, not sampling statistics.
+The fit quality has to be stated with the parameters: $\chi^2/\mathrm{ndf}$
+is $1.0$ at 120\,mm, $1.6$ at 60\,mm, $2.3$ at 40\,mm and $3.9$ at 30\,mm,
+but $23$ at 15\,mm, where the stochastic and constant terms both run onto
+their bounds. The three-term form is a poor description of the innermost
+region, and the $b = 2.1$\,GeV there should be read as a statement that the
+$1/E$ term dominates, not as a measured noise constant.
 
 \begin{figure}[t]
 \centering
@@ -810,7 +851,7 @@ applied to a domain where every production reconstruction uses a fixed
 seed- or barycentre-centred window. Measured offline (pointer
 predictions from the trained auxiliary members; the test split is
 pointed by models that never saw it), the five retrained members land at
-$0.0389 \pm 0.0002$ --- the five best single members of the
+$0.0389 \pm 0.0003$ --- the five best single members of the
 $134$-configuration campaign.
 
 \begin{table}[h]
@@ -831,7 +872,7 @@ ensemble & members & aggregate \seff{} & paired $\Delta$ vs reference\\
 reference (recentred window) & 5 & 0.0388 & ---\\
 + position head & 10 & 0.0380 & $-0.0008 \pm 0.0003$, $P{=}1.00$\\
 two-stage (point, re-cut, measure) & 5 & 0.0378 & $-0.0010 \pm 0.0003$, $P{=}1.00$\\
-pooled across the three families & 25 & 0.0375 & $-0.0013 \pm 0.0002$, $P{=}1.00$\\
+pooled across the three families & 20 & 0.0376 & $-0.0013 \pm 0.0002$, $P{=}1.00$\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -851,7 +892,7 @@ single member is a second route to the same margin ($0.0383$ ensemble,
 $P{=}0.98$; a distilled single member matches the ensemble's accuracy
 class at one fifth of its inference cost, which matters for the trigger
 budget of Section~\ref{sec:cost}). The two routes do not stack
-($-0.0003$, $P{=}0.73$ between them): both recover the same
+($-0.0002 \pm 0.0003$, $P{=}0.65$ between them): both recover the same
 centring-and-averaging margin, one structurally and one by imitation.
 
 \paragraph{The gain does not survive cross-validation.} Every value above
@@ -950,7 +991,7 @@ design would feed this model directly.
 The four measurements above say what the residual is made of. This subsection
 prices it: how much of the aggregate each part carries, how much of each part
 any estimator could remove, and what is therefore left. All values here use the
-development protocol on the pooled 31-member ensemble ($0.0376$ aggregate,
+development protocol on the pooled 28-member ensemble ($0.0376$ aggregate,
 10{,}877 events), because it is the largest set of members we have; the
 conclusions are ratios and carry over.
 
@@ -966,15 +1007,22 @@ against the inner regions; the aggregate is carried by the middle ones.
 \centering
 \caption{Error budget by bin, development protocol. ``Aggregate if perfect''
 replaces that bin's residuals with zero and rescores everything; it is an upper
-bound on what any improvement to that bin can buy. ``Sampling part'' is
-$a/\sqrt{E}$ from a per-region fit of $\sigma(E) = \sqrt{a^2/E + b^2 + c^2/E^2}$
-evaluated at the bin's median energy --- the part no estimator can remove.}
+bound on what any improvement to that bin can buy. The rows requiring
+per-cluster quantities are computed on the events whose energy key joins the
+geometry cache, $46\%$ of the split; that matched subset is not
+representative --- it scores $0.0427$ against the full split's $0.0376$ ---
+so the shares and headrooms below describe the harder half and should be
+read as indicative rather than exact. ``Sampling part'' is
+$a/\sqrt{E}$ from a per-region fit of
+$\seff(E) = \sqrt{a^2/E + b^2/E^2 + c^2}$, the parameterisation of
+Section~\ref{sec:primary} written out, evaluated at the bin's median
+energy --- the part no estimator can remove.}
 \label{tab:budget}
 \begin{tabular}{lccccc}
 \toprule
 bin & share & bin \seff{} & aggregate if perfect & sampling part & headroom\\
 \midrule
-60\,mm low-E & 11.3\% & 0.0513 & 0.0319 & 0.0226 & large\\
+60\,mm low-E & 11.3\% & 0.0513 & 0.0319 & 0.0225 & large\\
 40\,mm low-E & 9.6\% & 0.0583 & 0.0321 & 0.0469 & small\\
 30\,mm low-E & 6.7\% & 0.0699 & 0.0335 & 0.0513 & small\\
 15\,mm low-E & 3.8\% & 0.0675 & 0.0354 & 0.0417 & moderate\\
@@ -988,8 +1036,8 @@ the stochastic term alone is $0.0469$ of the bin's $0.0583$, and at 30\,mm
 $0.0513$ of $0.0699$: $80$ and $73$ per cent of the width is sampling
 fluctuation of the shower itself, which is a property of the detector, not of
 the estimator. Only 60\,mm low-E has real room --- its sampling term is
-$0.0226$ against a measured $0.0513$ --- and there the dominant term is
-$c/E = 0.0387$, an absolute error of $c \approx 0.29$\,GeV at that bin's
+$0.0225$ against a measured $0.0513$ --- and there the dominant term is
+$b/E = 0.0387$, an absolute error of $b \approx 0.29$\,GeV at that bin's
 $7.5$\,GeV, which is the scale of the pileup fluctuation the window carries
 ($E_{\rm win}/E_\gamma = 1.25$ at 60\,mm). We tested the obvious handle: the
 residual there correlates $+0.17$ with the observable window energy, but
@@ -998,7 +1046,7 @@ all, makes every bin $7$--$10\%$ worse. The window energy is already a global
 input; the network has consumed it.
 
 \paragraph{The variance component is exhausted.} Across 28 single members the
-mean is $0.0394$ and the best $0.0386$; pooling all 31 gives $0.0376$, only
+mean is $0.0394$ and the best $0.0386$; pooling all 28 gives $0.0376$, only
 $4.7\%$ below the member mean. The median member-to-member spread on a single
 event is $0.87\%$ of the prediction against a total error of $3.76\%$, so the
 variance that ensembling removes is of order $(0.87/3.76)^2 \approx 5\%$ of the
@@ -1046,8 +1094,19 @@ The sharpest comparison is the paired one (Table~\ref{tab:h2h}):
 ParticleNet (EdgeConv with dynamic $k$NN) and GravNet re-implemented behind
 the identical readout, loss, splits and window, so the encoder is the only
 difference, with two seeds per baseline and five for the transformer.
-SpaceTformer performs best in every cell at every seed. One caveat is
-required for fairness:
+SpaceTformer performs best in every cell at every seed. Two caveats are
+required for fairness. The first is capacity: behind the identical readout,
+the transformer encoder holds $625$k parameters against ParticleNet's $180$k
+and GravNet's $279$k, so it is the larger model by a factor $2.2$--$3.5$ and
+the comparison is at equal \emph{recipe}, not equal capacity. We did not
+grow the baselines to match, and the honest reading is that part of the
+margin may be capacity rather than architecture. What speaks against that
+reading is our own capacity sweep on the transformer itself
+(Table~\ref{tab:closed}): $d{=}256$ with six layers scores $0.1179$ and
+$d{=}64$ with two layers $0.0463$, both far worse than the $d{=}128$
+baseline, so on this sample parameter count is not a lever that buys
+resolution --- which is also why the baselines were not given more.
+The second caveat:
 the baselines inherit our frozen training recipe, which was validated on
 the transformer; they received their published architectural defaults but
 no dedicated hyperparameter sweep, and the comparison should be read with
@@ -1067,6 +1126,21 @@ any cost we measured. The aggregate gaps of the paired default comparison
 $+0.0038$ GravNet against the transformer's five-seed mean $0.0399$) exceed
 the transformer's own seed spread of $0.0005$; the weak-bin gaps are larger
 still and consistent across bins, baselines and seeds.
+
+Because only the encoder differs, the comparison can be paired event by
+event rather than read off seed spreads. Scoring every baseline seed against
+every transformer seed on the same events, and resampling events once per
+draw so both are scored on the same resample, the default ParticleNet is
+behind in at least $393$ of $400$ resamples in its worst seed pairing (ten
+pairings) and GravNet in $400$ of $400$ (ten pairings). Of the six tuned
+arms, five are behind in $400$ of $400$. The exception is the best of them,
+ParticleNet at lr $6\times10^{-4}$: its worst seed pairing beats the
+transformer in $46$ of $400$ resamples on the aggregate, so on the aggregate
+alone that single arm is not separated. It remains behind in the two weak
+bins ($0.0809$ against $0.0775$ pooled over 15 and 30\,mm low-E) at
+$3.6\times$ the training cost. This is the sharpest form of the claim the
+evidence supports, and it is weaker than ``wins everywhere'' on the
+aggregate for that one arm.
 
 \begin{table}[h]
 \centering
@@ -1096,8 +1170,13 @@ of their time.
 \begin{table}[h]
 \centering
 \caption{All encoder families measured, fixed-split protocol, aggregate
-\seff{} with the era's matching transformer reference; single-seed values,
-which is why the ParticleNet/GravNet rows differ slightly from
+\seff{} with the era's matching transformer reference. Values are
+single-seed unless an arm was run with more, in which case the row is that
+arm's seed ensemble --- the time-sliced row is a three-seed ensemble
+($0.0456$ as a single-seed mean) while the Mixer row is one seed; the
+column is therefore not uniform in seed count and the rows should be
+compared with their own era reference rather than with each other. This is
+also why the ParticleNet/GravNet rows differ slightly from
 Table~\ref{tab:h2h}'s two-seed means. The two time-factorised arms are one
 family measured in two eras. Screening = cut before a five-seed run.}
 \label{tab:encoders}
@@ -1207,12 +1286,24 @@ concentrated at low energy --- under pileup: timing is a pileup-separation
 tool, not an energy observable.}
 \label{fig:timing}
 \end{figure}
-\todo{state the simulated timestamp resolution once confirmed from the
-simulation configuration}. But every \emph{engineered} use of timing loses
+We could not obtain the simulated timestamp resolution from the production
+configuration, so we measured it on the samples themselves, taking the
+energy-weighted time of a cluster's top-decile cells as the reference. It is
+strongly energy-dependent: on the clean sample the per-cell spread falls
+from $0.756$\,ns at $2$--$10$\,MeV to $0.435$, $0.263$, $0.156$ and finally
+$0.038$\,ns above $3$\,GeV, a factor twenty across the range, and every bin
+degrades by $1.7$--$2\times$ under pileup ($1.275 \to 0.132$\,ns over the
+same cells). A cell's timestamp is informative only when the cell is
+energetic --- which is why probe~(iii)'s ``quarter of the per-event spread''
+is a tight constraint in the cells that carry the photon and a loose one in
+the low-energy cells where the pileup sits, and why an explicit time gate
+and a resolution-weighted pull both added nothing.
+Every \emph{engineered} use of timing loses
 to handing the network the raw timestamps: three time-pull coordinate
 constructions (per-cell time scaled by its expected spread), hard timing
 cuts, time-sliced attention, an inverse-variance front/back combination,
-and a Fourier basis on the raw time channels ($0.0413$ vs $0.0402$) were
+and a Fourier basis on the raw time channels (a null: $0.0390$ against the
+era's $0.0391$ at three seeds) were
 all measured and all reduce or at best match. The network already
 extracts what the timestamps carry; pre-digesting them removes information.
 The result independently supports the HL-LHC timing programme --- per-cell
@@ -1222,9 +1313,14 @@ resolution, and the fraction of cells that carry a timestamp at all, feed a
 model like this one directly.
 
 Three interventional probes on the trained model say \emph{how} the
-timestamps are read, which the retraining ablation cannot. Perturbing the
-inputs of the trained final member at evaluation (recalibrating per
-variant): (i)~permuting the timestamps among the cells of the same event
+timestamps are read, which the retraining ablation cannot. These perturb the
+inputs of one trained member at evaluation and recalibrate per variant, so
+they are scored against that member's own unperturbed $0.0402$ and not
+against the ensemble of Table~\ref{tab:primary}; a model asked to read
+corrupted timestamps it was trained to trust fails far worse than one
+retrained without them, which is why the numbers below are an order of
+magnitude larger than the $0.0485$ of the retraining ablation.
+(i)~Permuting the timestamps among the cells of the same event
 --- the identical multiset of values, reassigned --- degrades the
 aggregate to $0.398$, \emph{worse} than zeroing them ($0.310$), so the
 model reads per-cell time structure rather than any pooled event
@@ -1270,7 +1366,7 @@ recalibration & post-hoc per (region $\times$ E-decile) & 0.0386 vs 0.0379, wors
 test-time augmentation & D4 averaging & neutral, $8\times$ cost\\
 capacity & $d{=}256$/6L; $d{=}64$/2L & 0.1179 / 0.0463, both worse\\
 capacity, diagnosed & + warmup; + pre-LN~\cite{preln}; + both & 0.0692; 0.0474; 0.0412 --- trains, no gain\\
-time representation & Fourier basis on raw time channels & 0.0413 vs 0.0402, worse\\
+time representation & Fourier basis on raw time channels & 0.0390 vs 0.0391 (3 seeds), neutral\\
 slot decomposition & $K{=}4$ competing readout queries & 0.0406 vs 0.0402, neutral\\
 time-gated readout & multiplicative time gate on the final window & 0.0399 vs 0.0399 mean, neutral\\
 train-time augmentation & D4 transforms of the window & 0.0401 vs 0.0402, neutral\\
@@ -1297,7 +1393,7 @@ sample yields $\sim$$18\%$ --- what $N^{-0.18}$ purchases is diversity of pileup
 configurations, which symmetry transforms cannot manufacture. The data
 request has no augmentation shortcut.
 
-Beyond these, fourteen per-cell and global feature mechanisms were measured
+Beyond these, fifteen per-cell and global feature mechanisms were measured
 on the same protocol. The ones that stayed: extra reconstruction globals,
 local density, and the clean-sample auxiliary. The ones measured
 neutral-or-worse, each with its row in the repository ledger: time-pull
@@ -1317,12 +1413,13 @@ coordinates.
 
 A reconstruction algorithm is only deployable at a cost, so we benchmark
 inference throughput on commodity hardware (laptop CPU, i9-13900HX, batch
-64, median of 5 timed passes on an idle machine).
+64, median of 5 timed passes on an idle machine). The transformer carries
+$623{,}238$ parameters against the GBDT's $18{,}300$ tree nodes.
 Figure~\ref{fig:throughput} places each model family on the
 accuracy--throughput plane. At the $9{\times}9$ window a single transformer
 runs at $\sim$5{,}000 clusters/s (0.20\,ms per cluster) and the five-seed
 ensemble at 992 clusters/s; the GBDT reference is $3.3\times$ faster per
-cluster than a single transformer pass and $3.1\times$ worse in resolution;
+cluster than a single transformer pass and $3.15\times$ worse in resolution;
 the analytic calibrated sum is effectively free ($5.6\times10^6$
 clusters/s) and $4.6\times$ worse. The final $17{\times}17$ recentred
 configuration pays the quadratic attention cost of $289$ vs $81$ tokens:
@@ -1365,8 +1462,11 @@ log--log and give
 \seff \propto N^{-0.18},
 \]
 identically for single models ($0.0524 \to 0.0466 \to 0.0439 \to 0.0402$)
-and for three-seed ensembles (exponent $-0.179$), and the worst bin scales
-in parallel (15\,mm low-E: $0.1254 \to 0.0729$ across the same points).
+and for three-seed ensembles (exponent $-0.179$). The worst bin does not
+merely follow: 15\,mm low-E runs $0.1254 \to 0.1017 \to 0.0956 \to 0.0729$
+across the same points, an exponent of $-0.35$, about twice as steep as the
+aggregate. More data helps the bin that needs it most, faster than it helps
+the average.
 This within-protocol curve supersedes two earlier confounded two-point
 estimates ($-0.13$ and $-0.28$) and lands between them; power-law scaling
 of error with dataset size is the generic empirical behaviour of deep
@@ -1429,8 +1529,9 @@ bring the aggregate below $0.035$.
 
 On a simulated minimum-bias PicoCal sample, SpaceTformer reaches
 $\seff = 0.0388 \pm 0.0002$ aggregate, fully out-of-sample over the complete
-ten-fold protocol --- a $3.2\times$ improvement over a six-feature GBDT
-reference --- and beats paired re-implementations of ParticleNet and
+ten-fold protocol --- a factor $3.15 \pm 0.05$ over a six-feature GBDT
+reference on the events the two share --- and beats paired
+re-implementations of ParticleNet and
 GravNet in every measured cell at every seed, at a fraction of their cost.
 The improvement over our own starting point --- $53\%$ in the worst
 region--energy bin --- came entirely
@@ -1454,9 +1555,9 @@ makes the path below that a data request rather than an architecture search.
 \section*{Acknowledgements}
 
 This work was carried out within Google Summer of Code 2026 for the LHCb
-PicoCal project. I thank my mentors in the LHCb PicoCal group for the
-simulated samples, weekly guidance, and the error-analysis discipline this
-paper is built on. \todo{Named acknowledgements and LHCb
+PicoCal project. I thank my mentors Felipe Luan Souza de Almeida and Carla
+Malin Benito for the simulated samples, weekly guidance, and the
+error-analysis discipline this paper is built on. \todo{LHCb
 publication-approval status to be settled with the mentors before any
 submission; single-author use of collaboration simulation may require
 Editorial Board review or release as a collaboration note.}
@@ -1466,7 +1567,27 @@ Editorial Board review or release as a collaboration note.}
 All experiments run from a single training script with a flag for every
 mechanism in this paper; the prediction CSVs behind every reported number
 and the scripts that generate every figure are versioned alongside the code
-at \url{https://github.com/Lworakan/GSoC2026-picocal-spacetime-transformer}.
+at \url{https://github.com/Lworakan/GSoC2026-picocal-spacetime-transformer},
+together with a locked environment and a test suite whose regression canary
+is \seff{} itself.
+
+The script's defaults are the starting configuration, not the primary one,
+so the three member families of Table~\ref{tab:primary} are named
+explicitly. For fold $k \in \{0,\dots,9\}$:
+\begin{verbatim}
+train_picocal.py --window 8 --extra --dens --recenter --cleanaux \
+                 --aux --fold k --nfold 10 --seeds 0 1 2
+train_picocal.py --window 8 --extra --dens --recenter --cleanaux \
+                 --rc-regions 0 1 --fold k --nfold 10 --seeds 0
+train_picocal.py --window 4 --extra --dens --recenter --cleanaux \
+                 --allcells --fold k --nfold 10 --seeds 0
+\end{verbatim}
+The five members of a fold are combined by per-event median; the ten folds
+are concatenated. One gap should be stated plainly: the trained weights
+behind the primary result were produced on rented cloud hardware and are not
+in the repository, so a reader can re-score our predictions exactly but must
+retrain to reproduce them from scratch.
+
 The simulated samples belong to the LHCb collaboration and are not
 redistributed.
 
@@ -1574,9 +1695,9 @@ ICML 2020, arXiv:2002.04745.
 \emph{Nonparametric Estimation of Conditional Quantiles Using Neural
 Networks}, Computing Science and Statistics: Proceedings of the 23rd
 Symposium on the Interface (1992) 190.
-\bibitem{hgcaltiming} CMS Collaboration,
+\bibitem{hgcaltiming} A.~Lobanov (for the CMS Collaboration),
 \emph{Precision timing calorimetry with the CMS HGCAL},
-arXiv:2005.13324 (2020).
+JINST \textbf{15} (2020) C07003, arXiv:2005.13324.
 \bibitem{meanteacher} A.~Tarvainen, H.~Valpola,
 \emph{Mean teachers are better role models: Weight-averaged consistency
 targets improve semi-supervised deep learning results},

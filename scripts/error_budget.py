@@ -11,7 +11,7 @@ from run_experiments import resolution, PITCH
 # Run before spending GPU time: the answer decides which experiment is worth paying for.
 
 FAMS = ['ExDnRcQdEma', 'ExDnAuxRcQdEma', 'DsExDnRcQdEma', 'ExDnRpQdEma',
-        'Sc2ExDnRpQdEma', 'DsExDnAuxRcQdEma', 'AuxRpRr0123QdEma']
+        'DsExDnAuxRcQdEma']
 
 
 def load(names, P):

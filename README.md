@@ -184,7 +184,7 @@ it imitates.
 
 ## The falsification record
 
-The campaign measured **148 configurations** under one protocol (fixed splits, a pre-registered win criterion,
+The campaign measured **134 configurations** (cross-validated arms counted once) under one protocol (fixed splits, a pre-registered win criterion,
 ≥2 seeds, validation-only selection), each with a saved per-event prediction set. Highlights of what did **not**
 work — each with a measured mechanism:
 
