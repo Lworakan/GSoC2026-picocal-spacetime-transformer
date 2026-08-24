@@ -11,7 +11,7 @@
                     <mxGeometry x="112" y="596" width="246" height="66" as="geometry"/>
                 </mxCell>
                 <mxCell id="tok" value="&lt;b&gt;cell tokens&lt;/b&gt; (≤ 289)&lt;br&gt;&lt;font&gt;space &lt;b&gt;and&lt;/b&gt; raw time per cell&lt;/font&gt;" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#FFE8D9;strokeColor=#E8B396;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
-                    <mxGeometry x="140" y="490" width="190" height="55" as="geometry"/>
+                    <mxGeometry x="133" y="484" width="204" height="72" as="geometry"/>
                 </mxCell>
                 <mxCell id="tok-note" value="(E&lt;sub&gt;i&lt;/sub&gt;, Δx&lt;sub&gt;i&lt;/sub&gt;, Δy&lt;sub&gt;i&lt;/sub&gt;, t&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;front&lt;/sup&gt;, t&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;back&lt;/sup&gt;, h&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;front&lt;/sup&gt;, h&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;back&lt;/sup&gt;)&lt;br&gt;&lt;font color=&quot;#6B7280&quot;&gt;h: has-timestamp indicators&lt;/font&gt;" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=16;align=center;strokeWidth=2;" vertex="1" parent="1">
                     <mxGeometry x="366" y="498" width="205" height="66" as="geometry"/>
@@ -27,8 +27,8 @@
                 <mxCell id="plus" value="+" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#333333;fontSize=16;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
                     <mxGeometry x="220" y="350" width="30" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="poshead" value="&lt;b&gt;position head&lt;/b&gt; (auxiliary)&lt;br&gt;&lt;font&gt;&lt;i&gt;predicts the photon offset, 0.16 cells&lt;/i&gt;&lt;/font&gt;" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#EBE6F7;strokeColor=#B7A9E0;dashed=1;fontSize=16;strokeWidth=2;" vertex="1" parent="1">
-                    <mxGeometry x="-140" y="90" width="215" height="55" as="geometry"/>
+                <mxCell id="poshead" value="&lt;b&gt;position head&lt;/b&gt; (auxiliary)&lt;br&gt;&lt;font&gt;&lt;i&gt;photon offset, 0.16 cells&lt;/i&gt;&lt;/font&gt;" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#EBE6F7;strokeColor=#B7A9E0;dashed=1;fontSize=16;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="-144" y="86" width="223" height="64" as="geometry"/>
                 </mxCell>
                 <mxCell id="e-pos" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#7C3AED;strokeWidth=2;dashed=1;endArrow=blockThin;endFill=1;fontSize=15;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="addnorm2" target="poshead">
                     <mxGeometry relative="1" as="geometry"/>
@@ -37,7 +37,7 @@
                     <mxGeometry relative="1" as="geometry">
                         <Array as="points">
                             <mxPoint x="-178" y="117"/>
-                            <mxPoint x="-178" y="627"/>
+                            <mxPoint x="-178" y="629"/>
                         </Array>
                     </mxGeometry>
                 </mxCell>
@@ -48,7 +48,7 @@
                     <mxGeometry x="10" y="160" width="85" height="70" as="geometry"/>
                 </mxCell>
                 <mxCell id="mhsa" value="&lt;b&gt;Multi-Head Attention&lt;/b&gt;&lt;br&gt;&lt;font&gt;4 heads, full attention over cells&lt;/font&gt;" style="rounded=1;arcSize=25;whiteSpace=wrap;html=1;fillColor=#EBE6F7;strokeColor=#B7A9E0;fontSize=16;strokeWidth=2;" vertex="1" parent="1">
-                    <mxGeometry x="140" y="262" width="190" height="55" as="geometry"/>
+                    <mxGeometry x="136" y="258" width="198" height="68" as="geometry"/>
                 </mxCell>
                 <mxCell id="addnorm1" value="Add &amp;amp; Norm" style="rounded=1;arcSize=40;whiteSpace=wrap;html=1;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=16;strokeWidth=2;" vertex="1" parent="1">
                     <mxGeometry x="140" y="210" width="190" height="35" as="geometry"/>
@@ -60,7 +60,7 @@
                     <mxGeometry x="140" y="100" width="190" height="35" as="geometry"/>
                 </mxCell>
                 <mxCell id="gate" value="&lt;b&gt;Per-cell Gate&lt;/b&gt;&lt;br&gt;&lt;font&gt;&lt;i&gt;attention weight, not a fraction estimator&lt;/i&gt;&lt;/font&gt;" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#EBE6F7;strokeColor=#B7A9E0;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
-                    <mxGeometry x="575" y="-40" width="190" height="55" as="geometry"/>
+                    <mxGeometry x="572" y="-44" width="196" height="64" as="geometry"/>
                 </mxCell>
                 <mxCell id="gate-note" value="σ(f&lt;sub&gt;i&lt;/sub&gt;) ∈ (0, 1)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=16;align=center;strokeWidth=2;" vertex="1" parent="1">
                     <mxGeometry x="405" y="-32.5" width="120" height="40" as="geometry"/>
@@ -69,7 +69,7 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="sum" value="&lt;b&gt;Gated Sum&lt;/b&gt;&lt;br&gt;&lt;font&gt;only observed energy enters&lt;/font&gt;" style="rounded=1;arcSize=25;whiteSpace=wrap;html=1;fillColor=#FFE8D9;strokeColor=#E8B396;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
-                    <mxGeometry x="578" y="70" width="185" height="45" as="geometry"/>
+                    <mxGeometry x="572" y="66" width="196" height="54" as="geometry"/>
                 </mxCell>
                 <mxCell id="sum-note" value="S = Σ&lt;sub&gt;i&lt;/sub&gt; σ(f&lt;sub&gt;i&lt;/sub&gt;)·E&lt;sub&gt;i&lt;/sub&gt;" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=16;align=center;strokeWidth=2;" vertex="1" parent="1">
                     <mxGeometry x="415" y="72.5" width="120" height="40" as="geometry"/>
@@ -78,7 +78,7 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="read" value="&lt;b&gt;Readout&lt;/b&gt;&lt;br&gt;&lt;font&gt;&lt;i&gt;h: small MLP on the pooled state and the&lt;br&gt;cluster-level globals g&lt;/i&gt;&lt;/font&gt;" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#EBE6F7;strokeColor=#B7A9E0;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
-                    <mxGeometry x="575" y="155" width="190" height="55" as="geometry"/>
+                    <mxGeometry x="572" y="146" width="196" height="76" as="geometry"/>
                 </mxCell>
                 <mxCell id="read-note" value="ŷ = a·log(1+S) + b + h(z,g)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=16;align=center;strokeWidth=2;" vertex="1" parent="1">
                     <mxGeometry x="381.5" y="162.5" width="167" height="40" as="geometry"/>
@@ -87,10 +87,10 @@
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
                 <mxCell id="cal" value="&lt;b&gt;Calibration&lt;/b&gt;&lt;br&gt;&lt;font&gt;affine per tercile of predicted quantile width (fit on validation only)&lt;/font&gt;" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9CA3AF;strokeWidth=2;fontSize=16;" parent="1" vertex="1">
-                    <mxGeometry x="562.5" y="259.5" width="215" height="60" as="geometry"/>
+                    <mxGeometry x="560" y="254" width="220" height="72" as="geometry"/>
                 </mxCell>
                 <mxCell id="ens" value="&lt;b&gt;Ensemble&lt;/b&gt;&lt;br&gt;&lt;font&gt;per-event median, 5 members / fold&lt;/font&gt;" style="rounded=1;arcSize=25;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#9CA3AF;strokeWidth=2;fontSize=16;" parent="1" vertex="1">
-                    <mxGeometry x="563" y="360" width="215" height="50" as="geometry"/>
+                    <mxGeometry x="560" y="356" width="220" height="58" as="geometry"/>
                 </mxCell>
                 <mxCell id="out" value="&lt;b&gt;σ_eff = 0.0388 ± 0.0002&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#6B7280&quot;&gt;72,533 events • 10-fold CV • fully out-of-sample&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="470" y="540" width="400" height="45" as="geometry"/>
