@@ -313,16 +313,35 @@ around the predicted photon position (Section~\ref{sec:pointing}).}
 \label{fig:arch}
 \end{figure}
 
-\paragraph{Tokens.} Each calorimeter cell is a token of sixteen channels: its
-total, front and back energies as $\log(1+E)$; its offset from the window
-centre in cells, $(\Delta i, \Delta j)$, and the radius $r$; the logarithm of
-the cell pitch; its front and back timestamps with the window median
-subtracted and clipped to $\pm 5$\,ns; two has-timestamp indicators; and a
-five-way region one-hot. The timestamps are the arrival times themselves, not
-an engineered pull --- the median subtraction only removes the event's overall
-time offset. Cells without a usable timestamp carry the indicator alongside a
-zero, which after the linear embedding is equivalent to a learnable
-missing-value embedding.
+\paragraph{Tokens.} Each fired calorimeter cell $i$ of the window becomes one
+token of sixteen channels,
+\begin{equation}
+\mathbf{x}_i = \Big(
+  \log(1{+}E_i),\;
+  \log(1{+}E_i^{\mathrm{f}}),\;
+  \log(1{+}E_i^{\mathrm{b}}),\;
+  \delta_i,\; \delta_j,\; r_i,\;
+  \log p,\;
+  \Delta t_i^{\mathrm{f}},\; \Delta t_i^{\mathrm{b}},\;
+  h_i^{\mathrm{f}},\; h_i^{\mathrm{b}},\;
+  \mathbf{1}_\rho
+\Big) \;\in\; \mathbb{R}^{16},
+\label{eq:token}
+\end{equation}
+where $E_i$ is the cell energy and $E_i^{\mathrm{f}}, E_i^{\mathrm{b}}$ its
+front and back longitudinal samples; $(\delta_i, \delta_j)$ is the offset from
+the window centre in cells and $r_i$ its modulus; $p$ is the cell pitch;
+$\Delta t_i^{\mathrm{f},\mathrm{b}} = t_i^{\mathrm{f},\mathrm{b}} -
+\mathrm{med}_j\, t_j^{\mathrm{f},\mathrm{b}}$ are the two timestamps with the
+window median removed and clipped to $\pm 5$\,ns;
+$h_i^{\mathrm{f}}, h_i^{\mathrm{b}} \in \{0,1\}$ record whether each timestamp
+exists; and $\mathbf{1}_\rho$ is a five-way one-hot of the calorimeter region.
+The two time channels are arrival times, not an engineered pull: subtracting
+the window median removes only the event's overall time offset. A cell with no
+usable timestamp carries $h=0$ beside a zero, which after the linear embedding
+is equivalent to a learnable missing-value embedding.
+The whole set $\{\mathbf{x}_i\}$ is what the encoder attends over; nothing is
+aggregated before it.
 Cluster-level reconstruction quantities enter as global features, together
 with one indicator marking events drawn from the clean auxiliary sample rather
 than from minimum bias. All inputs come from the standard reconstruction or
@@ -388,10 +407,11 @@ loses. Ten encoder families were tried against this one
 \paragraph{Physics-constrained readout.} Instead of predicting the energy
 freely, the network emits a per-cell gate $\sigma(f_i)\in(0,1)$ and the
 readout is
-\[
+\begin{equation}
 \hat{y} = a \cdot \log\!\Big(1 + \sum_i \sigma(f_i)\, E_i\Big) + b
           + h(z, g),
-\]
+\label{eq:readout}
+\end{equation}
 a gated energy sum in log space plus a small learned correction $h$ (an MLP
 on the pooled encoder state $z$ and the global features $g$). The gated sum
 is the dominant pathway and anchors the prediction to observed cell

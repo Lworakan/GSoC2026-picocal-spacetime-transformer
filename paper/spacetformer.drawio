@@ -13,8 +13,8 @@
                 <mxCell id="tok" value="&lt;b&gt;cell tokens&lt;/b&gt; (≤ 289)&lt;br&gt;&lt;font&gt;space &lt;b&gt;and&lt;/b&gt; time per cell&lt;/font&gt;" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#FFE8D9;strokeColor=#E8B396;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="133" y="500" width="204" height="72" as="geometry"/>
                 </mxCell>
-                <mxCell id="tok-note" value="&lt;b&gt;16 channels per cell&lt;/b&gt;&lt;br&gt;log(1+E), log(1+E&lt;sup&gt;front&lt;/sup&gt;), log(1+E&lt;sup&gt;back&lt;/sup&gt;)&lt;br&gt;Δi, Δj, r, log(pitch)&lt;br&gt;Δt&lt;sup&gt;front&lt;/sup&gt;, Δt&lt;sup&gt;back&lt;/sup&gt;, h&lt;sup&gt;front&lt;/sup&gt;, h&lt;sup&gt;back&lt;/sup&gt;&lt;br&gt;region one-hot (5)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=16;align=center;strokeWidth=2;" vertex="1" parent="1">
-                    <mxGeometry x="-140" y="470" width="228" height="122" as="geometry"/>
+                <mxCell id="tok-note" value="&lt;b&gt;cell token&lt;/b&gt;&lt;br&gt;x&lt;sub&gt;i&lt;/sub&gt; ∈ ℝ&lt;sup&gt;16&lt;/sup&gt;, Eq. (1)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=16;align=center;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="120" y="524" width="150" height="56" as="geometry"/>
                 </mxCell>
                 <mxCell id="tok-note-e" style="endArrow=none;dashed=1;html=1;strokeColor=#C7BFA6;entryX=0.009;entryY=0.406;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=16;exitX=0.995;exitY=0.541;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="tok-note" target="tok">
                     <mxGeometry relative="1" as="geometry">
@@ -37,7 +37,7 @@
                     <mxGeometry x="-0.45" relative="1" as="geometry">
                         <Array as="points">
                             <mxPoint x="-252" y="117"/>
-                            <mxPoint x="-252" y="658"/>
+                            <mxPoint x="-252" y="660"/>
                         </Array>
                     </mxGeometry>
                 </mxCell>
