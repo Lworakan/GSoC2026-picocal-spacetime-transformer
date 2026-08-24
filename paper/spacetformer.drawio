@@ -4,17 +4,17 @@
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="evt" value="&lt;b&gt;Inputs&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#6B7280&quot;&gt;minimum-bias event (photon ≈ 30% of cluster energy)&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
+                <mxCell id="evt" value="&lt;b&gt;Inputs&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#6B7280&quot;&gt;minimum-bias event — the photon is a median 19% of its cluster at 15 mm, 89% at 120 mm&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="110" y="690" width="250" height="45" as="geometry"/>
                 </mxCell>
                 <mxCell id="win" value="&lt;b&gt;window 17×17&lt;/b&gt;&lt;br&gt;&lt;font&gt;centred on the cluster barycentre; wide enough to &lt;i&gt;tolerate that centre being ~3 cells off&lt;/i&gt;&lt;/font&gt;" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#FFE8D9;strokeColor=#E8B396;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="112" y="596" width="246" height="66" as="geometry"/>
                 </mxCell>
-                <mxCell id="tok" value="&lt;b&gt;cell tokens&lt;/b&gt; (≤ 289)&lt;br&gt;&lt;font&gt;space &lt;b&gt;and&lt;/b&gt; raw time per cell&lt;/font&gt;" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#FFE8D9;strokeColor=#E8B396;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
+                <mxCell id="tok" value="&lt;b&gt;cell tokens&lt;/b&gt; (≤ 289)&lt;br&gt;&lt;font&gt;space &lt;b&gt;and&lt;/b&gt; time per cell&lt;/font&gt;" style="rounded=1;arcSize=15;whiteSpace=wrap;html=1;fillColor=#FFE8D9;strokeColor=#E8B396;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="133" y="484" width="204" height="72" as="geometry"/>
                 </mxCell>
-                <mxCell id="tok-note" value="(E&lt;sub&gt;i&lt;/sub&gt;, Δx&lt;sub&gt;i&lt;/sub&gt;, Δy&lt;sub&gt;i&lt;/sub&gt;, t&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;front&lt;/sup&gt;, t&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;back&lt;/sup&gt;, h&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;front&lt;/sup&gt;, h&lt;sub&gt;i&lt;/sub&gt;&lt;sup&gt;back&lt;/sup&gt;)&lt;br&gt;&lt;font color=&quot;#6B7280&quot;&gt;h: has-timestamp indicators&lt;/font&gt;" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=16;align=center;strokeWidth=2;" vertex="1" parent="1">
-                    <mxGeometry x="366" y="498" width="205" height="66" as="geometry"/>
+                <mxCell id="tok-note" value="&lt;b&gt;16 channels per cell&lt;/b&gt;&lt;br&gt;log(1+E), log(1+E&lt;sup&gt;front&lt;/sup&gt;), log(1+E&lt;sup&gt;back&lt;/sup&gt;)&lt;br&gt;Δi, Δj, r, log(pitch)&lt;br&gt;Δt&lt;sup&gt;front&lt;/sup&gt;, Δt&lt;sup&gt;back&lt;/sup&gt;, h&lt;sup&gt;front&lt;/sup&gt;, h&lt;sup&gt;back&lt;/sup&gt;&lt;br&gt;region one-hot (5)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=16;align=center;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="350" y="420" width="222" height="122" as="geometry"/>
                 </mxCell>
                 <mxCell id="tok-note-e" style="endArrow=none;dashed=1;html=1;strokeColor=#C7BFA6;entryX=0.009;entryY=0.406;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=16;exitX=0.995;exitY=0.541;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="tok-note" target="tok">
                     <mxGeometry relative="1" as="geometry">
@@ -77,7 +77,7 @@
                 <mxCell id="sum-note-e" style="endArrow=none;dashed=1;html=1;strokeColor=#C7BFA6;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontSize=16;" edge="1" parent="1" source="sum-note" target="sum">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="read" value="&lt;b&gt;Readout&lt;/b&gt;&lt;br&gt;&lt;font&gt;&lt;i&gt;h: small MLP on the pooled state and the&lt;br&gt;cluster-level globals g&lt;/i&gt;&lt;/font&gt;" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#EBE6F7;strokeColor=#B7A9E0;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
+                <mxCell id="read" value="&lt;b&gt;Readout&lt;/b&gt;&lt;br&gt;&lt;font&gt;&lt;i&gt;h: small MLP on the pooled&lt;br&gt;state and 6 globals g&lt;/i&gt;&lt;/font&gt;" style="rounded=1;arcSize=20;whiteSpace=wrap;html=1;fillColor=#EBE6F7;strokeColor=#B7A9E0;fontSize=16;strokeWidth=2;" parent="1" vertex="1">
                     <mxGeometry x="572" y="146" width="196" height="76" as="geometry"/>
                 </mxCell>
                 <mxCell id="read-note" value="ŷ = a·log(1+S) + b + h(z,g)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=12;fillColor=#FFF6D9;strokeColor=#E6CE8A;fontSize=16;align=center;strokeWidth=2;" vertex="1" parent="1">

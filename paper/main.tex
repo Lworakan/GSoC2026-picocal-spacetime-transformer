@@ -29,7 +29,8 @@ Reconstruction in the LHCb PicoCal under Pileup}
 \begin{abstract}
 We study photon energy regression in the proposed LHCb Upgrade~II PicoCal
 electromagnetic calorimeter on a simulated minimum-bias sample, where the
-photon carries on average only $30\%$ of its cluster's energy. SpaceTformer,
+photon's median share of the energy in its own cluster is $19\%$ in the
+innermost region. SpaceTformer,
 a token transformer over calorimeter cells --- each token a point in detector
 space and time --- with a physics-constrained readout, reaches an aggregate
 relative resolution $\seff = 0.0388 \pm 0.0002$, measured fully out-of-sample
@@ -72,9 +73,9 @@ Upgrade~II~\cite{lhcbftdr}, designed to operate at instantaneous luminosities
 where each photon cluster is contaminated by energy from tens of simultaneous
 proton--proton interactions
 \todo{state the simulated $\nu$ / luminosity --- ask the collaboration}. In
-the sample used here the photon carries on average $30\%$ of the energy
-inside its own cluster, with the contamination worst in the small-cell inner
-regions. Reconstructing the photon energy then stops being a calibration
+the sample used here the photon's median share of the energy inside its own
+cluster is $58\%$ over all regions but only $19\%$ at 15\,mm and $32\%$ at
+30\,mm: the contamination is concentrated in the small-cell inner regions. Reconstructing the photon energy then stops being a calibration
 problem and becomes a separation problem. Figure~\ref{fig:pvp} makes the
 statement literal: on a paired sample in which the photon's own deposit is
 known cell by cell, two thirds of the energy inside the window belongs to
@@ -106,8 +107,8 @@ which makes it hard to know how much of a reported gain comes from the
 architecture and how much from everything around it. We instead fix one
 training protocol --- loss, splits, seeds, readout, calibration --- and vary
 exactly one component at a time, treating every proposed improvement as a
-hypothesis to be measured. One hundred and forty-eight configurations were measured this way, each with a
-saved per-event prediction set (the complete scored ledger is versioned with
+hypothesis to be measured. One hundred and thirty-four distinct configurations were measured this way,
+each with a saved per-event prediction set and cross-validated arms counted once (the complete scored ledger is versioned with
 the code).
 
 The thesis this discipline produced can be stated in one sentence: \emph{on
@@ -225,7 +226,7 @@ below. A \emph{clean sample} of pileup-free photon showers from the same
 simulation enters only as a training auxiliary
 (Section~\ref{sec:methods}). Each cluster provides its cells with per-cell
 energy, position, and two timestamps from the front and back longitudinal
-compartments --- only $\sim$$30\%$ of cells carry a usable timestamp ---
+compartments --- only $\sim$$37\%$ of cells carry a usable front timestamp ---
 plus cluster-level quantities from the standard reconstruction (cluster
 position, summed energy, cell multiplicity).
 \todo{Simulation provenance to be completed with the collaboration:
@@ -259,7 +260,7 @@ split with larger seed ensembles; that protocol biases the weak bins optimistica
 roughly $0.009$ (15\,mm low-E: $0.0691$ fixed-split vs $0.0783$
 cross-validated), so we do not quote fixed-split numbers as primary results and we
 label the protocol wherever one appears. Against selection effects across
-the $148$-configuration campaign (scored ledger versioned with the code): the
+the $134$-configuration campaign (scored ledger versioned with the code): the
 primary protocol was fixed before the final measurement, screening runs
 never enter the primary claims, and the half-sample preview and its correction
 ($0.0379 \to 0.0388$) are reported rather than absorbed.
@@ -312,13 +313,20 @@ around the predicted photon position (Section~\ref{sec:pointing}).}
 \label{fig:arch}
 \end{figure}
 
-\paragraph{Tokens.} Each calorimeter cell is a token carrying its energy,
-local coordinates relative to the window centre, and its raw front and back
-timestamps; cells without a usable timestamp carry explicit has-timestamp
-indicator channels alongside the zero-filled value, which after the linear
-embedding is equivalent to a learnable missing-value embedding.
-Cluster-level reconstruction quantities enter as global features; all
-inputs come from the standard reconstruction and none uses generator truth.
+\paragraph{Tokens.} Each calorimeter cell is a token of sixteen channels: its
+total, front and back energies as $\log(1+E)$; its offset from the window
+centre in cells, $(\Delta i, \Delta j)$, and the radius $r$; the logarithm of
+the cell pitch; its front and back timestamps with the window median
+subtracted and clipped to $\pm 5$\,ns; two has-timestamp indicators; and a
+five-way region one-hot. The timestamps are the arrival times themselves, not
+an engineered pull --- the median subtraction only removes the event's overall
+time offset. Cells without a usable timestamp carry the indicator alongside a
+zero, which after the linear embedding is equivalent to a learnable
+missing-value embedding.
+Cluster-level reconstruction quantities enter as global features, together
+with one indicator marking events drawn from the clean auxiliary sample rather
+than from minimum bias. All inputs come from the standard reconstruction or
+from that sample label; none uses generator truth.
 Figures~\ref{fig:input3d} and~\ref{fig:input} show the same real input from
 two views: the token set as the detector produces it --- one box per fired
 cell, in space, in time, and split over the two longitudinal segments ---
@@ -366,10 +374,12 @@ Section~\ref{sec:gain} presents the measurements behind both choices.
 \paragraph{Encoder.} SpaceTformer's encoder is a plain token
 transformer~\cite{vaswani}: $d=128$, 4 heads, 3 layers, feed-forward width
 $4d$, dropout 0.1, full self-attention over the cell tokens. The
-cluster-level global features do not enter the encoder; they are
-concatenated to the pooled state at the readout, so attention operates on
-per-cell information alone. The name marks what the model attends over --- each token
-is a point in detector space \emph{and} time, with the raw timestamps worth
+six cluster-level global features do not enter the encoder; they are
+concatenated to the pooled state at the readout. Attention therefore operates
+on per-cell channels, with the caveat that two of them --- the cell pitch and
+the region one-hot --- are constant within an event and tell the encoder which
+region it is reading. The name marks what the model attends over --- each token
+is a point in detector space \emph{and} time, with the timestamps worth
 $20\%$ of the aggregate resolution (Section~\ref{sec:timing}) --- not a
 factorised attention scheme: we measured time-factorised attention and it
 loses. Ten encoder families were tried against this one
@@ -671,9 +681,9 @@ containment.}
 
 Sweeping the seed-centred window from $5{\times}5$ to $21{\times}21$
 (Figure~\ref{fig:windowscan}) confirms the diagnosis in resolution space:
-15\,mm low-E falls monotonically from $0.186$ to $0.102$ as the window
+15\,mm low-E falls from $0.186$ to $0.102$ as the window
 opens --- the single largest lever found in the whole project --- while the
-\emph{aggregate barely moves} ($0.038$--$0.044$ across the whole scan),
+\emph{aggregate barely moves} ($0.038$--$0.041$ across the whole scan),
 because the outer regions dominate the event count and were already
 contained. That flatness is exactly how the defect stayed invisible: the
 aggregate metric hid it. Ring summaries (coarse sums of the cells outside
@@ -781,7 +791,7 @@ seed- or barycentre-centred window. Measured offline (pointer
 predictions from the trained auxiliary members; the test split is
 pointed by models that never saw it), the five retrained members land at
 $0.0389 \pm 0.0002$ --- the five best single members of the
-$148$-configuration campaign.
+$134$-configuration campaign.
 
 \begin{table}[h]
 \centering
@@ -1263,7 +1273,7 @@ Width-based flags remain useful for analysis-level purity; they cannot improve t
 quoted resolution. And the train-time augmentation null is a control for
 the scaling claim: an eight-fold increase in geometric variety yields
 nothing, while the measured curve implies that tripling the \emph{real}
-sample yields $\sim$$15\%$ --- what $N^{-0.18}$ purchases is diversity of pileup
+sample yields $\sim$$18\%$ --- what $N^{-0.18}$ purchases is diversity of pileup
 configurations, which symmetry transforms cannot manufacture. The data
 request has no augmentation shortcut.
 
