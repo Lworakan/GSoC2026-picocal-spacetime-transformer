@@ -28,9 +28,9 @@ calorimeter transformer under pileup](paper/main.pdf)** (draft, this repository)
 | result | value | protocol |
 |---|---|---|
 | aggregate σ_eff | **0.0388 ± 0.0002** | ten-fold cross-validation, every event predicted out-of-sample (72,533 events) |
-| vs. gradient-boosted reference | **3.2×** better | same sample, same metric |
-| vs. ParticleNet / GravNet | ahead in every region at every seed | paired re-implementations, encoder is the only varied component |
-| learned two-stage window | 0.0378 | development split (fixed 70/15/15), 5-seed ensemble |
+| vs. gradient-boosted reference | **3.15× ± 0.05** better | both scored on the 10,865 events they share; the tree behind in 400 of 400 paired resamples and in every region |
+| vs. ParticleNet / GravNet | ahead in every region at every seed | paired re-implementations, encoder is the only varied component; every arm behind in ≥393 of 400 paired resamples except tuned ParticleNet at lr 6e-4, which is not separated on the aggregate |
+| learned two-stage window | 0.0378 | development split (fixed 70/15/15), 5-seed ensemble — **does not reproduce under cross-validation**, see the paper's limitation |
 | inference | 24 µs / cluster | H100, batch 1024 |
 
 Every number in the paper is produced by a script in this repository from the
@@ -86,7 +86,7 @@ differences below 0.002 are treated as noise throughout.
 
 | Model | σ_eff | Notes |
 |---|---|---|
-| BDT (fair feature baseline) | 0.1253 | HistGradientBoosting on aggregate features |
+| BDT (fair feature baseline) | 0.1253 | HistGradientBoosting on aggregate features, scored on its own 12,227-event test set — see the headline table for the shared-event comparison |
 | GateHuber transformer (pre-campaign best) | 0.0463 | 5 seeds |
 | SubNet W4 + clean-aux (Huber) | 0.0452 | subtract-then-calibrate readout |
 | + quantile head, per seed | 0.0438 – 0.0448 | 5 seeds |
@@ -239,7 +239,7 @@ Wins are rare by design — each row is a pre-registered experiment, not a tunin
 | nb56 | lgpull+late | 2 | 0.0424 | 0.0000 |
 | nb56 | late (H20b ✗) | 2 | 0.0429 | 0.0003 |
 | nb57 | conv-stem CNN (H21 ✗) | 2 | 0.0476 | 0.0002 |
-| nb58 | qd+EMA (champion base) | 5 | 0.0418 | 0.0005 |
+| nb58 | qd+EMA (reference base) | 5 | 0.0418 | 0.0005 |
 | nb62 | refine2 (H24b ✗) | 2 | 0.0417 | 0.0002 |
 | nb62 | deep6 (H24a ✗) | 2 | 0.0425 | 0.0001 |
 
@@ -252,7 +252,18 @@ git clone https://github.com/Lworakan/GSoC2026-picocal-spacetime-transformer.git
 cd GSoC2026-picocal-spacetime-transformer
 uv sync   # one command: cpu torch, plotly + kaleido, everything pinned by uv.lock
 
-# reproduce the champion (5 seeds, GPU, ~3 h) — checkpointed and resumable
+# reproduce the headline result: three member families per fold, k = 0..9.
+# The script's defaults are the STARTING configuration, so every flag matters —
+# leaving them off gives 0.0402, not 0.0388.
+uv run scripts/train_picocal.py --sample minbias --window 8 --extra --dens \
+    --recenter --cleanaux --aux --fold 0 --nfold 10 --seeds 0 1 2
+uv run scripts/train_picocal.py --sample minbias --window 8 --extra --dens \
+    --recenter --cleanaux --rc-regions 0 1 --fold 0 --nfold 10 --seeds 0
+uv run scripts/train_picocal.py --sample minbias --window 4 --extra --dens \
+    --recenter --cleanaux --allcells --fold 0 --nfold 10 --seeds 0
+# five members per fold, combined by per-event median; ten folds concatenated
+
+# the starting configuration, for the window/centring comparison
 uv run scripts/train_picocal.py --sample minbias --cleanaux --seeds 0 1 2 3 4
 
 # train on the clean sample instead — same script, one flag
@@ -299,7 +310,7 @@ region, region_name, ET` — so any model (including external baselines) drops i
 scripts/
   picocal_data.py        frozen data pipeline: windows, selections, splits, ET
   picocal_models.py      frozen architectures + losses (SubNetFQ, pinball, qd)
-  train_picocal.py       configurable training entry point (champion recipe by default)
+  train_picocal.py       configurable training entry point (starting configuration by default; see Quick start for the headline flags)
   plot_resolution.py     N-file comparison plots, configurable bins, ideal-curve overlay
   run_experiments.py     legacy helpers (σ_eff, splits) shared by everything
 notebooks/               one hypothesis per notebook, six-stage structure:
