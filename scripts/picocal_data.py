@@ -207,7 +207,7 @@ def patch_tokens(ev, W, reach, side):
 def make_windows(W, EVS, phys=False, extra=False, dens=False, rho=False, tpull=False,
                  depth=False, orho=False, abst=False, prior=None, rings=0, halo=0,
                  patch=0, patch_side=3, recenter=False, mmgeo=False, rc_regions=None, rc_mode='centroid',
-                 tcomb=False, allcells=False):
+                 tcomb=False, allcells=False, aperture_mm=0.0):
     rows = []
     keep = []
     for i, ev in enumerate(EVS):
@@ -254,6 +254,16 @@ def make_windows(W, EVS, phys=False, extra=False, dens=False, rho=False, tpull=F
             m = ev['e'] >= THRESH
         else:
             m = (np.maximum(np.abs(ev['di'] - ci), np.abs(ev['dj'] - cj)) <= W) & (ev['e'] >= THRESH)
+            if aperture_mm > 0:
+                # The square crop is a geometric accident, not a physical one. A shower has a
+                # fixed width in millimetres (the Moliere radius is ~35 mm everywhere) while the
+                # window is counted in cells, so a half-width of W spans W*pitch mm and that
+                # varies eightfold across the regions. Cutting on a physical radius instead makes
+                # the aperture the same size in every region AND drops the square's corners,
+                # which reach W*sqrt(2) cells -- for the photon those are empty, since 99.8% of
+                # it sits inside 4 cells of a correctly centred window.
+                r_mm = np.hypot(ev['di'] - ci, ev['dj'] - cj) * ev['ps']
+                m &= r_mm <= aperture_mm
         if m.sum() < 1:
             continue
         di, dj, e, fr, bk, tf, tb = (v[m] for v in (ev['di'], ev['dj'], ev['e'], ev['fr'], ev['bk'], ev['tf'], ev['tb']))
@@ -463,7 +473,7 @@ def prep(W, main_events, aux_events=None, ng=6, phys=False, occ=False, extra=Fal
          dens=False, rho=False, tpull=False, aux=False, depth=False, orho=False,
          abst=False, prior=None, rings=0, halo=0, globpe=0, patch=0, patch_side=3,
          recenter=False, fold=None, nfold=5, mmgeo=False, rc_regions=None, rc_mode='centroid',
-         tcomb=False, allcells=False):
+         tcomb=False, allcells=False, aperture_mm=0.0):
     if aux and main_events and 'ax' not in main_events[0]:
         raise SystemExit('--aux needs truth position/time branches missing from these events: '
                          'delete .scratch/cache/*.pkl so the cache is rebuilt')
@@ -472,7 +482,7 @@ def prep(W, main_events, aux_events=None, ng=6, phys=False, occ=False, extra=Fal
                          'delete .scratch/cache/*.pkl so the cache is rebuilt')
     rows, keep = make_windows(W, main_events, phys, extra, dens, rho, tpull, depth, orho, abst,
                               prior, rings, halo, patch, patch_side, recenter, mmgeo, rc_regions, rc_mode, tcomb,
-                              allcells)
+                              allcells, aperture_mm)
     ktr, kva, kte = splits_for(keep, len(main_events), fold, nfold)
     n_mb = len(rows)
     ctr = np.array([], int)
@@ -480,7 +490,7 @@ def prep(W, main_events, aux_events=None, ng=6, phys=False, occ=False, extra=Fal
     if aux_events is not None:
         crows, keep_aux = make_windows(W, aux_events, phys, extra, dens, rho, tpull, depth, orho, abst,
                                 prior, rings, halo, patch, patch_side, recenter, mmgeo, rc_regions, rc_mode, tcomb,
-                              allcells)
+                              allcells, aperture_mm)
         rows = rows + crows
         ctr = np.arange(n_mb, len(rows))
     N = len(rows)
