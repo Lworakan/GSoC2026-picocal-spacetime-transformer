@@ -306,7 +306,7 @@ and time; the encoder is a plain transformer over cell tokens only; the
 cluster-level global features $g$ enter only at the readout, which is a gated
 energy sum in log space plus a small correction $h$; the loss is a three-quantile
 pinball loss with EMA weights; predictions are the per-event median over
-ensemble members. The decisive components are the window's size and
+ensemble members; the inset draws $h$ itself, a one-hidden-layer network from the pooled state and the globals to the three quantiles. The decisive components are the window's size and
 centring at the bottom (Section~\ref{sec:gain}). Dashed purple: the
 auxiliary position head and the two-stage path that re-cuts the window
 around the predicted photon position (Section~\ref{sec:pointing}).}
