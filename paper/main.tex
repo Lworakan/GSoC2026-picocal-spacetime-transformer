@@ -296,9 +296,36 @@ development split nor the cross-validated sample, so the two numbers are not
 divided directly; instead both estimators are scored on the $10{,}865$ events
 they share, where the tree reads $0.1189$ against the ensemble's $0.0377$, a
 factor $3.15 \pm 0.05$ with the tree behind in $400$ of $400$ paired
-resamples and in every region separately (worst margin $120$\,mm,
-$0.1021$ against $0.0410$). It is a fast-baseline reference,
-not a tuned competitor, and we label it as such. One substitution relative
+resamples. The comparison holds cell by cell and not only on the
+aggregate: Table~\ref{tab:vsbdt} scores both estimators in all fifteen
+region--energy bins, and the transformer is ahead in every one of them, by
+between $2.08\times$ and $4.06\times$. There is no bin in which the tree is
+competitive, so the aggregate ratio is not an average over a mixed result.
+It is a fast-baseline reference,
+not a tuned competitor, and we label it as such.
+
+\begin{table}[h]
+\centering
+\caption{\seff{} in all fifteen region--energy bins, both estimators scored
+on the $10{,}865$ events they share. Terciles are per region and are not
+comparable across rows. The transformer is ahead in $15$ of $15$ bins.}
+\label{tab:vsbdt}
+\small
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lccccccccc}
+\toprule
+& \multicolumn{3}{c}{low-E} & \multicolumn{3}{c}{mid-E} & \multicolumn{3}{c}{high-E}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
+region & ours & GBDT & gain & ours & GBDT & gain & ours & GBDT & gain\\
+\midrule
+15\,mm & 0.0688 & 0.2793 & $4.06\times$ & 0.0451 & 0.1368 & $3.03\times$ & 0.0317 & 0.0938 & $2.96\times$\\
+30\,mm & 0.0669 & 0.2599 & $3.88\times$ & 0.0392 & 0.1551 & $3.96\times$ & 0.0281 & 0.1127 & $4.01\times$\\
+40\,mm & 0.0579 & 0.1701 & $2.94\times$ & 0.0309 & 0.0980 & $3.17\times$ & 0.0225 & 0.0700 & $3.11\times$\\
+60\,mm & 0.0529 & 0.1504 & $2.84\times$ & 0.0294 & 0.0822 & $2.80\times$ & 0.0228 & 0.0646 & $2.83\times$\\
+120\,mm & 0.0635 & 0.1525 & $2.40\times$ & 0.0379 & 0.0788 & $2.08\times$ & 0.0269 & 0.0689 & $2.56\times$\\
+\bottomrule
+\end{tabular}
+\end{table} One substitution relative
 to the original project plan is made explicit: the LHCb production
 clustering algorithms (the Cellular Automaton and its graph-clustering
 successor) run upstream of this dataset --- the clusters we receive

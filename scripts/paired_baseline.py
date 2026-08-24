@@ -67,11 +67,24 @@ def main():
           f'BDT worse in {(d > 0).sum()}/{NBOOT} resamples')
     print(f'ratio {np.mean(db / da):.2f} +/- {np.std(db / da):.2f}')
 
-    for reg, sub in m.groupby('region_name'):
-        t = sub['true_energy'].values
-        print(f'  {reg:>8s} n={len(sub):6d} '
-              f'ST {resolution(sub["pred"].values, t)["sigma_eff"]:.4f} '
-              f'BDT {resolution(sub["pred_energy"].values, t)["sigma_eff"]:.4f}')
+    # the per-bin table: an aggregate ratio can hide a bin where the tree is ahead, so
+    # every region-energy cell is scored separately and the row is printed as LaTeX
+    wins = 0
+    for reg in ('15mm', '30mm', '40mm', '60mm', '120mm'):
+        s = m[m.region_name == reg]
+        q = s.true_energy.quantile([1 / 3, 2 / 3]).values
+        cells = (('low', s[s.true_energy <= q[0]]),
+                 ('mid', s[(s.true_energy > q[0]) & (s.true_energy <= q[1])]),
+                 ('high', s[s.true_energy > q[1]]))
+        out = []
+        for _, sub in cells:
+            tt = sub['true_energy'].values
+            a = resolution(sub['pred'].values, tt)['sigma_eff']
+            c = resolution(sub['pred_energy'].values, tt)['sigma_eff']
+            wins += a < c
+            out.append(f'{a:.4f} & {c:.4f} & ${c / a:.2f}\\times$')
+        print(f'{reg} & ' + ' & '.join(out) + r'\\')
+    print(f'% SpaceTformer ahead in {wins}/15 bins')
 
 
 if __name__ == '__main__':
