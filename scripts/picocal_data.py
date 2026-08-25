@@ -254,7 +254,7 @@ def make_windows(W, EVS, phys=False, extra=False, dens=False, rho=False, tpull=F
             m = ev['e'] >= THRESH
         else:
             m = (np.maximum(np.abs(ev['di'] - ci), np.abs(ev['dj'] - cj)) <= W) & (ev['e'] >= THRESH)
-            if aperture_mm > 0:
+            if aperture_mm != 0:
                 # The square crop is a geometric accident, not a physical one. A shower has a
                 # fixed width in millimetres (the Moliere radius is ~35 mm everywhere) while the
                 # window is counted in cells, so a half-width of W spans W*pitch mm and that
@@ -262,8 +262,16 @@ def make_windows(W, EVS, phys=False, extra=False, dens=False, rho=False, tpull=F
                 # the aperture the same size in every region AND drops the square's corners,
                 # which reach W*sqrt(2) cells -- for the photon those are empty, since 99.8% of
                 # it sits inside 4 cells of a correctly centred window.
-                r_mm = np.hypot(ev['di'] - ci, ev['dj'] - cj) * ev['ps']
-                m &= r_mm <= aperture_mm
+                # A NEGATIVE value is a radius in CELLS instead of millimetres. The two are very
+                # different requests and the measurement separates them: a constant physical
+                # radius shrinks the aperture below the square in the coarse regions and loses
+                # badly there (+0.0059 at 40mm low-E), because those outer cells carry the pileup
+                # the readout subtracts. A radius equal to the square's own half-width removes
+                # only the corners -- geometry, not physics -- and wins every bin at 15mm.
+                if aperture_mm < 0:
+                    m &= np.hypot(ev['di'] - ci, ev['dj'] - cj) <= -aperture_mm
+                else:
+                    m &= np.hypot(ev['di'] - ci, ev['dj'] - cj) * ev['ps'] <= aperture_mm
         if m.sum() < 1:
             continue
         di, dj, e, fr, bk, tf, tb = (v[m] for v in (ev['di'], ev['dj'], ev['e'], ev['fr'], ev['bk'], ev['tf'], ev['tb']))
