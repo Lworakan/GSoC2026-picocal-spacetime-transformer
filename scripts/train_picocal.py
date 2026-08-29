@@ -86,6 +86,19 @@ def parse_args():
                          '(Spearman 1.000 over the five regions). A radius cut makes the aperture '
                          'the same everywhere and drops the square corners, which reach W*sqrt(2) '
                          'cells and hold essentially no photon.')
+    ap.add_argument('--ema-decay', type=float, default=0.999,
+                    help='EMA decay. The averaging window is 1/(1-decay) optimiser steps, and at '
+                         'the default 0.999 with batch 96 that is ~1.9 epochs. Latest Weight '
+                         'Averaging (arXiv:2209.14981) finds k=6 epoch-end checkpoints the best '
+                         'default and k>16 harmful, so our window is about three times too short; '
+                         '0.99968 gives six epochs, 0.9999 gives nineteen and should be worse if '
+                         'that result carries over.')
+    ap.add_argument('--final-ema', action='store_true',
+                    help='use the EMA weights as they stand at the end of training instead of the '
+                         'EMA weights frozen at the argmin-validation epoch. The argmin is a '
+                         'selection over ~100 noisy validation evaluations -- 3,264 events under '
+                         'ten folds -- so it picks the epoch that was lucky on the validation '
+                         'slice. Taking the final EMA makes no such choice.')
     ap.add_argument('--allcells', action='store_true',
                     help='no square crop: every cluster cell is a token. A window is a square '
                          'crop of a round cluster, so even W8 discards corners and tail, and its '
@@ -308,7 +321,7 @@ def train_one(T, D, seed, args, device):
     torch.manual_seed(seed)
     rng = np.random.default_rng(seed)
     model = build_model(D, args, device)
-    ema = None if args.no_ema else AveragedModel(model, multi_avg_fn=get_ema_multi_avg_fn(0.999))
+    ema = None if args.no_ema else AveragedModel(model, multi_avg_fn=get_ema_multi_avg_fn(args.ema_decay))
     opt = torch.optim.AdamW(model.parameters(), lr=CFG['lr'], weight_decay=CFG['wd'])
     cos = torch.optim.lr_scheduler.CosineAnnealingLR(
         opt, T_max=max(args.epochs - args.warmup, 1))
@@ -428,7 +441,17 @@ def train_one(T, D, seed, args, device):
         if wait >= args.patience:
             break
     final = build_model(D, args, device)
-    final.load_state_dict(bstate)
+    # bstate is the EMA weights frozen at the ONE epoch that minimised the validation loss. With
+    # ~100 epochs scored on a 5% validation slice (3,264 events under ten folds), that argmin is
+    # a selection over 100 noisy numbers, and the epoch it picks is the one that got lucky on
+    # those events rather than the one that generalises. It is the same selection-on-noise error
+    # this project has caught twice in its own analyses, sitting inside the training loop -- and
+    # it is the size of effect that separates identical retrains by 2-5%. --final-ema keeps the
+    # EMA weights as they stand at the end instead, which makes no choice at all.
+    # ema.module, not ema: AveragedModel's own state_dict carries a "module." prefix and an
+    # n_averaged buffer, while bstate was taken from eval_model() == ema.module.
+    final.load_state_dict(ema.module.state_dict()
+                          if (args.final_ema and ema is not None) else bstate)
     final.eval()
 
     off = 16 + (2 if args.orho else 0) + (2 if args.depth else 0) + (3 if args.tpull else 0)
@@ -490,7 +513,7 @@ def main():
         args.name = (base + ('CleanAux' if args.cleanaux else '') +
                      ('Phys' if args.phys else '') + ('Occ' if args.occ else '') +
                      ('Tgate' if args.gate == 'time' else '') + ('Sgn' if args.gate == 'signed' else '') +
-                     ('D4' if args.d4aug else '') + ('Geo' if args.arch == 'geo' else '') + ('Cnn' if args.arch == 'cnn' else '') + ('Cnx' if args.arch == 'convnext' else '') + ('St' if args.arch == 'spacetime' else '') + ('Pnet' if args.arch == 'pnet' else '') + ('Grav' if args.arch == 'gravnet' else '') + ('Mxr' if args.arch == 'mixer' else '') + (f'Fr{int(round(args.frac*100))}' if args.frac and args.frac < 1.0 else '') + (f'Wu{args.warmup}' if args.warmup else '') + ('Pln' if args.preln else '') + (f'Nn{args.knn}' if args.knn else '') + (f'Tf{args.tfour}' if args.tfour else '') + (f'Sc{args.sum_core}' if args.sum_core else '') + (f'Sk{args.slots}' if args.slots else '') + ('Ds' if args.distill else '') + ('Ex' if args.extra else '') + ('Dn' if args.dens else '') + ('Gx' if args.gx else '') + ('Rho' if args.rho else '') + ('Tp' if args.tpull else '') + ('Aux' if args.aux else '') + (f'Gs{int(args.gatesup*10)}' if args.gatesup > 0 else '') + ('Sx' if args.synaux else '') + ('Pf' if args.prior_feat else '') + ('Pt' if args.prior_teach else '') + (f'R{args.rings}' if args.rings else '') + (f'Rg{args.only_region}' if args.only_region is not None else '') + (f'H{args.halo}' if args.halo else '') + (f'P{args.patch}s{args.patch_side}' if args.patch else '') + (f'Gp{args.globpe}' if args.globpe else '') + (f'D{args.dim}' if args.dim else '') + (f'Lr{args.lr:g}'.replace('.','p').replace('-','m') if args.lr else '') + (f'B{args.batch}' if args.batch else '') + ('Cos' if args.cosine else '') + (f'Cj{args.cjit:g}'.replace('.','p') if args.cjit else '') + (f'L{args.layers}' if args.layers else '') + (({'oracle': 'Ro', 'pred': 'Rp'}.get(args.rc_mode, 'Rc')) if args.recenter else '') + (f'K{args.fold}' if args.fold is not None else '') + ('Mm' if args.mmgeo else '') + ('Tc' if args.tcomb else '') + (f'Ap{int(args.aperture_mm)}'.replace('-','C') if args.aperture_mm else '') + ('Ac' if args.allcells else '') + (('Rr' + ''.join(map(str, args.rc_regions))) if args.rc_regions else '') + ('Dep' if args.depth else '') + ('Orh' if args.orho else '') + ('Abs' if args.abst else '') + (f'W{args.wlow:g}'.replace('.', '') if args.wlow > 0 else '') +
+                     ('D4' if args.d4aug else '') + ('Geo' if args.arch == 'geo' else '') + ('Cnn' if args.arch == 'cnn' else '') + ('Cnx' if args.arch == 'convnext' else '') + ('St' if args.arch == 'spacetime' else '') + ('Pnet' if args.arch == 'pnet' else '') + ('Grav' if args.arch == 'gravnet' else '') + ('Mxr' if args.arch == 'mixer' else '') + (f'Fr{int(round(args.frac*100))}' if args.frac and args.frac < 1.0 else '') + (f'Wu{args.warmup}' if args.warmup else '') + ('Pln' if args.preln else '') + (f'Nn{args.knn}' if args.knn else '') + (f'Tf{args.tfour}' if args.tfour else '') + (f'Sc{args.sum_core}' if args.sum_core else '') + (f'Sk{args.slots}' if args.slots else '') + ('Ds' if args.distill else '') + ('Ex' if args.extra else '') + ('Dn' if args.dens else '') + ('Gx' if args.gx else '') + ('Rho' if args.rho else '') + ('Tp' if args.tpull else '') + ('Aux' if args.aux else '') + (f'Gs{int(args.gatesup*10)}' if args.gatesup > 0 else '') + ('Sx' if args.synaux else '') + ('Pf' if args.prior_feat else '') + ('Pt' if args.prior_teach else '') + (f'R{args.rings}' if args.rings else '') + (f'Rg{args.only_region}' if args.only_region is not None else '') + (f'H{args.halo}' if args.halo else '') + (f'P{args.patch}s{args.patch_side}' if args.patch else '') + (f'Gp{args.globpe}' if args.globpe else '') + (f'D{args.dim}' if args.dim else '') + (f'Lr{args.lr:g}'.replace('.','p').replace('-','m') if args.lr else '') + (f'B{args.batch}' if args.batch else '') + ('Cos' if args.cosine else '') + (f'Cj{args.cjit:g}'.replace('.','p') if args.cjit else '') + (f'L{args.layers}' if args.layers else '') + (({'oracle': 'Ro', 'pred': 'Rp'}.get(args.rc_mode, 'Rc')) if args.recenter else '') + (f'K{args.fold}' if args.fold is not None else '') + ('Mm' if args.mmgeo else '') + ('Tc' if args.tcomb else '') + (f'Ap{int(args.aperture_mm)}'.replace('-','C') if args.aperture_mm else '') + (f'Ed{str(args.ema_decay).replace(".","p")}' if args.ema_decay != 0.999 else '') + ('Fe' if args.final_ema else '') + ('Ac' if args.allcells else '') + (('Rr' + ''.join(map(str, args.rc_regions))) if args.rc_regions else '') + ('Dep' if args.depth else '') + ('Orh' if args.orho else '') + ('Abs' if args.abst else '') + (f'W{args.wlow:g}'.replace('.', '') if args.wlow > 0 else '') +
                      ('Qp' if args.qpool else '') + ('Tta' if args.tta else '') + (f'Tr{int(args.trim*100)}' if args.trim > 0 else '') + ('Fm' if args.film else '') + (f'F{args.nfour}' if args.nfour else '') + suffix)
     if args.mode == 'smoke':
         args.name += '_smoke'
