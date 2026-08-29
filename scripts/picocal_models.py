@@ -253,7 +253,7 @@ class MixerBlock(nn.Module):
 
 class SubNetFQ(nn.Module):
     def __init__(self, in_dim, la0, lb0, ng=NG, cfg=CFG, gate='learned', arch='std', qpool=False,
-                 gx=False, aux=False, film=False, nfour=0, tfour=0, slots=0):
+                 gx=False, aux=False, film=False, nfour=0, tfour=0, slots=0, cellreg=False):
         super().__init__()
         self.gate_mode = gate
         self.signed = gate == 'signed'
@@ -330,6 +330,19 @@ class SubNetFQ(nn.Module):
         self.head = nn.Sequential(nn.Linear(d + ng, d), nn.ReLU(), nn.Dropout(cfg['dropout']),
                                   nn.Linear(d, 3 + (3 if aux else 0)))
         self.fhead = nn.Sequential(nn.Linear(d, d // 2), nn.ReLU(), nn.Linear(d // 2, 1))
+        # The gated sum can only ever REMOVE energy: w in (0,1) multiplies the observed cell
+        # energy, so a cell that sampled low, or that fell under the 2.49 MeV threshold, is
+        # unrecoverable. Our own error budget says the dominant term in the highest-leverage bin
+        # (60 mm low-E, 11.5% of events) is an energy-INDEPENDENT 0.29 GeV -- an additive error,
+        # which a multiplicative estimator cannot express whatever it is trained on. cellreg
+        # replaces the weight with a per-cell energy regression that may exceed E_i. The residual
+        # is initialised at zero so the model starts exactly at the gated sum and has to earn any
+        # departure from it.
+        self.cellreg = cellreg
+        if cellreg:
+            self.rhead = nn.Sequential(nn.Linear(d + 1, d // 2), nn.ReLU(), nn.Linear(d // 2, 1))
+            nn.init.zeros_(self.rhead[-1].weight)
+            nn.init.zeros_(self.rhead[-1].bias)
         if gate == 'time':
             self.thead = nn.Sequential(nn.Linear(4, 16), nn.ReLU(), nn.Linear(16, 1))
             nn.init.constant_(self.thead[-1].bias, 2.0)
@@ -422,7 +435,16 @@ class SubNetFQ(nn.Module):
             if self.gate_mode == 'time':
                 w = w * torch.sigmoid(self.thead(x[:, :, 7:11]).squeeze(-1))
         self.last_w = w
-        tot = (w * ecell).sum(1, keepdim=True)
+        if self.cellreg:
+            # relu, not softplus: w*E is already non-negative, so relu(w*E + r*E) reduces to w*E
+            # exactly when the zero-initialised residual is zero, and the arm therefore starts
+            # from the gated sum rather than 0.69 above it. The residual is scaled by the cell's
+            # own energy so one correction is meaningful for a 10 MeV cell and a 10 GeV one.
+            r = self.rhead(torch.cat([h, torch.log1p(ecell.clamp(min=0)).unsqueeze(-1)], -1)).squeeze(-1)
+            cell_e = torch.relu(w * ecell + r * ecell.clamp(min=1e-3)) * m.float()
+            tot = cell_e.sum(1, keepdim=True)
+        else:
+            tot = (w * ecell).sum(1, keepdim=True)
         base = self.la * torch.log1p(tot.clamp(min=1e-3)) + self.lb
         if self.qpool:
             p = self.norm(self.pool_attn(self.q.expand(h.shape[0], -1, -1), h, h,
