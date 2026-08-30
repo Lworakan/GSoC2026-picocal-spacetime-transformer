@@ -103,7 +103,17 @@ them. The arrow marks the true photon entry point.}
 Machine-learned regression is the natural tool, and the field has produced a
 family of increasingly sophisticated architectures for calorimeter and jet
 tasks --- graph networks such as ParticleNet~\cite{particlenet} and
-GravNet~\cite{gravnet}, attention models~\cite{part}, and hybrids. Papers in
+GravNet~\cite{gravnet}, attention models~\cite{part}, and hybrids. One of
+them addresses this detector and this task directly: a graph network for
+energy reconstruction in the Upgrade~II electromagnetic
+calorimeter~\cite{vetens}, built on an attention-enhanced GarNet and
+compressed for real-time use. We could not compare against its numbers, which
+are not published, so what we can say is narrower and we say only that: the
+GarNet family's closest published relative, GravNet, was re-implemented here
+behind an identical readout, loss, splits and window, and reads $0.0437$
+against the transformer's $0.0399$ as single models on the same events. That
+is a statement about the architecture in our pipeline, not about their result.
+Papers in
 this family usually compare against numbers published on other datasets,
 which makes it hard to know how much of a reported gain comes from the
 architecture and how much from everything around it. We instead fix one
@@ -1685,6 +1695,9 @@ CERN-LHCC-2017-023, CMS-TDR-019 (2017).
 \bibitem{polyak} B.~T.~Polyak, A.~B.~Juditsky,
 \emph{Acceleration of Stochastic Approximation by Averaging},
 SIAM J.\ Control Optim.\ 30 (1992) 838.
+\bibitem{vetens} W.~Vetens (LHCb Collaboration),
+\emph{Graph Neural Network-based Energy Reconstruction for the LHCb Upgrade II
+Electromagnetic Calorimeter}, ICHEP 2026, contribution 6959618.
 \bibitem{lhcbcalo} LHCb Collaboration,
 \emph{Calibration and performance of the LHCb calorimeters in Run 1 and 2 at the LHC},
 arXiv:2008.11556.
