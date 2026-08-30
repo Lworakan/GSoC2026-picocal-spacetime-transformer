@@ -645,6 +645,24 @@ their bounds. The three-term form is a poor description of the innermost
 region, and the $b = 2.1$\,GeV there should be read as a statement that the
 $1/E$ term dominates, not as a measured noise constant.
 
+\paragraph{Against the calorimeter LHCb has now.} The natural external scale is
+the existing LHCb electromagnetic calorimeter, whose simulated resolution runs
+from about $11\%$ at low energy to about $4\%$ at very high energy, integrated
+over its areas~\cite{lhcbcalo}. Binned the same way, this work reads
+$8.0\%$ below 5\,GeV, $4.1\%$ at 10--20\,GeV, $3.0\%$ at 30--50\,GeV and
+$2.6\%$ above 80\,GeV, on a minimum-bias sample --- that is, \emph{with} the
+pileup, which the reference curve does not carry.
+
+Three things make this a scale rather than a like-for-like comparison, and we
+state them rather than let the numbers stand alone. The detectors differ:
+PicoCal is the Upgrade~II replacement, with finer granularity and per-cell
+timing. The statistics differ: the reference is a Gaussian width, ours the
+half-width of the 68.3\% interval, which is the more conservative of the two
+on a distribution with tails. And the tasks differ: the reference measures a
+calibration chain, ours a regression trained on the same simulation it is
+scored against. What the comparison does establish is that the numbers here
+sit at the scale of a working calorimeter's performance rather than beside it.
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.72\textwidth]{figs/resolution_fit.pdf}
@@ -1667,6 +1685,9 @@ CERN-LHCC-2017-023, CMS-TDR-019 (2017).
 \bibitem{polyak} B.~T.~Polyak, A.~B.~Juditsky,
 \emph{Acceleration of Stochastic Approximation by Averaging},
 SIAM J.\ Control Optim.\ 30 (1992) 838.
+\bibitem{lhcbcalo} LHCb Collaboration,
+\emph{Calibration and performance of the LHCb calorimeters in Run 1 and 2 at the LHC},
+arXiv:2008.11556.
 \bibitem{lhcbftdr} LHCb Collaboration,
 \emph{Framework TDR for the LHCb Upgrade II --- Opportunities in flavour
 physics, and beyond, in the HL-LHC era},
