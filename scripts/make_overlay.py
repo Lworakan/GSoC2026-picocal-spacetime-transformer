@@ -78,7 +78,14 @@ def patches(mb_events, regions, W, rng, inner_mm=105.0):
             continue
         di, dj = ev['di'][out].astype(int), ev['dj'][out].astype(int)
         e, fr, bk = ev['e'][out], ev['fr'][out], ev['bk'][out]
-        tf, tb = ev['tf'][out], ev['tb'][out]
+        # Times are stored RELATIVE to the donor event's own reference. Copying the donor's
+        # absolute timestamps put a random offset -- the difference between two unrelated events'
+        # t0 -- between the photon cells and the pileup cells, so --gatesup was teaching the gate
+        # that "far from the photon in time" means pileup using examples where that distance was
+        # an artefact of pairing. Real pileup is in the same bunch crossing: the offset is zero on
+        # average, and what separates it is the SPREAD, which relative times preserve.
+        tref = np.nanmedian(ev['tf']) if np.isfinite(ev['tf']).any() else 0.0
+        tf, tb = ev['tf'][out] - tref, ev['tb'][out] - tref
         # translate a block of the annulus into the window, keeping relative geometry
         for _ in range(2):
             oi = int(rng.integers(-2 * W - 1, 2 * W + 2))
@@ -132,8 +139,10 @@ def main():
         pc = ev['pc'][base].copy()
         sig = e.copy()                                   # per-cell photon truth
         grid = {(int(i), int(j)): k for k, (i, j) in enumerate(zip(di, dj))}
+        t0 = float(np.nanmedian(tf)) if np.isfinite(tf).any() else 0.0
         for _ in range(a.per_event):
             pi, pj, pe, pfr, pbk, ptf, ptb = lib[r][int(rng.integers(len(lib[r])))]
+            ptf, ptb = ptf + t0, ptb + t0        # donor times onto the recipient's clock
             for k in range(len(pi)):
                 key = (int(pi[k]), int(pj[k]))
                 if key in grid:
