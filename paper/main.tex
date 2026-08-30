@@ -71,14 +71,27 @@ range and is labelled as such.
 \section{Introduction}
 
 The PicoCal is the proposed electromagnetic calorimeter for LHCb
-Upgrade~II~\cite{lhcbftdr}, designed to operate at instantaneous luminosities
-where each photon cluster is contaminated by energy from tens of simultaneous
-proton--proton interactions
-\todo{state the simulated $\nu$ / luminosity --- ask the collaboration}. In
-the sample used here the photon's median share of the energy inside its own
-cluster is $58\%$ over all regions but only $19\%$ at 15\,mm and $32\%$ at
-30\,mm: the contamination is concentrated in the small-cell inner regions. Reconstructing the photon energy then stops being a calibration
-problem and becomes a separation problem. Figure~\ref{fig:pvp} makes the
+Upgrade~II~\cite{lhcbftdr}. It is a sampling calorimeter built from
+$12 \times 12$\,cm modules of two technologies --- a spaghetti calorimeter
+close to the beam and shashlik further out --- segmented so that the cell
+pitch grows with distance from the beam pipe: five regions at $15$, $30$,
+$40$, $60$ and $120$\,mm, from one to 64 cells per module. Every cell is read
+out at both depths and carries a timestamp. The design intent of that
+segmentation is to keep the occupancy per cell manageable where the particle
+flux is highest, which is where the beam pipe is.
+
+It also sets the shape of the problem this paper is about. At the luminosities
+Upgrade~II targets
+\todo{state the simulated $\nu$ / luminosity --- ask the collaboration},
+every photon cluster carries energy from tens of simultaneous
+proton--proton interactions. In the sample used here the photon's median share
+of the energy inside its own cluster is $58\%$ over all regions but only
+$19\%$ at 15\,mm and $32\%$ at 30\,mm. The gradient follows the beam pipe, not
+the cell size: the inner regions are contaminated because the particle flux
+there is highest, and the fine segmentation is the response to that flux
+rather than its cause --- a coarser inner calorimeter would be contaminated
+more, not less. Reconstructing the photon energy in those regions then stops
+being a calibration problem and becomes a separation problem. Figure~\ref{fig:pvp} makes the
 statement literal: on a paired sample in which the photon's own deposit is
 known cell by cell, two thirds of the energy inside the window belongs to
 other interactions, and it is spread over the same cells as the photon
@@ -295,7 +308,10 @@ would assume independent test events that repeat across members. Across the
 \seff{} is $0.0397$ with spread $0.0010$; in the weak bins the single-member
 spread is $0.0070$ (15\,mm low-E) and $0.0046$ (30\,mm low-E).
 
-\paragraph{GBDT reference.} The external baseline is a
+\paragraph{GBDT reference.} The tree reference is one we trained ourselves, on
+the same events and under the same protocol, rather than a number taken from
+elsewhere; calling it external would suggest a published result being quoted,
+and it is not. It is a
 histogram-based gradient-boosted regressor (300 iterations) on six summary
 features per cluster --- log summed window energy, front/back energy ratio,
 cell multiplicity, log seed-cell energy, energy-weighted lateral width, and
@@ -640,6 +656,37 @@ matching the pileup-contamination pattern.}
 \label{fig:resve}
 \end{figure}
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/vs_gnn.pdf}
+\caption{The same resolution against \emph{transverse} energy, which is the
+axis the graph-network work on this detector reports~\cite{vetens} and the
+one in which the physics selections are written. Left: the 30\,mm region,
+which is the SpaCal-Pb equivalent --- their shashlik modules are $4 \times
+4$\,cm, our 40\,mm, and SpaCal-Pb sits between the tungsten spaghetti
+calorimeter and the shashlik. Right: all regions. Dashed is the starting
+configuration, solid this work. Plotted this way the two studies can be laid
+side by side: the metric is the same $\seff$, and this sample already lies
+inside their $0.5$--$5$\,GeV range. It is an axis, not a claim about their
+numbers --- their photons are isolated with pileup overlaid rather than real
+minimum-bias events, and their pileup condition is the worst case rather than
+the nominal one.}
+\label{fig:vsgnn}
+\end{figure}
+
+\paragraph{Why the curve stops falling at the top.} A resolution-versus-energy
+curve on this sample is not one detector measured at several energies: it is a
+different mixture of regions at each point. Below 10\,GeV the sample is 60\%
+60\,mm and holds no 15\,mm clusters at all; above 80\,GeV it is 58\% 15\,mm and
+42\% 30\,mm, with nothing from the outer regions. Energy and pseudorapidity are
+tied together at fixed transverse energy, so climbing the axis walks inwards
+across the calorimeter and into the worst of the pileup. The flattening above
+about 20\,GeV, and the point-to-point wobble past 80\,GeV --- $2.49\%$ at
+80--90\,GeV against $2.80\%$ at 90--100\,GeV, a $1.5\sigma$ difference on
+statistical errors of $0.13$ and $0.19\%$ --- are that composition changing
+under the curve, not the estimator degrading. Read the per-region curves for
+detector behaviour and the aggregate curve for what a mixed sample delivers.
+
 Figure~\ref{fig:resfit} fits the standard calorimeter parameterisation
 $\seff(E) = a/\sqrt{E} \oplus b/E \oplus c$ to the cross-validated points
 per region. The fit summarises the physics compactly: the $1/E$ term ---
@@ -823,6 +870,20 @@ the cluster energy barycentre gives the biggest single step in the
 cumulative decomposition (Table~\ref{tab:gain}: $0.1156 \to 0.0711$), and
 it invites a wrong reading --- that the barycentre localises the photon better
 than the seed cell. That reading is measurably false.
+One term needs pinning down before the comparison, because it is easy to read
+the wrong way. The recentred window is placed on the centre of the seed
+\emph{module} --- the $12 \times 12$\,cm block that holds between one and 64
+cells --- not on the centre of the seed \emph{cell}. In the 15\,mm region a
+module is eight cells across, so the two differ by up to four cells, and it is
+the module centre, not the cell, that the measurements below are about.
+
+That choice is a trade the paper should state rather than sell. Anchoring the
+aperture to the module buys coverage at low energy in the inner regions, where
+the pileup-dragged barycentre is the problem; it costs position resolution,
+because the frame the network sees is quantised to the module and no longer
+follows the photon. This work measures energy, so the trade is worth taking
+here; an analysis that needs the photon's position would want the opposite.
+
 Figure~\ref{fig:misseed} shows the distance of each candidate centre from
 the true photon entry point in the 15\,mm region: the seed cell is
 \emph{much closer} to the photon (median $0.44$ cells against $3.06$), yet
