@@ -38,6 +38,15 @@ def parse_args():
                     help='region indices to build (default: 0 1, the two where the density '
                          'check passes; 60mm and 120mm have almost no outside cells)')
     ap.add_argument('--window', type=int, default=4)
+    ap.add_argument('--patch-inner-mm', type=float, default=105.0,
+                    help='inner radius, in MILLIMETRES, of the annulus pileup patches are cut '
+                         'from. The annulus has to start beyond the photon so the patches are '
+                         'photon-free, and containment is set by the Moliere radius (~35 mm), not '
+                         'by a cell count: at a fixed inner radius of W=4 cells the annulus is '
+                         '60 mm out at 15 mm pitch but 240 mm out at 60 mm, where a cluster has '
+                         'almost no cells left -- which is why the library held 20,081 patches at '
+                         '30 mm and 173 at 60 mm, with none at 120 mm. Three Moliere radii is '
+                         'photon-free everywhere and leaves cells to cut in the coarse regions.')
     ap.add_argument('--per-event', type=int, default=3,
                     help='pileup patches transplanted per clean event (default: 3)')
     ap.add_argument('--seed', type=int, default=0)
@@ -55,7 +64,7 @@ def load(repo, tag, n):
         return pickle.load(f)
 
 
-def patches(mb_events, regions, W, rng):
+def patches(mb_events, regions, W, rng, inner_mm=105.0):
     """Pileup blocks lifted from outside the window, keyed by region."""
     lib = {r: [] for r in regions}
     for ev in mb_events:
@@ -63,7 +72,8 @@ def patches(mb_events, regions, W, rng):
         if r not in lib:
             continue
         d = np.maximum(np.abs(ev['di']), np.abs(ev['dj']))
-        out = d > W
+        inner = max(2, int(np.ceil(inner_mm / float(ev['ps']))))
+        out = d > inner
         if out.sum() < 4:
             continue
         di, dj = ev['di'][out].astype(int), ev['dj'][out].astype(int)
@@ -105,7 +115,7 @@ def main():
     W = a.window
     mb = load(a.repo, 'minbias', 94)
     cl = load(a.repo, 'clean-aux', 100)
-    lib = patches(mb, set(a.regions), W, rng)
+    lib = patches(mb, set(a.regions), W, rng, a.patch_inner_mm)
     print('pileup patches per region: '
           + ', '.join(f'{int(PITCH[r])}mm={len(v)}' for r, v in lib.items()), flush=True)
 
