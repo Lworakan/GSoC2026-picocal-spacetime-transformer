@@ -86,6 +86,12 @@ def parse_args():
                          '(Spearman 1.000 over the five regions). A radius cut makes the aperture '
                          'the same everywhere and drops the square corners, which reach W*sqrt(2) '
                          'cells and hold essentially no photon.')
+    ap.add_argument('--widthfb', action='store_true',
+                    help='feed the predicted interval width back into the readout correction. '
+                         'That width separates the 8.2%% tail carrying 21%% of the error at '
+                         'AUC 0.93, and it is currently used only to pick one of three '
+                         'calibration terciles. The second head is zero-initialised, so the arm '
+                         'starts exactly at the one-pass readout.')
     ap.add_argument('--cellreg', action='store_true',
                     help='regress the photon ENERGY in each cell instead of a weight on the '
                          'observed energy. The gated sum w*E with w in (0,1) can only remove: a '
@@ -324,7 +330,7 @@ def build_model(D, args, device):
     return SubNetFQ(D['IN_DIM'], D['la0'], D['lb0'], ng=D['G'].shape[1], gate=args.gate,
                     arch=args.arch, qpool=args.qpool, gx=args.gx, aux=args.aux, film=args.film,
                     nfour=args.nfour, tfour=args.tfour, slots=args.slots,
-                    cellreg=args.cellreg).to(device)
+                    cellreg=args.cellreg, widthfb=args.widthfb).to(device)
 
 
 def train_one(T, D, seed, args, device):
@@ -524,7 +530,7 @@ def main():
                      ('Phys' if args.phys else '') + ('Occ' if args.occ else '') +
                      ('Tgate' if args.gate == 'time' else '') + ('Sgn' if args.gate == 'signed' else '') +
                      ('D4' if args.d4aug else '') + ('Geo' if args.arch == 'geo' else '') + ('Cnn' if args.arch == 'cnn' else '') + ('Cnx' if args.arch == 'convnext' else '') + ('St' if args.arch == 'spacetime' else '') + ('Pnet' if args.arch == 'pnet' else '') + ('Grav' if args.arch == 'gravnet' else '') + ('Mxr' if args.arch == 'mixer' else '') + (f'Fr{int(round(args.frac*100))}' if args.frac and args.frac < 1.0 else '') + (f'Wu{args.warmup}' if args.warmup else '') + ('Pln' if args.preln else '') + (f'Nn{args.knn}' if args.knn else '') + (f'Tf{args.tfour}' if args.tfour else '') + (f'Sc{args.sum_core}' if args.sum_core else '') + (f'Sk{args.slots}' if args.slots else '') + ('Ds' if args.distill else '') + ('Ex' if args.extra else '') + ('Dn' if args.dens else '') + ('Gx' if args.gx else '') + ('Rho' if args.rho else '') + ('Tp' if args.tpull else '') + ('Aux' if args.aux else '') + (f'Gs{int(args.gatesup*10)}' if args.gatesup > 0 else '') + ('Sx' if args.synaux else '') + ('Pf' if args.prior_feat else '') + ('Pt' if args.prior_teach else '') + (f'R{args.rings}' if args.rings else '') + (f'Rg{args.only_region}' if args.only_region is not None else '') + (f'H{args.halo}' if args.halo else '') + (f'P{args.patch}s{args.patch_side}' if args.patch else '') + (f'Gp{args.globpe}' if args.globpe else '') + (f'D{args.dim}' if args.dim else '') + (f'Lr{args.lr:g}'.replace('.','p').replace('-','m') if args.lr else '') + (f'B{args.batch}' if args.batch else '') + ('Cos' if args.cosine else '') + (f'Cj{args.cjit:g}'.replace('.','p') if args.cjit else '') + (f'L{args.layers}' if args.layers else '') + (({'oracle': 'Ro', 'pred': 'Rp'}.get(args.rc_mode, 'Rc')) if args.recenter else '') + (f'K{args.fold}' if args.fold is not None else '') + ('Mm' if args.mmgeo else '') + ('Tc' if args.tcomb else '') + (f'Ap{int(args.aperture_mm)}'.replace('-','C') if args.aperture_mm else '') + (f'Ed{str(args.ema_decay).replace(".","p")}' if args.ema_decay != 0.999 else '') + ('Ov' + Path(args.overlay).stem.replace('overlay_', '').replace('_', '').title()
-                        if Path(args.overlay).name != 'overlay.pkl' else '') + ('Cr' if args.cellreg else '') + ('Fe' if args.final_ema else '') + ('Ac' if args.allcells else '') + (('Rr' + ''.join(map(str, args.rc_regions))) if args.rc_regions else '') + ('Dep' if args.depth else '') + ('Orh' if args.orho else '') + ('Abs' if args.abst else '') + (f'W{args.wlow:g}'.replace('.', '') if args.wlow > 0 else '') +
+                        if Path(args.overlay).name != 'overlay.pkl' else '') + ('Wf' if args.widthfb else '') + ('Cr' if args.cellreg else '') + ('Fe' if args.final_ema else '') + ('Ac' if args.allcells else '') + (('Rr' + ''.join(map(str, args.rc_regions))) if args.rc_regions else '') + ('Dep' if args.depth else '') + ('Orh' if args.orho else '') + ('Abs' if args.abst else '') + (f'W{args.wlow:g}'.replace('.', '') if args.wlow > 0 else '') +
                      ('Qp' if args.qpool else '') + ('Tta' if args.tta else '') + (f'Tr{int(args.trim*100)}' if args.trim > 0 else '') + ('Fm' if args.film else '') + (f'F{args.nfour}' if args.nfour else '') + suffix)
     if args.mode == 'smoke':
         args.name += '_smoke'

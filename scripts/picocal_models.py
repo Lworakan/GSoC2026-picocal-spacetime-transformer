@@ -253,7 +253,7 @@ class MixerBlock(nn.Module):
 
 class SubNetFQ(nn.Module):
     def __init__(self, in_dim, la0, lb0, ng=NG, cfg=CFG, gate='learned', arch='std', qpool=False,
-                 gx=False, aux=False, film=False, nfour=0, tfour=0, slots=0, cellreg=False):
+                 gx=False, aux=False, film=False, nfour=0, tfour=0, slots=0, cellreg=False, widthfb=False):
         super().__init__()
         self.gate_mode = gate
         self.signed = gate == 'signed'
@@ -338,6 +338,13 @@ class SubNetFQ(nn.Module):
         # replaces the weight with a per-cell energy regression that may exceed E_i. The residual
         # is initialised at zero so the model starts exactly at the gated sum and has to earn any
         # departure from it.
+        self.widthfb = widthfb
+        if widthfb:
+            nout = 3 + (3 if aux else 0)
+            self.whead = nn.Sequential(nn.Linear(d + ng + 2, d), nn.ReLU(),
+                                       nn.Dropout(cfg['dropout']), nn.Linear(d, nout))
+            nn.init.zeros_(self.whead[-1].weight)
+            nn.init.zeros_(self.whead[-1].bias)
         self.cellreg = cellreg
         if cellreg:
             self.rhead = nn.Sequential(nn.Linear(d + 1, d // 2), nn.ReLU(), nn.Linear(d // 2, 1))
@@ -453,6 +460,15 @@ class SubNetFQ(nn.Module):
             wm = m.unsqueeze(-1).float()
             p = self.norm((h * wm).sum(1) / wm.sum(1).clamp(min=1))
         out = self.head(torch.cat([p, g], 1))
+        if self.widthfb:
+            # The predicted interval width separates the 8.2% tail that carries 21% of the total
+            # error at AUC 0.93, and the pipeline spends that signal on nothing but choosing which
+            # of three calibration terciles an event lands in. Here the correction head reads it
+            # directly: a second pass sees how uncertain the first pass was, so the median can be
+            # pulled differently for an event the model already knows it is guessing at. The
+            # second head is zero-initialised, so this starts exactly at the one-pass readout.
+            wd = (out[:, 2] - out[:, 0]).detach().unsqueeze(-1)
+            out = out + self.whead(torch.cat([p, g, wd, wd.abs().log1p()], 1))
         q = base + out[:, :3]
         return torch.cat([q, out[:, 3:]], 1) if self.aux else q
 
