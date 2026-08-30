@@ -489,11 +489,14 @@ def pinball_loss(q, yb, qs, w=None):
     return (pin.mean(1) * w).sum() / w.sum().clamp(min=1e-6)
 
 
-def qd_pinball_loss(q, yb, qs, lam=0.5, tau=0.02, w=None):
+def qd_pinball_loss(q, yb, qs, lam=0.5, tau=0.02, w=None, cover=None):
     pin = pinball_loss(q, yb, qs, w)
     width = (q[:, 2] - q[:, 1]).abs() + (q[:, 1] - q[:, 0]).abs()
     inside = torch.sigmoid((yb.squeeze(1) - q[:, 0]) / tau) * torch.sigmoid((q[:, 2] - yb.squeeze(1)) / tau)
-    return pin + lam * (width.mean() + 10.0 * torch.relu(0.5 - inside.mean()) ** 2)
+    # the coverage the interval is pushed to must match the quantiles it is trained at, or the
+    # width term and the coverage term pull against each other
+    c = float(qs[2] - qs[0]) if cover is None else cover
+    return pin + lam * (width.mean() + 10.0 * torch.relu(c - inside.mean()) ** 2)
 
 
 def width_binned_calibration(qv, qt, yva, n_groups=3, min_n=10):
