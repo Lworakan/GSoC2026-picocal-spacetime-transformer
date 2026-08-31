@@ -1,0 +1,211 @@
+# Where the three targets stand, what the mentors are still owed, and what is left to try
+
+31 August 2026. Numbers from `reports/predictions/`, seed 0, single model, development
+split. Reproduce the table with the snippet at the bottom.
+
+## The three targets you set
+
+**1. The final model must win in every region.** Met, 15 of 15 bins, seed 0.
+
+**2. Every region must be below 0.08.** Met. The worst bin is 30 mm low at 0.0712.
+
+**3. Every region must beat the mentors' graph model.** Met where a comparison exists,
+which is the SpaCal-Pb region only. The talk publishes no other region.
+
+| region | low (new / control) | mid | high |
+|---|---|---|---|
+| 15 mm  | 0.0643 / 0.0767 | 0.0438 / 0.0472 | 0.0291 / 0.0322 |
+| 30 mm  | 0.0712 / 0.0768 | 0.0385 / 0.0427 | 0.0297 / 0.0307 |
+| 40 mm  | 0.0574 / 0.0636 | 0.0302 / 0.0327 | 0.0228 / 0.0243 |
+| 60 mm  | 0.0493 / 0.0516 | 0.0299 / 0.0315 | 0.0229 / 0.0235 |
+| 120 mm | 0.0596 / 0.0600 | 0.0341 / 0.0356 | 0.0293 / 0.0298 |
+| aggregate | **0.0376 / 0.0402** | | |
+
+Against the GNNMP curve at 30 mm (see `gnn_comparison_2026-08-30.md`), after scaling our
+numbers by the shared 3x3 anchor to hand the whole sample difference to them:
+
+| E_T [GeV] | ours, scaled | GNNMP |
+|---|---|---|
+| 0.5-1.4 |  6.90% | 18.97% |
+| 1.4-2.3 |  5.67% |  8.66% |
+| 2.3-3.2 |  4.40% |  6.46% |
+| 3.2-4.1 |  3.69% |  5.36% |
+| 4.1-5.0 |  2.69% |  4.54% |
+
+**The one thing standing between this and the paper is cross-validation.** All ten folds
+were launched; the four that finished before the credit ran out read 0.0368, 0.0369,
+0.0371, 0.0372 -- out-of-sample, and consistent with the 0.0375 the development split
+predicted. Two earlier development-split winners did not survive ten folds, so this is
+not a formality, but so far it is holding.
+
+## The 24 August list: what is done and what is not
+
+| # | Mentor asked | State |
+|---|---|---|
+| 1 | Intro: open on the five regions and their granularity | **done** |
+| 2 | Intro: contamination driven by beam-pipe proximity, not cell size | **done** |
+| 3 | Intro: name the LHCb Upgrade II baseline as the direct comparison point | **not done** |
+| 4 | "external baseline" is wrong for the GBDT -- reword | **done** |
+| 5 | Body centre = seed *module*, and it hurts position estimation | **done** |
+| 6 | Figure 14: investigate the highest-energy anomaly | **done** (region composition, 1.5 sigma) |
+| 7 | **Figure 7: redo with transverse energy on the x-axis** | **not done** |
+| 8 | Cite the GNN work | **done** |
+
+Item 7 was misread on my side: a *new* E_T figure was added for the GNN comparison, but
+Figure 7 itself still has true photon energy on its x-axis. `plot_resolution.py` already
+takes `--x ET`, so this costs nothing but the command.
+
+Item 3 is a decision, not a measurement: the paper compares against a GBDT we trained and
+against the standard 3x3 sum, but never states which of these is *the* Upgrade II
+baseline. The Run 1 and 2 calorimeter paper is now cited, so the anchor exists.
+
+## Graphs still needed
+
+1. **Figure 7 redone against E_T** -- item 7 above, one command.
+2. **Per-region sigma_eff vs E_T, ours against GNNMP**, five panels rather than the
+   current two. Only 30 mm can carry their curve; the other four panels show ours with
+   the 3x3 anchor, which is what makes them readable at all.
+3. **The 15-bin new-vs-control bar chart**, one bar per region-energy cell, so "wins
+   everywhere" is a picture rather than a table the reader has to scan.
+4. **CV fold spread**, once the folds are back: ten points per configuration, so the
+   development-split number and the cross-validated one sit on the same axis. This is the
+   figure that answers "did it survive", and it is the one a referee will look for.
+5. **Resolution vs E with the 0.08 line drawn**, since that threshold is now a stated
+   target and no figure shows it.
+
+## What is left to try on the physics
+
+Ordered by what the error analysis says is actually available, not by novelty.
+
+**a. Supervision volume, the only lever that has moved all session.** Gate labels reach
+39% of the training set (28,547 synthetic against 72,554 real). `overlay_b.pkl` and
+`overlay_c.pkl` are already generated. If 2x and 3x keep improving, the road to 0.035 is
+open; if flat, the honest ceiling on this sample is about 0.037 and we say so. This is
+the cheapest remaining experiment and the one with a real prior behind it.
+
+**b. Three seeds per fold rather than one.** The paper's headline is an ensemble; the CV
+now running is single-seed. The development split says the ensemble is worth 0.0375 ->
+0.0367, about 2%. It costs three times the GPU for a known-size gain.
+
+**c. The 30 mm low bin, which is now the worst cell at 0.0712.** It is the only bin above
+0.07 and it sets the "below 0.08" margin. Worth one targeted error analysis: is it
+containment, mis-seeding, or pileup? The answer decides whether anything else helps.
+
+**d. Closed already, do not re-open:** topology/graph encoders for the tail, a
+missing-energy head, overlay time alignment, 120 mm overlay (physically impossible at
+that pitch), EMA stacking, gatesup 10.0, width feedback, q68, gs-balance, per-bin bias
+removal, per-region window routing (the ceiling is 1%), selective recentring.
+
+## Can mid and high go below 0.02?
+
+Measured, not guessed. `fit_resolution.py` fits `sigma_eff(E) = a/sqrt(E) + b/E + c` per
+region to this model, and every mid/high bin is compared against its own fitted curve at
+the bin's median energy.
+
+| region | bin | median E | now | fitted floor | gap |
+|---|---|---|---|---|---|
+| 15 mm  | mid  | 60.9 | 0.0438 | 0.0367 | 0.0071 |
+| 15 mm  | high | 86.0 | 0.0291 | 0.0287 | **0.0004** |
+| 30 mm  | mid  | 44.7 | 0.0385 | 0.0372 | 0.0013 |
+| 30 mm  | high | 72.9 | 0.0297 | 0.0272 | 0.0025 |
+| 40 mm  | mid  | 25.8 | 0.0302 | 0.0307 | -0.0005 |
+| 40 mm  | high | 44.2 | 0.0228 | 0.0225 | **0.0003** |
+| 60 mm  | mid  | 16.8 | 0.0299 | 0.0279 | 0.0020 |
+| 60 mm  | high | 27.1 | 0.0229 | 0.0225 | **0.0004** |
+| 120 mm | mid  | 13.1 | 0.0341 | 0.0327 | 0.0014 |
+| 120 mm | high | 19.0 | 0.0293 | 0.0289 | **0.0004** |
+
+Fitted terms: a = 0.209 / 0.203 / 0.141 / 0.083 / 0.035 and c = 0 / 0 / 0 / 0.0134 /
+0.0241 for 15 / 30 / 40 / 60 / 120 mm.
+
+**Not easy, and in one region not possible at all.** Three things fall out.
+
+- The high bins are already *on* their own curve, four of five within 0.0004. There is no
+  slack left to collect at high energy by tuning anything.
+- 120 mm has a fitted constant term of 0.0241. A constant term is calibration and leakage,
+  independent of energy: if that number is real, no estimator reaches 0.02 at 120 mm at
+  any energy whatsoever.
+- The mid bins hold the only real slack, and it is at 15 mm: 0.0438 against a floor of
+  0.0367, a gap of 0.0071. Even collecting all of it leaves 0.037, not 0.02.
+
+**The honest caveat, which cuts both ways.** That floor curve is fitted to our own
+resolution points, so "we sit on the floor" is partly circular. The non-circular question
+is whether the fitted `a` is the detector's sampling term or our own residual pileup
+error wearing a `1/sqrt(E)` shape. The fit itself flags this: at 15, 30 and 40 mm the
+constant term ran onto its bound at zero, which means `a` absorbed everything.
+
+That is testable with no GPU: the PicoCal TDR quotes a design stochastic term per
+technology. If the inner regions were built to roughly 10%/sqrt(E) and we fit 0.21, then
+half our width at high energy is pileup rather than sampling, and there *is* headroom --
+0.10/sqrt(86) is 1.1%, so a clean-shower estimator could in principle reach far below
+0.02 at 15 mm high. If instead the design number is near 0.20, the door is shut.
+
+### The design number settles it, and it splits the detector in two
+
+PicoCal's stated target, from the LHCP 2024 proceedings on the detector: **`sigma_E/E =
+10%/sqrt(E[GeV]) + 1%`**, quoted for the calorimeter as a whole, with Shashlik described
+as already fulfilling it. That is an external number, not one fitted to our own points,
+so it breaks the circularity above.
+
+| region | bin | median E | ours | design floor | ratio | can 0.02 exist? |
+|---|---|---|---|---|---|---|
+| 15 mm  | mid  | 60.9 | 0.0438 | 0.0163 | 2.69x | yes |
+| 15 mm  | high | 86.0 | 0.0291 | 0.0147 | 1.98x | yes |
+| 30 mm  | mid  | 44.7 | 0.0385 | 0.0180 | 2.14x | yes |
+| 30 mm  | high | 72.9 | 0.0297 | 0.0154 | 1.93x | yes |
+| 40 mm  | mid  | 25.8 | 0.0302 | 0.0221 | 1.37x | **no** |
+| 40 mm  | high | 44.2 | 0.0228 | 0.0181 | 1.26x | yes |
+| 60 mm  | mid  | 16.8 | 0.0299 | 0.0264 | 1.13x | **no** |
+| 60 mm  | high | 27.1 | 0.0229 | 0.0217 | 1.06x | **no** |
+| 120 mm | mid  | 13.1 | 0.0341 | 0.0294 | 1.16x | **no** |
+| 120 mm | high | 19.0 | 0.0293 | 0.0250 | 1.17x | **no** |
+
+This corrects what the previous section concluded. Against our own fitted curve every bin
+looked finished; against the design curve the detector splits in two.
+
+**The outer regions are blocked by the detector, not by us.** At 60 and 120 mm the design
+floor is already 0.022 to 0.029 at those bins' energies, above the 0.02 target. No
+estimator reaches 0.02 there, because the calorimeter was not built to. The reason is
+geometric: energy and pseudorapidity are tied, so the outer regions never see high energy
+in the first place -- 120 mm "high" is 19 GeV, while 15 mm "high" is 86 GeV. And we are
+already within 6 to 17 per cent of the design there, which is the more interesting
+statement about those regions.
+
+**The inner regions have a factor of two of real headroom.** At 15 and 30 mm the design
+floor is 0.0147 to 0.0180, comfortably under 0.02, and we sit at 1.9 to 2.7 times it. The
+excess is not sampling -- the detector's sampling term is 0.10 and our fit reads 0.21 --
+so it is pileup, in exactly the regions where pileup is worst. That is the same lever as
+everywhere else in this project, and the same one that is already half-pulled: gate
+supervision reaches 39 per cent of the training set.
+
+**So mid and high below 0.02 is the wrong target as stated, but half of it is right.**
+Ask for it at 15 and 30 mm, where physics permits it and we are a factor of two away.
+Do not ask for it at 60 and 120 mm, where the honest claim is the opposite and stronger:
+we are within a sixth of the detector's design resolution on a pileup-loaded sample.
+
+## Two questions for the mentors, both blocking
+
+1. The luminosity of our `minimum_bias` sample. The 3x3 anchor lets the comparison happen
+   without it, but the number belongs in the paper.
+2. Permission to reproduce the digitised GNNMP values, and their tabulated numbers if the
+   author will share them. They are someone else's Preliminary results.
+
+## Reproducing the table
+
+```
+python - <<'EOF'
+import sys, pandas as pd
+sys.path.insert(0, 'scripts')
+from run_experiments import resolution
+t = pd.read_csv('reports/predictions/minbias__SubNetW8CleanAuxExDnGs50RcOvV2CrQdEma.csv')
+t = t[t.seed == 0]
+e = t.groupby(['true_energy', 'region_name'], sort=False).pred_energy.median().reset_index()
+for r in ['15mm', '30mm', '40mm', '60mm', '120mm']:
+    s = e[e.region_name == r]
+    q = s.true_energy.quantile([1/3, 2/3]).values
+    for lab, c in (('low', s[s.true_energy <= q[0]]),
+                   ('mid', s[(s.true_energy > q[0]) & (s.true_energy <= q[1])]),
+                   ('high', s[s.true_energy > q[1]])):
+        print(r, lab, resolution(c.pred_energy.values, c.true_energy.values)['sigma_eff'])
+EOF
+```
