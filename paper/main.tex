@@ -50,8 +50,13 @@ robustness to a window centre that pileup displaces by three cells, and
 above that, cells that sample the pileup field rather than the photon. The starting window held under half of the innermost region's cluster
 energy, and fixing the window's size and centring cut the worst
 region--energy bin by $53\%$ ($0.165 \to 0.078$), while ten encoder
-families, four gate-supervision protocols, five timing constructions, a
-capacity sweep and a recipe sweep all measured null against the same bins.
+families, five timing constructions, a capacity sweep and a recipe sweep
+all measured null against the same bins. Gate supervision belongs on the
+other side of that line, and only later measurement put it there: four
+protocols measured null on an overlay that covered two of the five regions,
+and the same idea wins once the overlay is region-complete and the readout
+regresses a per-cell energy rather than a multiplicative gate
+(Sec.~\ref{sec:gate}).
 Two mechanisms move the number at the per-cent level: an auxiliary head
 that regresses the photon's position alongside the energy, and a learned
 two-stage window built on it --- a first pass points at the photon (median
@@ -658,6 +663,48 @@ matching the pileup-contamination pattern.}
 
 \begin{figure}[t]
 \centering
+\includegraphics[width=\textwidth]{figs/resolution_vs_et.pdf}
+\caption{The same per-region curves against \emph{transverse} energy, the
+axis in which the physics selections are written. Single model, seed~0,
+development split; dashed is the starting configuration and solid this work.
+The ordering between the two is the same in every region and at every point,
+which is the property an axis change should not disturb and does not.}
+\label{fig:resvet}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/design_gap.pdf}
+\caption{The same curves with PicoCal's own specification drawn on top:
+$\sigma_E/E = 10\%/\sqrt{E} \oplus 1\%$~\cite{picocalpos}, dotted, evaluated
+at each bin's median true energy. The red line is $0.08$. The detector splits
+in two. At 60 and 120\,mm the measured points converge onto the design curve
+at the top of each region's range --- within $6$--$17\%$ of the number the
+calorimeter was specified to, on a sample that carries pileup the
+specification does not --- and the design curve is itself above $0.02$ there,
+so no estimator reaches $0.02$ in those regions at the energies they see. At
+15 and 30\,mm the curve sits a factor $1.9$--$2.7$ above a design floor of
+$0.015$--$0.018$, and since the design stochastic term is $0.10$ against a
+fitted $0.21$, that excess is pileup rather than sampling. Energy and
+pseudorapidity are tied at fixed transverse energy, which is why the outer
+regions never reach the energies where the inner ones are measured.}
+\label{fig:designgap}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figs/perbin_bars.pdf}
+\caption{Every region--energy cell, single model at seed~0 on the
+development split: per-cell energy regression with gate supervision on the
+region-complete overlay against the same recipe without them. Fifteen of
+fifteen cells improve and all fifteen sit below $0.08$, the worst being
+30\,mm low at $0.0712$. Cross-validation of this configuration was
+incomplete at the time of writing; see Sec.~\ref{sec:gate}.}
+\label{fig:perbinbars}
+\end{figure}
+
+\begin{figure}[t]
+\centering
 \includegraphics[width=\textwidth]{figs/vs_gnn.pdf}
 \caption{The same resolution against \emph{transverse} energy, which is the
 axis the graph-network work on this detector reports~\cite{vetens} and the
@@ -701,6 +748,21 @@ but $23$ at 15\,mm, where the stochastic and constant terms both run onto
 their bounds. The three-term form is a poor description of the innermost
 region, and the $b = 2.1$\,GeV there should be read as a statement that the
 $1/E$ term dominates, not as a measured noise constant.
+
+\paragraph{Which baseline is \emph{the} baseline.} Three reference points appear
+in this paper and they are not interchangeable, so we state plainly what each
+one is for. The \emph{direct} comparison point --- the thing a new
+reconstruction has to beat before it is worth anything to the collaboration ---
+is the standard $3\times3$ cluster reconstruction on the same events, because
+that is what LHCb runs today and what the Upgrade~II detector will run on day
+one. The gradient-boosted reference is a control we trained ourselves, matched
+in events, splits and protocol, and it exists to separate "the transformer
+helps" from "any learned estimator helps"; it is not a collaboration baseline
+and is not offered as one. PicoCal's design specification,
+$\sigma_E/E = 10\%/\sqrt{E} \oplus 1\%$~\cite{picocalpos}, is the third and is
+neither a competitor nor a control: it is the floor, and the useful question
+against it is not whether we beat it --- on a pileup-loaded sample we should
+not --- but how far above it each region sits (Fig.~\ref{fig:designgap}).
 
 \paragraph{Against the calorimeter LHCb has now.} The natural external scale is
 the existing LHCb electromagnetic calorimeter, whose simulated resolution runs
@@ -1378,6 +1440,32 @@ AUC~$0.93$ on cell-level observables, so labels manufactured by overlaying
 do not come from the distribution the model must serve. Structure helped;
 manufactured labels did not.
 
+\paragraph{The null was a property of the overlay, not of the idea.} Both
+results above were measured on an overlay that covered the 15 and 30\,mm
+regions only, which is $31\%$ of the sample: the remaining $69\%$ of the
+training events carried no per-cell label at all. Regenerating the overlay
+across all five regions and supervising a readout that regresses a per-cell
+\emph{energy} --- one that may exceed the cell's own deposit, rather than a
+multiplicative gate in $(0,1)$ that cannot express an additive error ---
+reverses the conclusion. On the development protocol the combination reads
+$\seff = 0.0376$ as a single model against the same recipe's $0.0399$, and
+$0.0367$ against $0.0388$ as a three-seed ensemble, ahead of the control in
+$15$ of $15$ region--energy bins with every region under $0.08$. A control
+arm that adds the same synthetic events \emph{without} the per-cell loss
+does not reproduce the gain, so what moved the number is the supervision and
+not the extra events. Two things follow. The gate is still not a fraction
+estimator --- the winning readout is the per-cell energy, not the gate ---
+and a null measured under partial coverage is a statement about the
+coverage. We report the earlier nulls and this result together rather than
+replacing one with the other.
+
+At the time of writing this configuration has four of ten cross-validation
+folds complete, reading $0.0368$, $0.0369$, $0.0371$ and $0.0372$; the
+headline of this paper remains the fully cross-validated $0.0388$ until all
+ten are in. This project has twice had a development-split winner fail to
+reproduce under cross-validation, and the number above is labelled
+accordingly.
+
 \subsection{Timing}
 \label{sec:timing}
 
@@ -1474,7 +1562,7 @@ $0.0402$ (fixed-split single seed) as labelled.}
 \toprule
 family & protocols tried & outcome\\
 \midrule
-gate supervision & 4 (direct, aux head, prior feature, distill) & neutral or worse\\
+gate supervision, 15/30\,mm overlay & 4 (direct, aux head, prior feature, distill) & neutral or worse; superseded, see Sec.~\ref{sec:gate}\\
 engineered timing & 5 (pulls $\times$3, cuts, slices, front/back comb.) & all worse\\
 training recipe & lr $\times$2, batch $\times$2, jitter $\times$2 & 0.0422--0.0462 vs 0.0402\\
 ensembling & learned stacking on held-out data & 0.0414 vs 0.0379, worse\\
@@ -1762,6 +1850,9 @@ Electromagnetic Calorimeter}, ICHEP 2026, contribution 6959618.
 \bibitem{lhcbcalo} LHCb Collaboration,
 \emph{Calibration and performance of the LHCb calorimeters in Run 1 and 2 at the LHC},
 arXiv:2008.11556.
+\bibitem{picocalpos} \emph{The PicoCal of LHCb Upgrade 2},
+PoS(LHCP2024)301, on behalf of the LHCb Collaboration.
+\todo{author list to be completed from the published record}
 \bibitem{lhcbftdr} LHCb Collaboration,
 \emph{Framework TDR for the LHCb Upgrade II --- Opportunities in flavour
 physics, and beyond, in the HL-LHC era},
