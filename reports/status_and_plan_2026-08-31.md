@@ -231,7 +231,49 @@ should attack the aggregation step, not the input representation, because five t
 constructions and four gate-supervision protocols have now all measured null there while
 per-cell information demonstrably exists.
 
-## The final-round list, ranked
+## Re-ranked with risk as the criterion
+
+Asked for on 31 August: no risk. That changes the order, and it changes it a lot, because
+**the result is already won and does not need a new architecture.**
+
+On the development split the current model beats the control in 15 of 15 bins, every
+region sits under 0.08 with the worst at 0.0712, and it is ahead of GNNMP in all five E_T
+bins even after handing them the entire sample difference. Four cross-validated folds read
+0.0368 to 0.0372. Nothing on the risky list is needed to make that a paper.
+
+**Do (cannot fail):**
+
+1. The two sentences the paper contradicts -- correctness, no GPU
+2. Figure 7 against E_T -- mentor item, one command
+3. Name the Upgrade II baseline -- mentor item, a decision
+4. The 15-bin bar chart and the design-curve figure -- no GPU
+5. Release artifacts: split definition, pinned environment, weights, one command per
+   figure -- no GPU, and it is the thing that actually makes a result the one others must
+   beat
+
+**Do (a measurement, not a gamble):**
+
+6. Finish the six cross-validation folds. This is the only GPU item with no downside,
+   because both outcomes are publishable: it either confirms the development split, and
+   the headline improves, or it does not, and the paper reports both -- which is exactly
+   what it already does for the two-stage window. The only thing at stake is money.
+
+**Do if credit allows (known size, not a gamble):**
+
+7. Supervision volume 2x/3x. The lever has already worked once on this exact label source;
+   scaling it is the most likely of the remaining ideas to pay, and a flat result is itself
+   a publishable ceiling statement rather than a wasted run.
+8. Three seeds per fold. Worth about 2%, size known in advance.
+
+**Hold:**
+
+9. Object condensation and the ParT pairwise bias. Both are argued in their own reports and
+   both may be null -- five representation changes and four supervision schemes already
+   were. They are the right ideas for a second paper or for a version of this one that has
+   spare GPU and spare weeks. They are not needed for this submission, and running them
+   under time pressure risks the thing that is already finished.
+
+## The earlier list, ranked by upside rather than risk
 
 Ranked by what a wrong answer would cost, divided by what it costs to get. Everything in
 the first block runs on this laptop.
