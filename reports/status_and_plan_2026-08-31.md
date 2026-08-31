@@ -183,6 +183,54 @@ Ask for it at 15 and 30 mm, where physics permits it and we are a factor of two 
 Do not ask for it at 60 and 120 mm, where the honest claim is the opposite and stronger:
 we are within a sixth of the detector's design resolution on a pileup-loaded sample.
 
+## What CERN's own pileup work says, and what our sample actually contains
+
+The HL-LHC answer to pileup is timing. Interaction vertices are spread over about
++-150 ps, so 20-30 ps hit timing separates them: CMS HGCAL targets better than 30 ps for
+clusters above 5 GeV, the CMS MIP Timing Detector 30-60 ps for 4D vertexing, and PicoCal's
+own target is `sigma_t ~ O(10 ps)`. That is the mechanism our detector was designed
+around, and it is the natural candidate for the factor of two at 15 and 30 mm.
+
+**The separation is present in our sample, and it is large.** Referencing every cell's
+front-face time to the shower core's own time, on 2,000 real 15 mm minimum-bias events:
+
+| cells | n | median offset | IQR |
+|---|---|---|---|
+| core, d <= 1 | 8,181 | 0.000 ns | **0.077 ns** |
+| ring, d = 2-3 | 27,159 | +0.181 ns | 0.300 ns |
+| far, d >= 5 | 64,690 | +0.391 ns | **1.641 ns** |
+
+Far cells arrive later and are spread 21 times wider than core cells. The times are
+continuous rather than digitised, so this is truth-level timing without detector smearing.
+A discriminant this strong should be worth something.
+
+**It is not, and that is measured, not assumed.** The obvious reading of the table is that
+the default time reference is wrong: it is the median over *all* cells in the window
+(`picocal_data.py:318`), and far cells outnumber core cells eight to one, so the reference
+is set by the pileup it is meant to reject. But that fix already exists as `--tpull`,
+which references time to the energy-weighted top decile, and it was already run at this
+window and recentring. On the same seed:
+
+| bin | `--tpull` | control |
+|---|---|---|
+| aggregate  | 0.0409 | **0.0402** |
+| 15 mm mid  | 0.0532 | **0.0472** |
+| 15 mm high | 0.0354 | **0.0322** |
+| 30 mm mid  | **0.0425** | 0.0427 |
+| 30 mm high | 0.0333 | **0.0307** |
+
+It loses in four of five, including both bins where this section predicted it would win.
+The hypothesis is refuted by an experiment that was already on disk.
+
+**So the bottleneck is not identifying pileup cells.** That reading is consistent with the
+gate study: a gradient-boosted per-cell estimator reaches correlation 0.945 with the true
+photon fraction on the same observables, while the network's gate reaches 0.211 and the
+network routes the information around it. Per-cell separability is available and unused;
+what fails is converting it into an energy. Any further attempt on the inner regions
+should attack the aggregation step, not the input representation, because five timing
+constructions and four gate-supervision protocols have now all measured null there while
+per-cell information demonstrably exists.
+
 ## Two questions for the mentors, both blocking
 
 1. The luminosity of our `minimum_bias` sample. The 3x3 anchor lets the comparison happen
