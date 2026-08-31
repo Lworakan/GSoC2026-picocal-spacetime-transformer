@@ -231,6 +231,69 @@ should attack the aggregation step, not the input representation, because five t
 constructions and four gate-supervision protocols have now all measured null there while
 per-cell information demonstrably exists.
 
+## The final-round list, ranked
+
+Ranked by what a wrong answer would cost, divided by what it costs to get. Everything in
+the first block runs on this laptop.
+
+### No GPU — do these regardless of credit
+
+**1. The two sentences the paper now contradicts.** `main.tex:53` says four
+gate-supervision protocols "measured null", and the table at `main.tex:1477` says "neutral
+or worse". The best configuration in the project is `--gatesup 5.0`. It is not a flat
+contradiction -- the null was measured on an overlay covering only 15 and 30 mm, without
+per-cell regression -- but the paper cannot ship saying the opposite of its own best
+result. This is a correctness fix, not an improvement, so it ranks first.
+
+**2. Figure 7 against transverse energy.** Mentor item 7 from 24 August, still open.
+`plot_resolution.py --x ET`. One command.
+
+**3. Name the Upgrade II baseline.** Mentor item 3, still open. A decision about which of
+the GBDT, the 3x3 sum, or the published calorimeter curve is *the* comparison point.
+
+**4. Repair `oracle_ceiling.py`.** Calibrate inside the bin instead of extrapolating
+across energy, and score the trained model on the same overlay events so the comparison
+stops being cross-sample. This decides whether any further pileup work is worth GPU time,
+which is why it outranks the figures below despite being the least presentable.
+
+**5. Two figures the argument now needs**: the 15-bin new-versus-control bars, so "wins
+everywhere" is a picture; and resolution versus energy with the 0.08 line and the design
+curve `10%/sqrt(E) + 1%` both drawn, which is the figure that makes the outer-region claim
+land.
+
+### GPU, when credit returns
+
+**6. Finish the six remaining cross-validation folds.** Everything above and below is
+unpublishable without it. Four folds read 0.0368 to 0.0372 and the checkpoints resume, so
+this is the cheapest it will ever be.
+
+**7. `--cellsup`: supervise the per-cell energy head.** The one architectural idea the
+error analysis actually points at, and it has never been run. `picocal_models.py:322`
+records that nothing supervises `rhead` -- `--gatesup` supervises the *gate*, which the
+paper itself shows is not a fraction estimator (correlation 0.211 against a
+gradient-boosted 0.945 on identical observables), while `cellreg` emits a real per-cell
+energy that can exceed the cell's own deposit. The overlay's `sig` is exactly the right
+target for it and is already generated. Per-cell separability is demonstrably present and
+demonstrably unused; this is the only untried way to force it through the aggregation
+step, which the timing and gate studies have now both identified as the bottleneck.
+
+**8. Supervision volume, 2x and 3x.** `overlay_b.pkl` and `overlay_c.pkl` exist. Labels
+currently reach 39% of the training set. Flat between 2x and 3x means the lever is spent
+and the honest ceiling on this sample is about 0.037.
+
+**9. Three seeds per fold.** The paper's headline is an ensemble and the CV is single-seed.
+Worth about 2%, a known quantity, at three times the cost. Last, because it buys a number
+rather than an answer.
+
+### Ranked out — do not re-open
+
+Per-region window routing (measured ceiling 1%), selective recentring (wins 2 of 15),
+topology and graph encoders for the tail, a missing-energy head, overlay time alignment,
+120 mm overlay (impossible at that pitch), EMA stacking, `--gatesup 10.0`, width feedback,
+`--q68`, `--gs-balance`, per-bin bias removal, `--tpull` (loses 4 of 5, measured above),
+and 0.02 as a target at 40 mm mid, 60 mm and 120 mm, where the detector's own design
+resolution is already above it.
+
 ## Two questions for the mentors, both blocking
 
 1. The luminosity of our `minimum_bias` sample. The 3x3 anchor lets the comparison happen
