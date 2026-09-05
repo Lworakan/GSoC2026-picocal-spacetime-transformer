@@ -1,0 +1,4 @@
+# Third-party binaries fetched on demand by `npm run vendor` -- large, and not
+# ours to redistribute. The app falls back to the CDN when they are absent.
+*
+!.gitignore

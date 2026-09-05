@@ -1,0 +1,11 @@
+# Analysis output written by the CLI
+badminton-report/
+out/
+
+# Node
+node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/

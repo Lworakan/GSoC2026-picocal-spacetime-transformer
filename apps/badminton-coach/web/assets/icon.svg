@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Badminton posture coach">
+  <rect width="512" height="512" rx="96" fill="#0b1220"/>
+  <g fill="none" stroke="#f97316" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="256" cy="118" r="34"/>
+    <path d="M256 152v128"/>
+    <path d="M256 176 168 120"/>
+    <path d="M256 190l92 74"/>
+    <path d="M256 280l-62 96M256 280l62 96"/>
+  </g>
+  <g fill="none" stroke="#38bdf8" stroke-width="14" stroke-linecap="round">
+    <ellipse cx="150" cy="104" rx="34" ry="44" transform="rotate(-32 150 104)"/>
+  </g>
+  <g stroke="#24324d" stroke-width="10">
+    <path d="M64 420h384M128 460h256"/>
+  </g>
+</svg>

@@ -1,0 +1,5 @@
+# The pipeline's own dependencies. The pure-maths modules (geometry, biomech,
+# strokes, court, coach, session) need none of these -- only extraction and the
+# annotated video do -- which is what keeps them unit-testable anywhere.
+mediapipe>=0.10
+opencv-python-headless>=4.8

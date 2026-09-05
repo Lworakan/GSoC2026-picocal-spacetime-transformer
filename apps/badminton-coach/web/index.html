@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<meta name="theme-color" content="#0b1220" />
+<meta name="description" content="Badminton posture and stroke analysis in the browser: arm angles, forehand and backhand detection, and court movement, from a phone camera." />
+<title>Badminton posture coach</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="assets/icon-180.png" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="mark" aria-hidden="true">🏸</span>
+    <span class="brand-text" data-i18n="title">Badminton posture coach</span>
+  </div>
+  <div class="topbar-actions">
+    <div class="lang" role="group" aria-label="Language">
+      <button id="lang-th" class="lang-btn is-active" type="button">ไทย</button>
+      <button id="lang-en" class="lang-btn" type="button">EN</button>
+    </div>
+    <button id="btn-settings" class="icon-btn" type="button" data-i18n-label="settings">⚙</button>
+  </div>
+</header>
+
+<!-- Start screen ------------------------------------------------------------>
+<section id="screen-start" class="screen is-active">
+  <div class="hero">
+    <h1 data-i18n="title">Badminton posture coach</h1>
+    <p class="tagline" data-i18n="tagline">Arm angles and body position on forehands and backhands</p>
+    <div class="start-actions">
+      <button id="btn-camera" class="primary" type="button" data-i18n="start_camera">Use camera</button>
+      <label class="secondary" for="file-input" data-i18n="start_video">Open a video</label>
+      <input id="file-input" type="file" accept="video/*" hidden />
+    </div>
+    <p class="hint" data-i18n="camera_hint">Prop the phone still, with the whole body and the feet in shot</p>
+  </div>
+
+  <div class="setup-card">
+    <label class="field">
+      <span data-i18n="racket_hand">Racket hand</span>
+      <div class="segmented" id="racket-hand">
+        <button type="button" data-value="right" class="is-active" data-i18n="right">Right</button>
+        <button type="button" data-value="left" data-i18n="left">Left</button>
+        <button type="button" data-value="auto" data-i18n="auto">Auto</button>
+      </div>
+    </label>
+    <label class="field">
+      <span data-i18n="quality">Model quality</span>
+      <select id="quality">
+        <option value="lite" data-i18n="quality_lite">Fast (lite)</option>
+        <option value="full" selected data-i18n="quality_full">Balanced (full)</option>
+        <option value="heavy" data-i18n="quality_heavy">Accurate (heavy)</option>
+      </select>
+    </label>
+    <label class="field">
+      <span data-i18n="sensitivity">Swing sensitivity</span>
+      <input id="sensitivity" type="range" min="3" max="12" step="0.5" value="6" />
+      <output id="sensitivity-value">6.0</output>
+    </label>
+  </div>
+</section>
+
+<!-- Analysis screen --------------------------------------------------------->
+<section id="screen-analyse" class="screen">
+  <div class="stage" id="stage">
+    <video id="video" playsinline muted></video>
+    <canvas id="overlay"></canvas>
+    <div class="stage-hud">
+      <span id="status-chip" class="chip"><span id="status-text" data-i18n="searching">Looking for the player</span></span>
+      <span id="fps-chip" class="chip chip-dim">0 <span data-i18n="fps">fps</span></span>
+    </div>
+    <p id="stage-hint" class="stage-hint" data-i18n="hint_tap_player">Tap the player to lock on</p>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab is-active" data-tab="live" type="button" data-i18n="tab_live">Live</button>
+    <button class="tab" data-tab="shots" type="button" data-i18n="tab_shots">Shots</button>
+    <button class="tab" data-tab="court" type="button" data-i18n="tab_court">Court</button>
+    <button class="tab" data-tab="summary" type="button" data-i18n="tab_summary">Summary</button>
+  </nav>
+
+  <div class="panels">
+    <div class="panel is-active" data-panel="live">
+      <div class="metrics" id="metrics"></div>
+    </div>
+
+    <div class="panel" data-panel="shots">
+      <div id="shot-list" class="shot-list">
+        <p class="empty" data-i18n="no_shots">No shots detected yet</p>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="court">
+      <div class="court-controls">
+        <span id="court-status" class="chip chip-dim" data-i18n="court_none">Court not set up</span>
+        <button id="btn-calibrate" class="secondary small" type="button" data-i18n="calibrate">Set up court</button>
+        <button id="btn-swap-sides" class="secondary small" type="button" data-i18n="swap_sides" hidden>Swap left / right</button>
+        <button id="btn-clear-court" class="secondary small" type="button" data-i18n="calibrate_clear" hidden>Clear court</button>
+      </div>
+      <canvas id="court-map" class="court-map"></canvas>
+      <div class="metrics" id="court-metrics"></div>
+    </div>
+
+    <div class="panel" data-panel="summary">
+      <div id="summary" class="summary"></div>
+      <div class="summary-actions">
+        <button id="btn-export" class="secondary small" type="button" data-i18n="export">Export data (JSON)</button>
+        <button id="btn-reset" class="secondary small" type="button" data-i18n="reset">Start over</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottombar">
+    <button id="btn-stop" class="primary danger" type="button" data-i18n="stop">Stop</button>
+  </div>
+</section>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

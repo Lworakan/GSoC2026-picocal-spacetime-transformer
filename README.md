@@ -321,6 +321,9 @@ reports/
   figures/interactive/   plotly figures (ifig1–11)
   *.md                   specs, plans, literature reviews, roadmap
 data/                    ROOT files (git-ignored, provided by mentors)
+apps/
+  badminton-coach/       standalone side project, unrelated to the PicoCal work:
+                         browser + Python pose analysis of badminton technique
 ```
 
 ## Reproducibility
